@@ -162,7 +162,7 @@ public class GameOfLights {
 	}
 
 	private static GameOfLights fromFile() throws IOException {
-		String fileContents = Files.toString(new File("src/advent/day18/input.txt"), StandardCharsets.UTF_8);
+		String fileContents = Files.toString(new File("src/main/java/advent/day18/input.txt"), StandardCharsets.UTF_8);
 		return new GameOfLights(fileContents);
 	}
 

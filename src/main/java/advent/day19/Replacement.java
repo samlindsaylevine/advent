@@ -24,7 +24,7 @@ public class Replacement {
 	private String to;
 
 	public static List<Replacement> fromFile() throws IOException {
-		return Files.lines(Paths.get("src/advent/day19/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/day19/input.txt")) //
 				.map(Replacement::new) //
 				.collect(toList());
 	}

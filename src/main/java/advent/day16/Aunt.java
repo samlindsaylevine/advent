@@ -91,7 +91,7 @@ public class Aunt {
 	}
 
 	private static Stream<Aunt> auntsFromFile() throws IOException {
-		return Files.lines(Paths.get("src/advent/day16/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/day16/input.txt")) //
 				.map(Aunt::new);
 	}
 

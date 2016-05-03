@@ -117,7 +117,7 @@ public class PackageGrouping {
 	}
 
 	public static Multiset<Integer> fromFile() throws IOException {
-		return Files.lines(Paths.get("src/advent/day24/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/day24/input.txt")) //
 				.map(Integer::valueOf) //
 				.collect(MultisetCollector.toImmutableMultiset());
 	}

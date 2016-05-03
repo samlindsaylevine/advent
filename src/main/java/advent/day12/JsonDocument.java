@@ -125,7 +125,7 @@ public class JsonDocument {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String input = Files.toString(new File("src/advent/day12/input.txt"), StandardCharsets.UTF_8);
+		String input = Files.toString(new File("src/main/java/advent/day12/input.txt"), StandardCharsets.UTF_8);
 		JsonDocument document = new JsonDocument(input);
 		System.out.println(document.sumOfAllNumbers);
 		System.out.println(document.sumOfAllNonRedNumbers);

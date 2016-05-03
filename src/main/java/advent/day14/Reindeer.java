@@ -49,7 +49,7 @@ public class Reindeer {
 	}
 
 	private static Stream<Reindeer> reindeerFromFile() throws IOException {
-		return Files.lines(Paths.get("src/advent/day14/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/day14/input.txt")) //
 				.map(Reindeer::new);
 	}
 

@@ -77,7 +77,7 @@ public class DistanceGraph {
 
 	private static DistanceGraph graphFromFile() throws IOException {
 		DistanceGraph graph = new DistanceGraph();
-		Files.lines(Paths.get("src/advent/day9/input.txt")) //
+		Files.lines(Paths.get("src/main/java/advent/day9/input.txt")) //
 				.forEach(graph::addEdge);
 		return graph;
 	}

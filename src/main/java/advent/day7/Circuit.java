@@ -24,7 +24,7 @@ public class Circuit {
 
 	public static void main(String[] args) throws IOException {
 		Circuit circuit = new Circuit();
-		Files.lines(Paths.get("src/advent/day7/input.txt")) //
+		Files.lines(Paths.get("src/main/java/advent/day7/input.txt")) //
 				.forEach(circuit::addGate);
 
 		System.out.println(circuit.get("a"));

@@ -34,7 +34,7 @@ public class Program {
 	}
 
 	public static Program fromFile() throws IOException {
-		return new Program(Files.lines(Paths.get("src/advent/day23/input.txt")) //
+		return new Program(Files.lines(Paths.get("src/main/java/advent/day23/input.txt")) //
 				.map(Instruction::fromString) //
 				.collect(toList()));
 	}

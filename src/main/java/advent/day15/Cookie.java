@@ -104,7 +104,7 @@ public class Cookie {
 	}
 
 	private static List<Ingredient> ingredientsFromFile() throws IOException {
-		return Files.lines(Paths.get("src/advent/day15/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/day15/input.txt")) //
 				.map(Ingredient::fromString) //
 				.collect(toList());
 	}
