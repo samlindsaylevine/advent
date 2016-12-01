@@ -43,7 +43,7 @@ public class DeliveryInstructions {
 
 	public static DeliveryInstructions fromFile() throws IOException {
 		return new DeliveryInstructions(
-				Files.toString(new File("src/main/java/advent/day1/input.txt"), StandardCharsets.UTF_8));
+				Files.toString(new File("src/main/java/advent/year2015/day1/input.txt"), StandardCharsets.UTF_8));
 	}
 
 	public static void main(String[] args) throws IOException {

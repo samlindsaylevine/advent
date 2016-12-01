@@ -56,7 +56,7 @@ class Present {
 	}
 
 	private static int total(ToIntFunction<Present> presentFunction) throws IOException {
-		return Files.lines(Paths.get("src/main/java/advent/day2/presents.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/year2015/day2/presents.txt")) //
 				.map(Present::new) //
 				.mapToInt(presentFunction) //
 				.sum();

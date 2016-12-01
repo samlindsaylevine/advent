@@ -77,13 +77,13 @@ public class NiceStrings {
 	}
 
 	public static long countOriginalNice() throws IOException {
-		return Files.lines(Paths.get("src/main/java/advent/day5/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/year2015/day5/input.txt")) //
 				.filter(OriginalRule::isNice) //
 				.count();
 	}
 
 	public static long countSecondNice() throws IOException {
-		return Files.lines(Paths.get("src/main/java/advent/day5/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/year2015/day5/input.txt")) //
 				.filter(SecondRule::isNice) //
 				.count();
 	}

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class EggnogContainers {
 	public static List<Integer> containerSizes() throws IOException {
-		return Files.lines(Paths.get("src/main/java/advent/day17/input.txt")) //
+		return Files.lines(Paths.get("src/main/java/advent/year2015/day17/input.txt")) //
 				.map(Integer::valueOf) //
 				.collect(toList());
 	}

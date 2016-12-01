@@ -49,7 +49,7 @@ public class LightGrid {
 	private static long countAfterInstructions(Supplier<Light> lightConstructor) throws IOException {
 		LightGrid grid = new LightGrid(lightConstructor);
 
-		Files.lines(Paths.get("src/main/java/advent/day6/input.txt")) //
+		Files.lines(Paths.get("src/main/java/advent/year2015/day6/input.txt")) //
 				.map(Instruction::new) //
 				.forEach(grid::execute);
 

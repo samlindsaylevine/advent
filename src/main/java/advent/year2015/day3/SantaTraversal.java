@@ -42,14 +42,14 @@ public class SantaTraversal {
 	}
 
 	public static void santaVistsHouses() throws IOException {
-		String directions = Files.toString(new File("src/main/java/advent/day3/input.txt"), StandardCharsets.UTF_8);
+		String directions = Files.toString(new File("src/main/java/advent/year2015/day3/input.txt"), StandardCharsets.UTF_8);
 		SantaTraversal traversal = new SantaTraversal();
 		traversal.traverse(directions);
 		System.out.println(traversal.visitedCount());
 	}
 
 	public static void santaAndRoboSantaVisitHouses() throws IOException {
-		String directions = Files.toString(new File("src/main/java/advent/day3/input.txt"), StandardCharsets.UTF_8);
+		String directions = Files.toString(new File("src/main/java/advent/year2015/day3/input.txt"), StandardCharsets.UTF_8);
 
 		SantaTraversal santa = new SantaTraversal();
 		SantaTraversal roboSanta = new SantaTraversal();

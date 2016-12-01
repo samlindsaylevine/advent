@@ -100,7 +100,7 @@ public class SeatingHappiness {
 
 	private static SeatingHappiness seatingFromFile() throws IOException {
 		SeatingHappiness seating = new SeatingHappiness();
-		Files.lines(Paths.get("src/main/java/advent/day13/input.txt")) //
+		Files.lines(Paths.get("src/main/java/advent/year2015/day13/input.txt")) //
 				.forEach(seating::addPreference);
 		return seating;
 	}

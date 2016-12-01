@@ -37,7 +37,7 @@ public class SantaString {
 	}
 
 	public static void main(String[] args) throws IOException {
-		long total = Files.lines(Paths.get("src/main/java/advent/day8/input.txt")) //
+		long total = Files.lines(Paths.get("src/main/java/advent/year2015/day8/input.txt")) //
 				.map(SantaString::new) //
 				.mapToInt(str -> str.encodedLength() - str.rawLength()) //
 				.sum();
