@@ -9,16 +9,31 @@ import org.junit.Test;
 public class BathroomCodeTest {
 
 	@Test
-	public void reference() {
+	public void referenceSquare() {
 		Stream<String> referenceLines = Stream.of( //
 				"ULL", //
 				"RRDDD", //
 				"LURDL", //
 				"UUUUD");
 
-		BathroomCode code = BathroomCode.of(referenceLines);
+		BathroomCode code = BathroomCode.squareKeys();
+		referenceLines.forEach(code::applyInstructionLine);
 
 		assertEquals("1985", code.keyString());
+	}
+
+	@Test
+	public void referenceDiamond() {
+		Stream<String> referenceLines = Stream.of( //
+				"ULL", //
+				"RRDDD", //
+				"LURDL", //
+				"UUUUD");
+
+		BathroomCode code = BathroomCode.diamondKeys();
+		referenceLines.forEach(code::applyInstructionLine);
+
+		assertEquals("5DB3", code.keyString());
 	}
 
 }

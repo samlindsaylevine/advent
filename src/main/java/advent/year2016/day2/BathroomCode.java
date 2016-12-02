@@ -12,51 +12,91 @@ import java.util.stream.Stream;
 
 public class BathroomCode {
 
-	private static final String[][] KEYS = { //
+	private static final String STARTING_KEY = "5";
+
+	/**
+	 * A blank, or whitespace, string at a position on the keypad means it is
+	 * inaccessible.
+	 */
+
+	private static final String[][] SQUARE_KEYS = { //
 			{ "1", "2", "3" }, //
 			{ "4", "5", "6" }, //
 			{ "7", "8", "9" } //
 	};
 
+	private static final String[][] DIAMOND_KEYS = { //
+			{ " ", " ", "1", " ", " " }, //
+			{ " ", "2", "3", "4", " " }, //
+			{ "5", "6", "7", "8", "9" }, //
+			{ " ", "A", "B", "C", " " }, //
+			{ " ", " ", "D", " ", " " } //
+	};
+
 	private List<String> keysInCode;
+
+	private final String[][] keypad;
 
 	private int x;
 	private int y;
 
-	private BathroomCode() {
+	private BathroomCode(String[][] keypad) {
 		keysInCode = new LinkedList<>();
-		x = 1;
-		y = 1;
+		this.keypad = keypad;
+		this.setStartingKey();
 	}
 
-	public static BathroomCode of(Stream<String> instructionLines) {
-		BathroomCode output = new BathroomCode();
+	private void setStartingKey() {
+		for (int y = 0; y < this.keypad.length; y++) {
+			String[] keyRow = this.keypad[y];
+			for (int x = 0; x < keyRow.length; x++) {
+				if (keyRow[x].equals(STARTING_KEY)) {
+					this.x = x;
+					this.y = y;
+					return;
+				}
+			}
+		}
 
-		instructionLines.forEach(output::applyInstructionLine);
-
-		return output;
+		throw new IllegalStateException("Starting key " + STARTING_KEY + " not found!");
 	}
 
-	private void applyInstructionLine(String instructionLine) {
+	public static BathroomCode squareKeys() {
+		return new BathroomCode(SQUARE_KEYS);
+	}
+
+	public static BathroomCode diamondKeys() {
+		return new BathroomCode(DIAMOND_KEYS);
+	}
+
+	public void applyInstructionLine(String instructionLine) {
 		for (String instruction : instructionLine.trim().split("")) {
 			this.applyInstruction(instruction);
 		}
 
-		keysInCode.add(KEYS[y][x]);
+		keysInCode.add(keypad[y][x]);
 	}
 
 	private void applyInstruction(String instruction) {
 		this.applyInstruction(Instruction.valueOf(instruction));
 	}
 
+	/**
+	 * Apply an instruction as long as it moves us to a legal space. (Off the
+	 * keypad, or to an empty space, are not legal moves.)
+	 */
 	private void applyInstruction(Instruction instruction) {
-		this.x += instruction.deltaX;
-		this.y += instruction.deltaY;
+		int newX = this.x + instruction.deltaX;
+		int newY = this.y + instruction.deltaY;
 
-		this.x = Math.max(0, this.x);
-		this.x = Math.min(KEYS[0].length - 1, this.x);
-		this.y = Math.max(0, this.y);
-		this.y = Math.min(KEYS.length - 1, this.y);
+		if (newY >= 0 && //
+				newY < this.keypad.length && //
+				newX >= 0 && //
+				newX < this.keypad[y].length && //
+				!this.keypad[newY][newX].trim().isEmpty()) {
+			this.x = newX;
+			this.y = newY;
+		}
 	}
 
 	public String keyString() {
@@ -82,9 +122,17 @@ public class BathroomCode {
 	public static final void main(String[] args) throws IOException {
 		Path inputFilePath = Paths.get("src/main/java/advent/year2016/day2/input.txt");
 
+		BathroomCode square = BathroomCode.squareKeys();
+		BathroomCode diamond = BathroomCode.diamondKeys();
+
 		try (Stream<String> lines = Files.lines(inputFilePath)) {
-			BathroomCode code = BathroomCode.of(lines);
-			System.out.println(code.keyString());
+			lines.forEach(line -> {
+				square.applyInstructionLine(line);
+				diamond.applyInstructionLine(line);
+			});
 		}
+
+		System.out.println(square.keyString());
+		System.out.println(diamond.keyString());
 	}
 }
