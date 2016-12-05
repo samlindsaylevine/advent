@@ -44,7 +44,7 @@ public class MD5Password {
 		CinematicPasswordInProgress password = new CinematicPasswordInProgress();
 		int i = 0;
 
-		output.ifPresent(out -> out.println(password));
+		output.ifPresent(out -> out.print(password));
 
 		while (!password.isComplete()) {
 			String nextHash = hexMD5Hash(this.doorId + i);
@@ -53,12 +53,13 @@ public class MD5Password {
 				String character = nextHash.substring(6, 7);
 				boolean updated = password.put(position, character);
 				if (updated) {
-					output.ifPresent(out -> out.println(password));
+					output.ifPresent(out -> out.print("\r" + password));
 				}
 			}
 			i++;
 		}
 
+		output.ifPresent(PrintStream::println);
 		output.ifPresent(out -> out.println("HACK THE PLANET"));
 		return password.toString();
 
