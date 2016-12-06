@@ -21,14 +21,16 @@ public class ErrorCorrection {
 	public static Collector<String, ?, String> correctingErrorsByMostCommon() {
 		return Collector.of(PartialErrorCorrectionResult::byMostCommon, //
 				PartialErrorCorrectionResult::add, //
-				PartialErrorCorrectionResult::merge, PartialErrorCorrectionResult::result, //
+				PartialErrorCorrectionResult::merge, //
+				PartialErrorCorrectionResult::result, //
 				Characteristics.UNORDERED);
 	}
 
 	public static Collector<String, ?, String> correctingErrorsByLeastCommon() {
 		return Collector.of(PartialErrorCorrectionResult::byLeastCommon, //
 				PartialErrorCorrectionResult::add, //
-				PartialErrorCorrectionResult::merge, PartialErrorCorrectionResult::result, //
+				PartialErrorCorrectionResult::merge, //
+				PartialErrorCorrectionResult::result, //
 				Characteristics.UNORDERED);
 	}
 
