@@ -18,8 +18,15 @@ import java.util.stream.Stream;
 
 public class ErrorCorrection {
 
-	public static Collector<String, ?, String> correctingErrors() {
-		return Collector.of(PartialErrorCorrectionResult::new, //
+	public static Collector<String, ?, String> correctingErrorsByMostCommon() {
+		return Collector.of(PartialErrorCorrectionResult::byMostCommon, //
+				PartialErrorCorrectionResult::add, //
+				PartialErrorCorrectionResult::merge, PartialErrorCorrectionResult::result, //
+				Characteristics.UNORDERED);
+	}
+
+	public static Collector<String, ?, String> correctingErrorsByLeastCommon() {
+		return Collector.of(PartialErrorCorrectionResult::byLeastCommon, //
 				PartialErrorCorrectionResult::add, //
 				PartialErrorCorrectionResult::merge, PartialErrorCorrectionResult::result, //
 				Characteristics.UNORDERED);
@@ -29,13 +36,29 @@ public class ErrorCorrection {
 
 		private List<Map<Character, Integer>> characterFrequencies;
 
-		public PartialErrorCorrectionResult() {
+		/**
+		 * The order used to sort characters by frequency - the character that
+		 * this comparator sorts to the front will be used as the 'correct'
+		 * character.
+		 */
+		private final Comparator<Integer> ascendingFrequencyOrder;
+
+		private PartialErrorCorrectionResult(Comparator<Integer> ascendingFrequencyOrder) {
 			this.characterFrequencies = new ArrayList<>();
+			this.ascendingFrequencyOrder = ascendingFrequencyOrder;
+		}
+
+		public static PartialErrorCorrectionResult byMostCommon() {
+			return new PartialErrorCorrectionResult(Comparator.reverseOrder());
+		}
+
+		public static PartialErrorCorrectionResult byLeastCommon() {
+			return new PartialErrorCorrectionResult(Comparator.naturalOrder());
 		}
 
 		public String result() {
 			return this.characterFrequencies.stream() //
-					.map(PartialErrorCorrectionResult::mostFrequentCharacter) //
+					.map(this::resultingCharacter) //
 					.filter(Optional::isPresent) //
 					.map(Optional::get) //
 					.collect(StringBuilder::new, StringBuilder::append, StringBuilder::append) //
@@ -66,10 +89,10 @@ public class ErrorCorrection {
 			return this;
 		}
 
-		private static Optional<Character> mostFrequentCharacter(Map<Character, Integer> frequencies) {
-			Comparator<Character> mostFrequentLast = comparing(frequencies::get);
+		private Optional<Character> resultingCharacter(Map<Character, Integer> frequencies) {
+			Comparator<Character> resultingCharacterFirst = comparing(frequencies::get, this.ascendingFrequencyOrder);
 			return frequencies.keySet().stream() //
-					.sorted(mostFrequentLast.reversed()) //
+					.sorted(resultingCharacterFirst) //
 					.findFirst();
 		}
 
@@ -79,7 +102,11 @@ public class ErrorCorrection {
 		Path inputFilePath = Paths.get("src/main/java/advent/year2016/day6/input.txt");
 
 		try (Stream<String> lines = Files.lines(inputFilePath)) {
-			System.out.println(lines.collect(correctingErrors()));
+			System.out.println(lines.collect(correctingErrorsByMostCommon()));
+		}
+
+		try (Stream<String> lines = Files.lines(inputFilePath)) {
+			System.out.println(lines.collect(correctingErrorsByLeastCommon()));
 		}
 	}
 
