@@ -36,4 +36,12 @@ public class IPv7AddressTest {
 		assertTrue(new IPv7Address("ioxxoj[asdfgh]zxcvbn").supportsTLS());
 	}
 
+	@Test
+	public void supportsSSL() {
+		assertTrue(new IPv7Address("aba[bab]xyx").supportsSSL());
+		assertFalse(new IPv7Address("xyx[xyx]xyx").supportsSSL());
+		assertTrue(new IPv7Address("aaa[kek]eke").supportsSSL());
+		assertTrue(new IPv7Address("zazbz[bzb]cdb").supportsSSL());
+	}
+
 }
