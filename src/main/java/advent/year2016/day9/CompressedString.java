@@ -16,27 +16,34 @@ public class CompressedString {
 		this.compressedRepresentation = representation;
 	}
 
-	public String decompress() {
-		return this.compressedRepresentation.chars() //
-				.collect(DecompressionResult::new, //
-						DecompressionResult::add, //
-						(l, r) -> {
-							throw new UnsupportedOperationException();
-						}) // Not implementing merging because we know this will
-							// not be parallel.
-				.toString();
+	public String singlyDecompress() {
+		SingleDecompressProcessor processor = new SingleDecompressProcessor();
+		this.compressedRepresentation.chars().forEachOrdered(processor::add);
+		return processor.result();
 	}
 
-	private static class DecompressionResult {
+	public long recursivelyDecompressedLength() {
+		RecursiveDecompressProcessor processor = new RecursiveDecompressProcessor();
+		this.compressedRepresentation.chars().forEachOrdered(processor::add);
+		return processor.result();
+	}
 
-		private final StringBuilder result;
+	/**
+	 * A state machine for processing the compressed string one character at a
+	 * time.
+	 * 
+	 * @param <T>
+	 *            The result type of the processor (since one wants to return
+	 *            the string, the other simply a length).
+	 */
+	private static abstract class DecompressionProcessor<T> {
+
 		private ReadMode readMode;
 		private StringBuilder tempBuffer;
 		private int charactersLeftToRepeat;
 		private int lastSectionRepeatCount;
 
-		public DecompressionResult() {
-			this.result = new StringBuilder();
+		public DecompressionProcessor() {
 			this.readMode = ReadMode.NORMAL;
 			this.tempBuffer = new StringBuilder();
 		}
@@ -50,7 +57,7 @@ public class CompressedString {
 				this.tempBuffer = new StringBuilder();
 				this.readMode = ReadMode.READING_SECTION_LENGTH;
 			} else if (this.readMode == ReadMode.NORMAL) {
-				this.result.append(character);
+				this.addToOutput(1, Character.toString(character));
 			} else if (this.readMode == ReadMode.READING_SECTION_LENGTH && character == 'x') {
 				this.charactersLeftToRepeat = Integer.valueOf(this.tempBuffer.toString());
 				this.tempBuffer = new StringBuilder();
@@ -67,7 +74,7 @@ public class CompressedString {
 				this.tempBuffer.append(character);
 				this.charactersLeftToRepeat--;
 				if (this.charactersLeftToRepeat == 0) {
-					IntStream.range(0, this.lastSectionRepeatCount).forEach(i -> this.result.append(this.tempBuffer));
+					this.addToOutput(this.lastSectionRepeatCount, this.tempBuffer.toString());
 					this.readMode = ReadMode.NORMAL;
 				}
 			} else {
@@ -75,10 +82,9 @@ public class CompressedString {
 			}
 		}
 
-		@Override
-		public String toString() {
-			return this.result.toString();
-		}
+		protected abstract void addToOutput(int repeatNTimes, String section);
+
+		protected abstract T result();
 
 		private static enum ReadMode {
 			NORMAL, //
@@ -88,6 +94,61 @@ public class CompressedString {
 		}
 	}
 
+	/**
+	 * Processor that makes only a single pass and returns the actual
+	 * decompressed string.
+	 */
+	private static class SingleDecompressProcessor extends DecompressionProcessor<String> {
+
+		private final StringBuilder result;
+
+		public SingleDecompressProcessor() {
+			super();
+			this.result = new StringBuilder();
+		}
+
+		@Override
+		protected void addToOutput(int repeatNTimes, String section) {
+			IntStream.range(0, repeatNTimes).forEach(i -> this.result.append(section));
+		}
+
+		@Override
+		protected String result() {
+			return this.result.toString();
+		}
+
+	}
+
+	/**
+	 * Processor that continues decompressing every section as long as it still
+	 * has compression markers, and only remembers the total output length, not
+	 * the output itself.
+	 */
+	private static class RecursiveDecompressProcessor extends DecompressionProcessor<Long> {
+
+		private long length;
+
+		public RecursiveDecompressProcessor() {
+			super();
+			this.length = 0;
+		}
+
+		@Override
+		protected void addToOutput(int repeatNTimes, String section) {
+			if (section.contains("(")) {
+				this.length += repeatNTimes * new CompressedString(section).recursivelyDecompressedLength();
+			} else {
+				this.length += repeatNTimes * section.length();
+			}
+		}
+
+		@Override
+		protected Long result() {
+			return this.length;
+		}
+
+	}
+
 	public static void main(String[] args) throws IOException {
 		Path inputFilePath = Paths.get("src/main/java/advent/year2016/day9/input.txt");
 
@@ -95,7 +156,9 @@ public class CompressedString {
 				.stream() //
 				.collect(joining(""));
 
-		System.out.println(new CompressedString(input).decompress().length());
+		CompressedString compressedString = new CompressedString(input);
+		System.out.println(compressedString.singlyDecompress().length());
+		System.out.println(compressedString.recursivelyDecompressedLength());
 	}
 
 }
