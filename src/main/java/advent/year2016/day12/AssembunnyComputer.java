@@ -164,7 +164,11 @@ public class AssembunnyComputer {
 
 		List<String> lines = Files.readAllLines(inputFilePath);
 		computer.executeProgram(lines);
-
 		System.out.println(computer.getValue("a"));
+
+		AssembunnyComputer partTwo = new AssembunnyComputer();
+		partTwo.setRegister("c", 1);
+		partTwo.executeProgram(lines);
+		System.out.println(partTwo.getValue("a"));
 	}
 }
