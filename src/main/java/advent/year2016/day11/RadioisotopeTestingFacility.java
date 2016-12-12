@@ -1,6 +1,9 @@
 package advent.year2016.day11;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
@@ -8,8 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,13 +34,16 @@ public class RadioisotopeTestingFacility {
 
 	public RadioisotopeTestingFacility(Stream<String> lines) {
 		// Assuming that all floors are presented to us in ascending order.
-		this.floors = lines.map(Floor::new).collect(toList());
-		this.humanFloorIndex = 0;
+		this(lines.map(Floor::new).collect(toList()), 0);
 	}
 
 	private RadioisotopeTestingFacility(RadioisotopeTestingFacility other) {
-		this.floors = new ArrayList<>(other.floors);
-		this.humanFloorIndex = other.humanFloorIndex;
+		this(new ArrayList<>(other.floors), other.humanFloorIndex);
+	}
+
+	private RadioisotopeTestingFacility(List<Floor> floors, int humanFloorIndex) {
+		this.floors = floors;
+		this.humanFloorIndex = humanFloorIndex;
 	}
 
 	public int minimumNumberOfStepsToGetEverythingOntoTheTopFloor() {
@@ -96,6 +106,71 @@ public class RadioisotopeTestingFacility {
 		output.floors.set(newFloor, output.floors.get(newFloor).with(movedItems));
 		output.humanFloorIndex = newFloor;
 		return output;
+	}
+
+	RadioisotopeTestingFacility withAdditionalItemsOnFirstFloor(FacilityItem... items) {
+		RadioisotopeTestingFacility output = new RadioisotopeTestingFacility(this);
+		output.floors.set(0, output.floors.get(0).with(Arrays.stream(items).collect(toSet())));
+		return output;
+	}
+
+	/**
+	 * A pure brute-force run is not efficient enough to be able to handle part
+	 * 2 of the problem. For purposes of our solution, we don't particularly
+	 * care which element is where - a state with A on floor 1 and B on floor 2
+	 * is equivalent to one with B on floor 1 and A on floor 2.
+	 * 
+	 * So, we check only the 'canonical' forms of the states, where we are
+	 * willing to permute around the elements as long as the replacements are
+	 * one-to-one.
+	 * 
+	 * We'll make the canonical form one where the elements are in alphabetical
+	 * order from lowest microchip to highest, tiebreaking on lowest generator.
+	 */
+	RadioisotopeTestingFacility canonicalize() {
+		List<String> alphabeticalElements = this.allElements() //
+				.sorted() //
+				.collect(toList());
+
+		Comparator<String> byFloorOrder = comparing(this::firstMicrochipIndex) //
+				.thenComparing(this::firstGeneratorIndex) //
+				.thenComparing(naturalOrder());
+
+		List<String> currentOrderedElements = this.allElements() //
+				.sorted(byFloorOrder) //
+				.collect(toList());
+
+		Map<String, String> renames = IntStream.range(0, currentOrderedElements.size()) //
+				.boxed() //
+				.collect(toMap(currentOrderedElements::get, alphabeticalElements::get));
+
+		List<Floor> newFloors = this.floors.stream() //
+				.map(floor -> floor.changingElements(renames)) //
+				.collect(toList());
+
+		return new RadioisotopeTestingFacility(newFloors, this.humanFloorIndex);
+	}
+
+	private Stream<String> allElements() {
+		return this.floors.stream() //
+				.map(floor -> floor.microchips) //
+				.flatMap(Set::stream) //
+				.map(microchip -> microchip.element) //
+				.distinct();
+	}
+
+	private int firstMicrochipIndex(String element) {
+		return IntStream.range(0, this.floors.size()) //
+				.filter(i -> this.floors.get(i).microchips.stream().anyMatch(chip -> chip.element.equals(element))) //
+				.findFirst() //
+				.orElseThrow(() -> new NoSuchElementException("No chip for element " + element));
+	}
+
+	private int firstGeneratorIndex(String element) {
+		return IntStream.range(0, this.floors.size()) //
+				.filter(i -> this.floors.get(i).generators.stream().anyMatch(chip -> chip.element.equals(element))) //
+				.findFirst() //
+				.orElseThrow(() -> new NoSuchElementException("No chip for element " + element));
 	}
 
 	private static interface FacilityItem {
@@ -274,10 +349,20 @@ public class RadioisotopeTestingFacility {
 			return output;
 		}
 
-		private Floor with(Set<FacilityItem> removedItems) {
+		private Floor with(Set<FacilityItem> additionalItems) {
 			Floor output = new Floor(this);
-			removedItems.forEach(item -> item.addTo(output));
+			additionalItems.forEach(item -> item.addTo(output));
 			return output;
+		}
+
+		public Floor changingElements(Map<String, String> elementRenames) {
+			Set<Microchip> newChips = this.microchips.stream() //
+					.map(chip -> new Microchip(elementRenames.get(chip.element))) //
+					.collect(toSet());
+			Set<Generator> newGenerators = this.generators.stream() //
+					.map(generator -> new Generator(elementRenames.get(generator.element))) //
+					.collect(toSet());
+			return new Floor(newChips, newGenerators);
 		}
 
 		@Override
@@ -369,11 +454,14 @@ public class RadioisotopeTestingFacility {
 		private Set<RadioisotopeTestingFacility> currentStates;
 
 		public FacilitySolution(RadioisotopeTestingFacility facility) {
+
+			RadioisotopeTestingFacility canonical = facility.canonicalize();
+
 			this.stepsElapsed = 0;
 			this.visitedStates = new HashSet<>();
-			this.visitedStates.add(facility);
+			this.visitedStates.add(canonical);
 			this.currentStates = new HashSet<>();
-			this.currentStates.add(facility);
+			this.currentStates.add(canonical);
 		}
 
 		private boolean isSolved() {
@@ -386,8 +474,9 @@ public class RadioisotopeTestingFacility {
 					throw new IllegalStateException("Unsolvable, ran out of possiblities");
 				}
 
-				Set<RadioisotopeTestingFacility> nextStates = this.currentStates.stream() //
+				Set<RadioisotopeTestingFacility> nextStates = this.currentStates.parallelStream() //
 						.flatMap(RadioisotopeTestingFacility::legalNextMoves) //
+						.map(RadioisotopeTestingFacility::canonicalize) //
 						.filter(state -> !this.visitedStates.contains(state)) //
 						.collect(toSet());
 
@@ -395,6 +484,10 @@ public class RadioisotopeTestingFacility {
 				this.visitedStates.addAll(this.currentStates);
 
 				this.stepsElapsed++;
+
+				// Debug output / progress indicator if desired.
+				// System.out.println(" " + this.stepsElapsed + " " +
+				// this.currentStates.size());
 			}
 
 			return this.stepsElapsed;
@@ -407,6 +500,14 @@ public class RadioisotopeTestingFacility {
 		try (Stream<String> lines = Files.lines(inputFilePath)) {
 			RadioisotopeTestingFacility facility = new RadioisotopeTestingFacility(lines);
 			System.out.println(facility.minimumNumberOfStepsToGetEverythingOntoTheTopFloor());
+
+			RadioisotopeTestingFacility partTwo = facility.withAdditionalItemsOnFirstFloor( //
+					new Generator("elerium"), //
+					new Microchip("elerium"), //
+					new Generator("dilithium"), //
+					new Microchip("dilithium"));
+			System.out.println(partTwo.minimumNumberOfStepsToGetEverythingOntoTheTopFloor());
+
 		}
 	}
 

@@ -105,4 +105,18 @@ public class RadioisotopeTestingFacilityTest {
 		assertEquals(expected, floor);
 	}
 
+	@Test
+	public void canonicalize() {
+		// Same as the reference input but with the generators swapped.
+		Stream<String> input = Stream.of(
+				"The first floor contains a hydrogen-compatible microchip and a lithium-compatible microchip.", //
+				"The second floor contains a lithium generator.", //
+				"The third floor contains a hydrogen generator.", //
+				"The fourth floor contains nothing relevant.");
+
+		RadioisotopeTestingFacility facility = new RadioisotopeTestingFacility(input);
+
+		assertEquals(this.reference(), facility.canonicalize());
+	}
+
 }
