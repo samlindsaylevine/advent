@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import com.google.common.collect.ImmutableSet;
@@ -50,7 +51,13 @@ public class CubicleMaze {
 	}
 
 	public int pathLength(int startX, int startY, int endX, int endY) {
-		return new Traversal(this, new Address(startX, startY), new Address(endX, endY)).solve();
+		Traversal traversal = Traversal.toTarget(this, new Address(startX, startY), new Address(endX, endY));
+		return traversal.stepsTaken;
+	}
+
+	public int locationsReachable(int startX, int startY, int maxSteps) {
+		Traversal traversal = Traversal.maxSteps(this, new Address(startX, startY), maxSteps);
+		return traversal.visited.size();
 	}
 
 	private static class Traversal {
@@ -58,29 +65,39 @@ public class CubicleMaze {
 		private int stepsTaken;
 		private Set<Address> visited;
 		private Set<Address> current;
-		private Address target;
+		private final Predicate<Traversal> isDone;
 
-		public Traversal(CubicleMaze maze, Address start, Address end) {
+		public Traversal(CubicleMaze maze, Address start, Predicate<Traversal> isDone) {
 			this.maze = maze;
 			this.stepsTaken = 0;
 			this.visited = new HashSet<>();
 			this.visited.add(start);
 			this.current = ImmutableSet.of(start);
-			this.target = end;
+			this.isDone = isDone;
+			this.solve();
 		}
 
-		public int solve() {
-			while (!this.current.contains(this.target)) {
+		public static Traversal toTarget(CubicleMaze maze, Address start, Address end) {
+			return new Traversal(maze, start, traversal -> traversal.current.contains(end));
+		}
+
+		public static Traversal maxSteps(CubicleMaze maze, Address start, int maxSteps) {
+			return new Traversal(maze, start, traversal -> traversal.stepsTaken == maxSteps);
+		}
+
+		private void solve() {
+			while (!this.isDone.test(this)) {
 				this.current = this.current.stream() //
 						.map(Address::adjacent) //
 						.flatMap(Set::stream) //
 						.filter(address -> !this.visited.contains(address)) //
 						.filter(this.maze::isOpen) //
 						.collect(toSet());
+				this.visited.addAll(this.current);
 				this.stepsTaken++;
 			}
 
-			return this.stepsTaken;
+			return;
 		}
 	}
 
@@ -135,5 +152,6 @@ public class CubicleMaze {
 	public static void main(String[] args) {
 		CubicleMaze maze = new CubicleMaze(1352);
 		System.out.println(maze.pathLength(1, 1, 31, 39));
+		System.out.println(maze.locationsReachable(1, 1, 50));
 	}
 }

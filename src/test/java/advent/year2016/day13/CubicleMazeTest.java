@@ -73,4 +73,14 @@ public class CubicleMazeTest {
 		assertEquals(11, this.reference.pathLength(1, 1, 7, 4));
 	}
 
+	@Test
+	public void locationsReachable() {
+		// Counts taken by inspection from the diagram above.
+		assertEquals(1, this.reference.locationsReachable(1, 1, 0));
+		assertEquals(3, this.reference.locationsReachable(1, 1, 1));
+		assertEquals(5, this.reference.locationsReachable(1, 1, 2));
+		assertEquals(6, this.reference.locationsReachable(1, 1, 3));
+		assertEquals(9, this.reference.locationsReachable(1, 1, 4));
+	}
+
 }
