@@ -19,15 +19,33 @@ import advent.year2016.day5.MD5Password;
 public class OneTimePadKeyStream {
 
 	private static final int FUTURE_HASH_DISTANCE = 1000;
+	private static final int STRETCHED_HASH_ITERATIONS = 2017;
 
 	private final String salt;
 
-	public OneTimePadKeyStream(String salt) {
+	private final int numberOfHashApplications;
+
+	private OneTimePadKeyStream(String salt, int numberOfHashApplications) {
 		this.salt = salt;
+		this.numberOfHashApplications = numberOfHashApplications;
+	}
+
+	public static OneTimePadKeyStream unstretched(String salt) {
+		return new OneTimePadKeyStream(salt, 1);
+	}
+
+	public static OneTimePadKeyStream stretched(String salt) {
+		return new OneTimePadKeyStream(salt, STRETCHED_HASH_ITERATIONS);
 	}
 
 	public String possibleKey(int index) {
-		return MD5Password.hexMD5Hash(this.salt + index);
+		String s = this.salt + index;
+
+		for (int i = 0; i < this.numberOfHashApplications; i++) {
+			s = MD5Password.hexMD5Hash(s);
+		}
+
+		return s;
 	}
 
 	public List<Key> keys(int keyCount) {
@@ -35,7 +53,7 @@ public class OneTimePadKeyStream {
 		int currentIndex = 0;
 
 		// Keeping two data structures for lookup speed.
-		LinkedList<Key> lookForward = IntStream.range(1, 1 + FUTURE_HASH_DISTANCE) //
+		LinkedList<Key> lookForward = IntStream.range(0, 1 + FUTURE_HASH_DISTANCE) //
 				.mapToObj(i -> new Key(i, this.possibleKey(i))) //
 				.collect(toLinkedList());
 		Multimap<Character, Key> lookForwardsByQuintuples = lookForward.stream() //
@@ -43,12 +61,15 @@ public class OneTimePadKeyStream {
 
 		while (output.size() < keyCount) {
 
-			String possibleKey = this.possibleKey(currentIndex);
+			// Debug progress indicator.
+			// System.out.println(currentIndex);
 
-			int i = currentIndex;
-			firstRepeatedChar(possibleKey, 3).ifPresent(repeated -> {
+			Key possibleKey = lookForward.removeFirst();
+			possibleKey.quintupleChars.forEach(c -> lookForwardsByQuintuples.remove(c, possibleKey));
+
+			possibleKey.firstTriplet.ifPresent(repeated -> {
 				if (lookForwardsByQuintuples.containsKey(repeated)) {
-					output.add(new Key(i, possibleKey));
+					output.add(possibleKey);
 				}
 			});
 
@@ -58,9 +79,6 @@ public class OneTimePadKeyStream {
 			Key nextLookForward = new Key(nextLookForwardIndex, this.possibleKey(nextLookForwardIndex));
 			lookForward.add(nextLookForward);
 			nextLookForward.quintupleChars.forEach(c -> lookForwardsByQuintuples.put(c, nextLookForward));
-
-			Key previousLookForward = lookForward.removeFirst();
-			previousLookForward.quintupleChars.forEach(c -> lookForwardsByQuintuples.remove(c, previousLookForward));
 		}
 
 		return output;
@@ -138,9 +156,19 @@ public class OneTimePadKeyStream {
 	}
 
 	public static void main(String[] args) {
-		OneTimePadKeyStream stream = new OneTimePadKeyStream("cuanljph");
-		List<Key> keys = stream.keys(64);
-		System.out.println(keys.get(keys.size() - 1).index);
+		String input = "cuanljph";
+
+		{
+			OneTimePadKeyStream stream = OneTimePadKeyStream.unstretched(input);
+			List<Key> keys = stream.keys(64);
+			System.out.println(keys.get(keys.size() - 1).index);
+		}
+
+		{
+			OneTimePadKeyStream stretched = OneTimePadKeyStream.stretched(input);
+			List<Key> stretchedKeys = stretched.keys(64);
+			System.out.println(stretchedKeys.get(stretchedKeys.size() - 1).index);
+		}
 	}
 
 }
