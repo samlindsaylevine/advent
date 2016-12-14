@@ -65,7 +65,7 @@ public class MD5Password {
 
 	}
 
-	private static String hexMD5Hash(String input) {
+	public static String hexMD5Hash(String input) {
 		MessageDigest md5;
 		try {
 			md5 = MessageDigest.getInstance("MD5");
