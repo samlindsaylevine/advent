@@ -1,18 +1,17 @@
 package advent.year2016.day8;
 
+import static advent.utils.CollectorUtils.toArrayList;
 import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -39,19 +38,6 @@ public class PixelDisplay {
 		return IntStream.range(0, width) //
 				.mapToObj(any -> false) //
 				.collect(toArrayList());
-	}
-
-	/**
-	 * Helper collector for making mutable lists, so that we can invoke
-	 * {@link Collections#rotate(List, int)} on them.
-	 */
-	private static <T> Collector<T, ?, ArrayList<T>> toArrayList() {
-		return Collector.of(ArrayList::new, //
-				ArrayList::add, //
-				(l, r) -> {
-					l.addAll(r);
-					return l;
-				});
 	}
 
 	public long litPixelCount() {
