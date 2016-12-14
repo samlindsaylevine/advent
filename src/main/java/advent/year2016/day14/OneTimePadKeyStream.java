@@ -39,13 +39,10 @@ public class OneTimePadKeyStream {
 	}
 
 	public String possibleKey(int index) {
-		String s = this.salt + index;
-
-		for (int i = 0; i < this.numberOfHashApplications; i++) {
-			s = MD5Password.hexMD5Hash(s);
-		}
-
-		return s;
+		return Stream.iterate(this.salt + index, MD5Password::hexMD5Hash) //
+				.limit(this.numberOfHashApplications + 1) //
+				.reduce((first, second) -> second) //
+				.get();
 	}
 
 	public List<Key> keys(int keyCount) {
