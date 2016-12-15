@@ -19,7 +19,15 @@ public class DiscSculpture {
 	private final List<Disc> discs;
 
 	public DiscSculpture(Stream<String> lines) {
-		this.discs = lines.map(Disc::new).collect(toList());
+		this(lines.map(Disc::new).collect(toList()));
+	}
+
+	private DiscSculpture(List<Disc> discs) {
+		this.discs = discs;
+	}
+
+	public DiscSculpture withAdditionalDisc(Disc disc) {
+		return new DiscSculpture(Stream.concat(this.discs.stream(), Stream.of(disc)).collect(toList()));
 	}
 
 	public boolean capsulePasses(int dropTime) {
@@ -30,6 +38,9 @@ public class DiscSculpture {
 
 	public int firstSuccessfulDropTime() {
 		// Naive implementation - try 'em.
+		// Probably some elegant way we could do this symbolically with linear
+		// algebra / modular arithmetic instead? But the naive implementation
+		// runs fast enough for our problem.
 		return IntStream.iterate(0, i -> i + 1) //
 				.parallel() //
 				.filter(this::capsulePasses) //
@@ -52,6 +63,11 @@ public class DiscSculpture {
 			this.initialPosition = Integer.valueOf(matcher.group(2));
 		}
 
+		public Disc(int positionCount, int initialPosition) {
+			this.positionCount = positionCount;
+			this.initialPosition = initialPosition;
+		}
+
 		public boolean isOpenAt(int time) {
 			return (this.initialPosition + time) % this.positionCount == 0;
 		}
@@ -63,6 +79,10 @@ public class DiscSculpture {
 		try (Stream<String> lines = Files.lines(inputFilePath)) {
 			DiscSculpture sculpture = new DiscSculpture(lines);
 			System.out.println(sculpture.firstSuccessfulDropTime());
+
+			Disc additionalDisc = new Disc(11, 0);
+			DiscSculpture partTwo = sculpture.withAdditionalDisc(additionalDisc);
+			System.out.println(partTwo.firstSuccessfulDropTime());
 		}
 	}
 }
