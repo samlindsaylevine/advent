@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -13,6 +12,7 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import advent.utils.StreamUtils;
 import advent.year2016.day5.MD5Password;
 
 public class SecureVault {
@@ -27,53 +27,29 @@ public class SecureVault {
 	}
 
 	public Optional<Path> shortestPathToExit() {
-		return shortestPathToExit(ImmutableSet.of(new Path(this)));
+		return pathsToExit().findFirst();
 	}
 
-	public OptionalInt longestPathToExitLength() {
-		return longestPathToExit(OptionalInt.empty(), ImmutableSet.of(new Path(this)));
+	public Optional<Path> longestPathToExit() {
+		return pathsToExit() //
+				// Assuming that the stream is in shortest-to-longest order.
+				.reduce((l, r) -> r);
 	}
 
-	private Optional<Path> shortestPathToExit(Set<Path> current) {
-		if (current.isEmpty()) {
-			return Optional.empty();
-		}
+	public Optional<Integer> longestPathToExitLength() {
+		return longestPathToExit().map(p -> p.steps.size());
+	}
 
-		Optional<Path> solution = current.stream() //
-				.filter(Path::isAtExit) //
-				.findAny();
+	private Stream<Path> pathsToExit() {
+		return StreamUtils.iterateUntil(ImmutableSet.of(new Path(this)), SecureVault::nextSteps, Set::isEmpty) //
+				.flatMap(Set::stream) //
+				.filter(Path::isAtExit);
+	}
 
-		if (solution.isPresent()) {
-			return solution;
-		}
-
-		Set<Path> nextSteps = current.stream() //
+	private static Set<Path> nextSteps(Set<Path> steps) {
+		return steps.stream() //
 				.flatMap(Path::nextSteps) //
 				.collect(toSet());
-
-		return shortestPathToExit(nextSteps);
-	}
-
-	private OptionalInt longestPathToExit(OptionalInt longestSoFar, Set<Path> current) {
-		if (current.isEmpty()) {
-			return longestSoFar;
-		}
-
-		Optional<Integer> currentSuccessSize = current.stream() //
-				.filter(Path::isAtExit) //
-				.findAny() //
-				.map(p -> p.steps.size());
-
-		OptionalInt nextLongest = currentSuccessSize.isPresent() ? //
-				OptionalInt.of(currentSuccessSize.get()) : //
-				longestSoFar;
-
-		Set<Path> nextSteps = current.stream() //
-				.flatMap(Path::nextSteps) //
-				.collect(toSet());
-
-		return longestPathToExit(nextLongest, nextSteps);
-
 	}
 
 	public static class Path {
@@ -173,7 +149,7 @@ public class SecureVault {
 	public static void main(String[] args) {
 		SecureVault vault = new SecureVault("rrrbmfta");
 		System.out.println(vault.shortestPathToExit().get());
-		System.out.println(vault.longestPathToExitLength().getAsInt());
+		System.out.println(vault.longestPathToExitLength().get());
 	}
 
 }

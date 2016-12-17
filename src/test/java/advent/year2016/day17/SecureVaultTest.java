@@ -35,20 +35,20 @@ public class SecureVaultTest {
 
 	@Test
 	public void longestIhgpwlah() {
-		assertEquals(370, //
-				new SecureVault("ihgpwlah").longestPathToExitLength().getAsInt());
+		assertEquals(Optional.of(370), //
+				new SecureVault("ihgpwlah").longestPathToExitLength());
 
 	}
 
 	@Test
 	public void longestKglvqrro() {
-		assertEquals(492, //
-				new SecureVault("kglvqrro").longestPathToExitLength().getAsInt());
+		assertEquals(Optional.of(492), //
+				new SecureVault("kglvqrro").longestPathToExitLength());
 	}
 
 	@Test
 	public void longestUlqzkmiv() {
-		assertEquals(830, //
-				new SecureVault("ulqzkmiv").longestPathToExitLength().getAsInt());
+		assertEquals(Optional.of(830), //
+				new SecureVault("ulqzkmiv").longestPathToExitLength());
 	}
 }
