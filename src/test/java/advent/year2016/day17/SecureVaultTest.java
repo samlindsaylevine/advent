@@ -14,22 +14,41 @@ public class SecureVaultTest {
 	public void hijkl() {
 		assertEquals(Optional.empty(), new SecureVault("hijkl").shortestPathToExit());
 	}
-	
+
 	@Test
 	public void ihgpwlah() {
 		assertEquals(Optional.of("DDRRRD"), //
 				new SecureVault("ihgpwlah").shortestPathToExit().map(Path::toString));
 	}
-	
+
 	@Test
 	public void kglvqrro() {
 		assertEquals(Optional.of("DDUDRLRRUDRD"), //
 				new SecureVault("kglvqrro").shortestPathToExit().map(Path::toString));
 	}
-	
+
 	@Test
 	public void ulqzkmiv() {
 		assertEquals(Optional.of("DRURDRUDDLLDLUURRDULRLDUUDDDRR"), //
 				new SecureVault("ulqzkmiv").shortestPathToExit().map(Path::toString));
+	}
+
+	@Test
+	public void longestIhgpwlah() {
+		assertEquals(370, //
+				new SecureVault("ihgpwlah").longestPathToExitLength().getAsInt());
+
+	}
+
+	@Test
+	public void longestKglvqrro() {
+		assertEquals(492, //
+				new SecureVault("kglvqrro").longestPathToExitLength().getAsInt());
+	}
+
+	@Test
+	public void longestUlqzkmiv() {
+		assertEquals(830, //
+				new SecureVault("ulqzkmiv").longestPathToExitLength().getAsInt());
 	}
 }
