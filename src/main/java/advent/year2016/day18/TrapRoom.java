@@ -117,6 +117,7 @@ public class TrapRoom {
 		TrapRoom room = new TrapRoom(input);
 
 		System.out.println(room.safeTiles(40));
+		System.out.println(room.safeTiles(400000));
 	}
 
 }

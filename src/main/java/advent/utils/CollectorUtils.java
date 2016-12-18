@@ -61,4 +61,11 @@ public class CollectorUtils {
 
 	}
 
+	public static Collector<Character, ?, String> charsToString() {
+		return Collector.of(StringBuilder::new, //
+				(sb, c) -> sb.appendCodePoint(c), //
+				StringBuilder::append, //
+				StringBuilder::toString);
+	}
+
 }
