@@ -56,8 +56,15 @@ public class ElfPresentParty {
 			currentElf = currentElf.next;
 
 			if (elvesRemaining % 2 == 0) {
+				// Suppose we started with (e.g.) 5 elves, starting with elf 1.
+				// Then we removed elf 3. Our next elf will be elf 2, and we
+				// want to move the "across" pointer so that it is pointing at
+				// elf 5 - we move ahead twice.
 				acrossElf = acrossElf.next.next;
 			} else {
+				// If we started with (e.g.) 6 elves, starting with elf 1, we
+				// removed elf 4. Our next elf is 2, and we want the pointer to
+				// be at elf 5 - ahead only once.
 				acrossElf = acrossElf.next;
 			}
 		}
