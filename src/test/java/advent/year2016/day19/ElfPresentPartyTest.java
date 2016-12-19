@@ -2,28 +2,37 @@ package advent.year2016.day19;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
-
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
+import advent.year2016.day19.ElfPresentParty.PartyElf;
 
 public class ElfPresentPartyTest {
 
 	@Test
 	public void reference() {
-		ElfPresentParty party = new ElfPresentParty(5);
+		ElfPresentParty party = ElfPresentParty.stealingFromTheLeft(5);
 		assertEquals(3, party.elfThatGetsAllThePresents());
 	}
 
 	@Test
-	public void nextTrue() {
-		List<Boolean> values = ImmutableList.of(true, false, true, false, false);
+	public void referenceAcross() {
+		ElfPresentParty party = ElfPresentParty.stealingAcross(5);
+		assertEquals(2, party.elfThatGetsAllThePresents());
+	}
 
-		assertEquals(2, ElfPresentParty.nextTrueValue(values, 0));
-		assertEquals(2, ElfPresentParty.nextTrueValue(values, 1));
-		assertEquals(0, ElfPresentParty.nextTrueValue(values, 2));
-		assertEquals(0, ElfPresentParty.nextTrueValue(values, 3));
-		assertEquals(0, ElfPresentParty.nextTrueValue(values, 4));
+	@Test
+	public void linkedElves() {
+		PartyElf first = ElfPresentParty.linkedElves(5);
+		assertEquals(1, first.number);
+		assertEquals(2, first.next().number);
+		assertEquals(3, first.next().next().number);
+		assertEquals(4, first.next().next().next().number);
+		assertEquals(5, first.next().next().next().next().number);
+		assertEquals(1, first.next().next().next().next().next().number);
+
+		assertEquals(5, first.previous().number);
+		assertEquals(4, first.previous().previous().number);
+
+		assertEquals(1, first.next().previous().number);
 	}
 }
