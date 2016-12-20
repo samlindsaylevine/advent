@@ -50,6 +50,10 @@ public class IPRules {
 		Preconditions.checkArgument(matcher.matches(), "Bad range string %s", rangeStr);
 		long lower = Long.valueOf(matcher.group(1));
 		long upper = Long.valueOf(matcher.group(2));
+		// Canonicalize it over its appropriate domain, so that we can know that
+		// the ranges "0-1" and "2-4" are contiguous and can be merged together.
+		// This also puts all the ranges into [closed, open) format for
+		// consistency.
 		return Range.closed(lower, upper).canonical(DiscreteDomain.longs());
 	}
 
