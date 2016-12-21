@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.primitives.Chars;
+
+import advent.utils.CollectorUtils;
 
 public class ScramblingFunction {
 
@@ -22,7 +26,7 @@ public class ScramblingFunction {
 		this.instructions = lines.map(ScramblingInstruction::of).collect(toList());
 	}
 
-	public String apply(String input) {
+	public String scramble(String input) {
 		String output = input;
 
 		for (ScramblingInstruction instruction : instructions) {
@@ -30,6 +34,28 @@ public class ScramblingFunction {
 		}
 
 		return output;
+	}
+
+	/**
+	 * The sophisticated way to do this would be to identify the reverse
+	 * operation of each instruction, and apply those, but the possiblity space
+	 * for a 8 letter password is so small that we can just try 'em and see.
+	 */
+	public String unscramble(String scrambled) {
+		return permutations(scrambled) //
+				.filter(possibility -> this.scramble(possibility).equals(scrambled)) //
+				.findAny() //
+				.get();
+	}
+
+	private static Stream<String> permutations(String input) {
+		List<Character> chars = Chars.asList(input.toCharArray());
+		return Collections2.permutations(chars).stream() //
+				.map(ScramblingFunction::charsToString);
+	}
+
+	private static String charsToString(List<Character> chars) {
+		return chars.stream().collect(CollectorUtils.charsToString());
 	}
 
 	static class ScramblingInstruction {
@@ -168,7 +194,8 @@ public class ScramblingFunction {
 
 		try (Stream<String> lines = Files.lines(inputFilePath)) {
 			ScramblingFunction function = new ScramblingFunction(lines);
-			System.out.println(function.apply("abcdefgh"));
+			System.out.println(function.scramble("abcdefgh"));
+			System.out.println(function.unscramble("fbgdceah"));
 		}
 	}
 }

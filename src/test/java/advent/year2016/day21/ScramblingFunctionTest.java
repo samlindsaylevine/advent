@@ -87,6 +87,6 @@ public class ScramblingFunctionTest {
 
 		ScramblingFunction function = new ScramblingFunction(lines);
 
-		assertEquals("decab", function.apply("abcde"));
+		assertEquals("decab", function.scramble("abcde"));
 	}
 }
