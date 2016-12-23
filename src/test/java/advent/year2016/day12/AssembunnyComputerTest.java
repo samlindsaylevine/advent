@@ -25,4 +25,22 @@ public class AssembunnyComputerTest {
 
 		assertEquals(42, computer.getValue("a"));
 	}
+
+	@Test
+	public void toggleReference() {
+		AssembunnyComputer computer = new AssembunnyComputer();
+
+		List<String> instructions = ImmutableList.of( //
+				"cpy 2 a", //
+				"tgl a", //
+				"tgl a", //
+				"tgl a", //
+				"cpy 1 a", //
+				"dec a", //
+				"dec a");
+
+		computer.executeProgram(instructions);
+
+		assertEquals(3, computer.getValue("a"));
+	}
 }

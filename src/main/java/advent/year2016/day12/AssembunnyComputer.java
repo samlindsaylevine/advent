@@ -1,6 +1,6 @@
 package advent.year2016.day12;
 
-import static java.util.stream.Collectors.toList;
+import static advent.utils.CollectorUtils.toArrayList;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,14 +12,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * This class has been extended on day 23 to also handle the "toggle"
+ * instruction.
+ */
 public class AssembunnyComputer {
 
-	private Map<String, Integer> registers = new HashMap<>();
+	private Map<String, Long> registers = new HashMap<>();
+
+	private List<AssembunnyInstruction> instructions;
+	int instructionPointer = 0;
 
 	/**
 	 * Several instructions want to be able to reference either a register
@@ -28,33 +36,37 @@ public class AssembunnyComputer {
 	 * @param name
 	 * @return
 	 */
-	int getValue(String name) {
+	public long getValue(String name) {
 		try {
-			return Integer.parseInt(name);
+			return Long.parseLong(name);
 		} catch (NumberFormatException e) {
-			return this.registers.computeIfAbsent(name, any -> 0);
+			return this.registers.computeIfAbsent(name, any -> 0L);
 		}
 	}
 
-	private void setRegister(String name, int value) {
+	public void setRegister(String name, long value) {
 		this.registers.put(name, value);
 	}
 
 	public void executeProgram(List<String> program) {
 
-		List<AssembunnyInstruction> instructions = program.stream() //
-				.map(AssembunnyInstruction::of) //
-				.collect(toList());
+		int stepsTaken = 0;
 
-		int instructionPointer = 0;
+		this.instructions = program.stream() //
+				.map(AssembunnyInstruction::of) //
+				.collect(toArrayList());
+
+		this.instructionPointer = 0;
 
 		while (instructionPointer < instructions.size()) {
 			// Debug output if interested.
-			// System.out.println("State " + this.registers);
-			// System.out.println("Pointer " + instructionPointer);
-			// System.out.println("Executing " +
-			// program.get(instructionPointer));
-			// System.out.println();
+			stepsTaken++;
+			if (stepsTaken % 1000000 == 0) {
+				System.out.println("State " + this.registers);
+				System.out.println("Pointer " + instructionPointer);
+				System.out.println("Executing " + program.get(instructionPointer));
+				System.out.println();
+			}
 
 			instructionPointer += instructions.get(instructionPointer).execute(this);
 		}
@@ -63,7 +75,8 @@ public class AssembunnyComputer {
 	private static class AssembunnyInstruction {
 
 		private final Consumer<AssembunnyComputer> mutateComputer;
-		private final Function<AssembunnyComputer, Integer> stepsToAdvance;
+		private final Function<AssembunnyComputer, Long> stepsToAdvance;
+		private final Supplier<AssembunnyInstruction> toggledVersion;
 
 		public static AssembunnyInstruction of(String representation) {
 			return Arrays.stream(OpCodes.values()) //
@@ -73,18 +86,26 @@ public class AssembunnyComputer {
 					.orElseThrow(() -> new IllegalArgumentException("Bad instruction " + representation));
 		}
 
-		private AssembunnyInstruction(Consumer<AssembunnyComputer> mutateComputer) {
-			this(mutateComputer, any -> 1);
+		private AssembunnyInstruction(Consumer<AssembunnyComputer> mutateComputer,
+				Supplier<AssembunnyInstruction> toggledVersion) {
+			this(mutateComputer, any -> 1L, toggledVersion);
 		}
 
-		public AssembunnyInstruction(Consumer<AssembunnyComputer> mutateComputer,
-				Function<AssembunnyComputer, Integer> stepsToAdvance) {
+		private AssembunnyInstruction(Function<AssembunnyComputer, Long> stepsToAdvance,
+				Supplier<AssembunnyInstruction> toggledVersion) {
+			this(computer -> {
+			}, stepsToAdvance, toggledVersion);
+		}
+
+		private AssembunnyInstruction(Consumer<AssembunnyComputer> mutateComputer,
+				Function<AssembunnyComputer, Long> stepsToAdvance, Supplier<AssembunnyInstruction> toggledVersion) {
 			super();
 			this.mutateComputer = mutateComputer;
 			this.stepsToAdvance = stepsToAdvance;
+			this.toggledVersion = toggledVersion;
 		}
 
-		public int execute(AssembunnyComputer computer) {
+		public long execute(AssembunnyComputer computer) {
 			this.mutateComputer.accept(computer);
 			return this.stepsToAdvance.apply(computer);
 		}
@@ -97,8 +118,8 @@ public class AssembunnyComputer {
 			protected AssembunnyInstruction create(Matcher matchResult) {
 				String from = matchResult.group(1);
 				String to = matchResult.group(2);
-				return new AssembunnyInstruction(computer -> computer.setRegister(to, computer.getValue(from)));
-
+				return new AssembunnyInstruction(computer -> computer.setRegister(to, computer.getValue(from)),
+						() -> JMP.create(matchResult));
 			}
 		}, //
 
@@ -107,7 +128,8 @@ public class AssembunnyComputer {
 			protected AssembunnyInstruction create(Matcher matchResult) {
 				String register = matchResult.group(1);
 				return new AssembunnyInstruction(
-						computer -> computer.setRegister(register, computer.getValue(register) + 1));
+						computer -> computer.setRegister(register, computer.getValue(register) + 1),
+						() -> DEC.create(matchResult));
 			}
 		}, //
 
@@ -117,7 +139,8 @@ public class AssembunnyComputer {
 
 				String register = matchResult.group(1);
 				return new AssembunnyInstruction(
-						computer -> computer.setRegister(register, computer.getValue(register) - 1));
+						computer -> computer.setRegister(register, computer.getValue(register) - 1),
+						() -> INC.create(matchResult));
 			}
 		}, //
 
@@ -125,17 +148,31 @@ public class AssembunnyComputer {
 			@Override
 			protected AssembunnyInstruction create(Matcher matchResult) {
 				String value = matchResult.group(1);
-				int jump = Integer.parseInt(matchResult.group(2));
+				String jumpStr = matchResult.group(2);
 
-				return new AssembunnyInstruction(computer -> {
-				} , computer -> {
-					if (computer.getValue(value) == 0) {
-						return 1;
-					} else {
-						return jump;
-					}
-				});
+				return new AssembunnyInstruction(
+						computer -> computer.getValue(value) == 0 ? 1 : computer.getValue(jumpStr),
+						() -> OpCodes.CPY.create(matchResult));
 			}
+		},
+
+		TGL("tgl (\\w+)") {
+
+			@Override
+			protected AssembunnyInstruction create(Matcher matchResult) {
+				String stepsStr = matchResult.group(1);
+				return new AssembunnyInstruction(computer -> {
+					long steps = computer.getValue(stepsStr);
+					int index = (int) (computer.instructionPointer + steps);
+					if (index < 0 || index >= computer.instructions.size()) {
+						return;
+					}
+
+					AssembunnyInstruction existing = computer.instructions.get(index);
+					computer.instructions.set(index, existing.toggledVersion.get());
+				}, () -> INC.create(matchResult));
+			}
+
 		};
 
 		private OpCodes(String regex) {
