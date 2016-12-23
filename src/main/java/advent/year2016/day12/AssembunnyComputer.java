@@ -86,14 +86,14 @@ public class AssembunnyComputer {
 					.orElseThrow(() -> new IllegalArgumentException("Bad instruction " + representation));
 		}
 
-		private AssembunnyInstruction(Consumer<AssembunnyComputer> mutateComputer,
+		private static AssembunnyInstruction acting(Consumer<AssembunnyComputer> mutateComputer,
 				Supplier<AssembunnyInstruction> toggledVersion) {
-			this(mutateComputer, any -> 1L, toggledVersion);
+			return new AssembunnyInstruction(mutateComputer, any -> 1L, toggledVersion);
 		}
 
-		private AssembunnyInstruction(Function<AssembunnyComputer, Long> stepsToAdvance,
+		private static AssembunnyInstruction stepping(Function<AssembunnyComputer, Long> stepsToAdvance,
 				Supplier<AssembunnyInstruction> toggledVersion) {
-			this(computer -> {
+			return new AssembunnyInstruction(computer -> {
 			}, stepsToAdvance, toggledVersion);
 		}
 
@@ -118,7 +118,7 @@ public class AssembunnyComputer {
 			protected AssembunnyInstruction create(Matcher matchResult) {
 				String from = matchResult.group(1);
 				String to = matchResult.group(2);
-				return new AssembunnyInstruction(computer -> computer.setRegister(to, computer.getValue(from)),
+				return AssembunnyInstruction.acting(computer -> computer.setRegister(to, computer.getValue(from)),
 						() -> JMP.create(matchResult));
 			}
 		}, //
@@ -127,7 +127,7 @@ public class AssembunnyComputer {
 			@Override
 			protected AssembunnyInstruction create(Matcher matchResult) {
 				String register = matchResult.group(1);
-				return new AssembunnyInstruction(
+				return AssembunnyInstruction.acting(
 						computer -> computer.setRegister(register, computer.getValue(register) + 1),
 						() -> DEC.create(matchResult));
 			}
@@ -138,7 +138,7 @@ public class AssembunnyComputer {
 			protected AssembunnyInstruction create(Matcher matchResult) {
 
 				String register = matchResult.group(1);
-				return new AssembunnyInstruction(
+				return AssembunnyInstruction.acting(
 						computer -> computer.setRegister(register, computer.getValue(register) - 1),
 						() -> INC.create(matchResult));
 			}
@@ -150,7 +150,7 @@ public class AssembunnyComputer {
 				String value = matchResult.group(1);
 				String jumpStr = matchResult.group(2);
 
-				return new AssembunnyInstruction(
+				return AssembunnyInstruction.stepping(
 						computer -> computer.getValue(value) == 0 ? 1 : computer.getValue(jumpStr),
 						() -> OpCodes.CPY.create(matchResult));
 			}
@@ -161,7 +161,7 @@ public class AssembunnyComputer {
 			@Override
 			protected AssembunnyInstruction create(Matcher matchResult) {
 				String stepsStr = matchResult.group(1);
-				return new AssembunnyInstruction(computer -> {
+				return AssembunnyInstruction.acting(computer -> {
 					long steps = computer.getValue(stepsStr);
 					int index = (int) (computer.instructionPointer + steps);
 					if (index < 0 || index >= computer.instructions.size()) {
