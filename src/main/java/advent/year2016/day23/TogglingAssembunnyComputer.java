@@ -24,6 +24,14 @@ public class TogglingAssembunnyComputer {
 		computer.executeProgram(lines);
 		System.out.println(computer.getValue("a"));
 
+		// This is unquestionably the stupid naive way of completing this
+		// problem - clearly the desired solution is to come up with a lookahead
+		// optimization that recognizes patterns in the assembly and translates
+		// that into a higher order operation - e.g., multiplication.
+		//
+		// However, CPU time is cheaper than programmer time! So, I launched
+		// this stupid naive way, went off to eat lunch, and came back in 2
+		// hours and it had spit out the correct answer. Hooray??
 		AssembunnyComputer partTwo = new AssembunnyComputer();
 		partTwo.setRegister("a", 12);
 		partTwo.executeProgram(lines);
