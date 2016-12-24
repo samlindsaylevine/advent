@@ -40,4 +40,10 @@ public class AirDuctMazeTest {
 		assertEquals(14, referenceMaze().shortestLengthToVisitAll());
 	}
 
+	@Test
+	public void shortestLengthWithReturn() {
+		// 20 taken by inspection - have to do a lap.
+		assertEquals(20, referenceMaze().shortestLengthToVistAllAndReturn());
+	}
+
 }

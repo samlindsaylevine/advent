@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
 import com.google.common.collect.Collections2;
@@ -64,6 +65,21 @@ public class AirDuctMaze extends Maze {
 	}
 
 	public int shortestLengthToVisitAll() {
+		return shortestLength(nonZeros -> cons(0, nonZeros));
+	}
+
+	public int shortestLengthToVistAllAndReturn() {
+		return shortestLength(nonZeros -> cons(0, append(nonZeros, 0)));
+	}
+
+	/**
+	 * Finds the shortest length path, starting at 0.
+	 * 
+	 * @param nonZerosToAll
+	 *            Given a permutation of the non-zero points of interest, what
+	 *            is our total path including 0?
+	 */
+	private int shortestLength(UnaryOperator<List<Integer>> nonZerosToAll) {
 		Set<Integer> nonZeroPoints = pointsOfInterest.keySet().stream() //
 				.filter(i -> i != 0) //
 				.collect(toSet());
@@ -71,7 +87,7 @@ public class AirDuctMaze extends Maze {
 		Collection<List<Integer>> possiblePointOrders = Collections2.permutations(nonZeroPoints);
 
 		return possiblePointOrders.stream() //
-				.map(nonZero -> cons(0, nonZero)) //
+				.map(nonZerosToAll::apply) //
 				.mapToInt(this::pathDistance) //
 				.min() //
 				.getAsInt();
@@ -81,6 +97,13 @@ public class AirDuctMaze extends Maze {
 		ArrayList<T> output = new ArrayList<>();
 		output.add(element);
 		output.addAll(rest);
+		return output;
+	}
+
+	private static <T> List<T> append(List<T> list, T element) {
+		ArrayList<T> output = new ArrayList<>();
+		output.addAll(list);
+		output.add(element);
 		return output;
 	}
 
@@ -109,7 +132,8 @@ public class AirDuctMaze extends Maze {
 		Address to = pointsOfInterest.get(pointTo);
 
 		// Optional debug information.
-		System.out.println("Calculating distance from " + pointFrom + " (" + from + ") to " + pointTo + "(" + to + ")");
+		// System.out.println("Calculating distance from " + pointFrom + " (" +
+		// from + ") to " + pointTo + "(" + to + ")");
 
 		return this.pathLength(from.x, from.y, to.x, to.y);
 	}
@@ -121,7 +145,7 @@ public class AirDuctMaze extends Maze {
 		AirDuctMaze maze = new AirDuctMaze(lines);
 
 		System.out.println(maze.shortestLengthToVisitAll());
-
+		System.out.println(maze.shortestLengthToVistAllAndReturn());
 	}
 
 }
