@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +22,7 @@ import com.google.common.base.Preconditions;
 
 /**
  * This class has been extended on day 23 to also handle the "toggle"
- * instruction.
+ * instruction, and on day 25 for "out".
  */
 public class AssembunnyComputer {
 
@@ -28,6 +30,8 @@ public class AssembunnyComputer {
 
 	private List<AssembunnyInstruction> instructions;
 	int instructionPointer = 0;
+
+	private List<Long> output = new ArrayList<>();
 
 	/**
 	 * Several instructions want to be able to reference either a register
@@ -44,11 +48,28 @@ public class AssembunnyComputer {
 		}
 	}
 
+	public List<Long> getOutput() {
+		return output;
+	}
+
 	public void setRegister(String name, long value) {
 		this.registers.put(name, value);
 	}
 
 	public void executeProgram(List<String> program) {
+		this.executeProgram(program, computer -> false);
+	}
+
+	/**
+	 * @param program
+	 *            The string representation of the lines to run.
+	 * @param haltCondition
+	 *            An extra halt condition - if this becomes true, we will not
+	 *            continue executing the program. (This is used particularly for
+	 *            Day 25, stopping after we have amassed a certain amount of
+	 *            output.)
+	 */
+	public void executeProgram(List<String> program, Predicate<AssembunnyComputer> haltCondition) {
 
 		int stepsTaken = 0;
 
@@ -59,6 +80,11 @@ public class AssembunnyComputer {
 		this.instructionPointer = 0;
 
 		while (instructionPointer < instructions.size()) {
+
+			if (haltCondition.test(this)) {
+				return;
+			}
+
 			// Debug output if interested.
 			stepsTaken++;
 			if (stepsTaken % 1000000 == 0) {
@@ -171,6 +197,17 @@ public class AssembunnyComputer {
 					AssembunnyInstruction existing = computer.instructions.get(index);
 					computer.instructions.set(index, existing.toggledVersion.get());
 				}, () -> INC.create(matchResult));
+			}
+
+		},
+
+		OUT("out (\\w+)") {
+
+			@Override
+			protected AssembunnyInstruction create(Matcher matchResult) {
+				String value = matchResult.group(1);
+				return AssembunnyInstruction.acting(computer -> computer.output.add(computer.getValue(value)),
+						() -> INC.create(matchResult));
 			}
 
 		};
