@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!-- saved from url=(0034)http://adventofcode.com/2015/day/8 -->
+<html lang="en-us"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Day 8 - Advent of Code 2015</title>
+<!--[if lt IE 9]><script src="/static/html5.js"></script><![endif]-->
+<link href="./Day 8 - Advent of Code 2015_files/css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="./Day 8 - Advent of Code 2015_files/style.css">
+<link rel="shortcut icon" href="http://adventofcode.com/favicon.ico?2">
+</head><!--
+
+
+
+
+Oh, hello!  Funny seeing you here.
+
+I appreciate your enthusiasm, but you aren't going to find much down here.
+There certainly aren't clues to any of the puzzles.  The best surprises don't
+even appear in the source until you unlock them for real.
+
+Please be careful with automated requests; I'm not Google, and I can only take
+so much traffic.  Please be considerate so that everyone gets to play.
+
+If you're curious about how Advent of Code works, it's running on some custom
+Perl code. Other than a few integrations (auth, analytics, ads, social media),
+I built the whole thing myself, including the design, animations, prose, and
+all of the puzzles.
+
+The puzzles probably took the longest; the easiest ones were around 45 minutes
+each, but the harder ones took 2-3 hours, and a few even longer than that. A
+lot of effort went into building this thing - I hope you're enjoying playing it
+as much as I enjoyed making it for you!
+
+If you'd like to hang out, I'm @ericwastl on Twitter.
+
+- Eric Wastl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-->
+<body>
+<header><div><h1 class="title-global"><a href="http://adventofcode.com/">Advent of Code</a></h1><nav><ul><li><a href="http://adventofcode.com/2015/about">[About]</a></li><li><a href="http://adventofcode.com/2015/support">[AoC++]</a></li><li><a href="http://adventofcode.com/2015/events">[Events]</a></li><li><a href="http://adventofcode.com/2015/settings">[Settings]</a></li><li><a href="http://adventofcode.com/2015/auth/logout">[Log Out]</a></li></ul></nav><div class="user">Sam Lindsay-Levine <span class="star-count">50*</span></div></div><div><h1 class="title-event">&nbsp;&nbsp;&nbsp;<span class="title-event-wrap">&lt;y&gt;</span><a href="http://adventofcode.com/2015">2015</a><span class="title-event-wrap">&lt;/y&gt;</span></h1><nav><ul><li><a href="http://adventofcode.com/2015">[Calendar]</a></li><li><a href="http://adventofcode.com/2015/leaderboard">[Leaderboard]</a></li><li><a href="http://adventofcode.com/2015/stats">[Stats]</a></li><li><a href="http://adventofcode.com/2015/sponsors">[Sponsors]</a></li></ul></nav></div></header>
+
+<div id="sidebar">
+<div id="ad">
+<script async="" src="./Day 8 - Advent of Code 2015_files/analytics.js"></script><script async="" src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Advent of Code Wide Skyscraper -->
+<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px" data-ad-client="ca-pub-9420604735624631" data-ad-slot="8014013294"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div><!--/ad-->
+</div><!--/sidebar-->
+
+<main>
+<style>article *[title]{border-bottom:1px dotted #ffff66;}</style><article class="day-desc"><h2>--- Day 8: Matchsticks ---</h2><p>Space on the sleigh is limited this year, and so Santa will be bringing his list as a digital copy. He needs to know how much space it will take up when stored.</p>
+<p>It is common in many programming languages to provide a way to <span title="It is common for many programmers to try to escape from string escaping.  No such luck here.">escape</span> special characters in strings.  For example, <a href="https://en.wikipedia.org/wiki/Escape_sequences_in_C">C</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">JavaScript</a>, <a href="http://perldoc.perl.org/perlop.html#Quote-and-Quote-like-Operators">Perl</a>, <a href="https://docs.python.org/2.0/ref/strings.html">Python</a>, and even <a href="http://php.net/manual/en/language.types.string.php#language.types.string.syntax.double">PHP</a> handle special characters in very similar ways.</p>
+<p>However, it is important to realize the difference between the number of characters <em>in the code representation of the string literal</em> and the number of characters <em>in the in-memory string itself</em>.</p>
+<p>For example:</p>
+<ul>
+<li><code>""</code> is <code>2</code> characters of code (the two double quotes), but the string contains zero characters.</li>
+<li><code>"abc"</code> is <code>5</code> characters of code, but <code>3</code> characters in the string data.</li>
+<li><code>"aaa\"aaa"</code> is <code>10</code> characters of code, but the string itself contains six "a" characters and a single, escaped quote character, for a total of <code>7</code> characters in the string data.</li>
+<li><code>"\x27"</code> is <code>6</code> characters of code, but the string itself contains just one - an apostrophe (<code>'</code>), escaped using hexadecimal notation.</li>
+</ul>
+<p>Santa's list is a file that contains many double-quoted string literals, one on each line.  The only escape sequences used are <code>\\</code> (which represents a single backslash), <code>\"</code> (which represents a lone double-quote character), and <code>\x</code> plus two hexadecimal characters (which represents a single character with that ASCII code).</p>
+<p>Disregarding the whitespace in the file, what is <em>the number of characters of code for string literals</em> minus <em>the number of characters in memory for the values of the strings</em> in total for the entire file?</p>
+<p>For example, given the four strings above, the total number of characters of string code (<code>2 + 5 + 10 + 6 = 23</code>) minus the total number of characters in memory for string values (<code>0 + 3 + 7 + 1 = 11</code>) is <code>23 - 11 = 12</code>.</p>
+</article>
+<p>Your puzzle answer was <code>1371</code>.</p><article class="day-desc"><h2>--- Part Two ---</h2><p>Now, let's go the other way.  In addition to finding the number of characters of code, you should now <em>encode each code representation as a new string</em> and find the number of characters of the new encoded representation, including the surrounding double quotes.</p>
+<p>For example:</p>
+<ul>
+<li><code>""</code> encodes to <code>"\"\""</code>, an increase from <code>2</code> characters to <code>6</code>.</li>
+<li><code>"abc"</code> encodes to <code>"\"abc\""</code>, an increase from <code>5</code> characters to <code>9</code>.</li>
+<li><code>"aaa\"aaa"</code> encodes to <code>"\"aaa\\\"aaa\""</code>, an increase from <code>10</code> characters to <code>16</code>.</li>
+<li><code>"\x27"</code> encodes to <code>"\"\\x27\""</code>, an increase from <code>6</code> characters to <code>11</code>.</li>
+</ul>
+<p>Your task is to find <em>the total number of characters to represent the newly encoded strings</em> minus <em>the number of characters of code in each original string literal</em>. For example, for the strings above, the total encoded length (<code>6 + 9 + 16 + 11 = 42</code>) minus the characters in the original code representation (<code>23</code>, just like in the first part of this puzzle) is <code>42 - 23 = 19</code>.</p>
+</article>
+<p>Your puzzle answer was <code>2117</code>.</p><p class="day-success">Both parts of this puzzle are complete! They provide two gold stars: **</p>
+<p>At this point, all that is left is for you to <a href="http://adventofcode.com/2015">admire your advent calendar</a>.</p>
+<p>If you still want to see it, you can <a href="http://adventofcode.com/2015/day/8/input" target="_blank">get your puzzle input</a>.</p>
+<p>You can also <span class="share">[Share<span class="share-content">on
+  <a href="https://twitter.com/intent/tweet?text=I%27ve+completed+%22Matchsticks%22+%2D+Day+8+%2D+Advent+of+Code+2015&amp;url=http%3A%2F%2Fadventofcode%2Ecom%2F2015%2Fday%2F8&amp;related=ericwastl&amp;hashtags=AdventOfCode" target="_blank">Twitter</a>
+  <a href="https://plus.google.com/share?url=http%3A%2F%2Fadventofcode%2Ecom%2F2015%2Fday%2F8" target="_blank">Google+</a>
+  <a href="http://www.reddit.com/submit?url=http%3A%2F%2Fadventofcode%2Ecom%2F2015%2Fday%2F8&amp;title=I%27ve+completed+%22Matchsticks%22+%2D+Day+8+%2D+Advent+of+Code+2015" target="_blank">Reddit</a></span>]</span> this puzzle.</p>
+</main>
+
+<!-- ga -->
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-69522494-1', 'auto');
+ga('send', 'pageview');
+</script>
+<!-- /ga -->
+
+</body></html>

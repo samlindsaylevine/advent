@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!-- saved from url=(0034)http://adventofcode.com/2016/day/2 -->
+<html lang="en-us"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Day 2 - Advent of Code 2016</title>
+<!--[if lt IE 9]><script src="/static/html5.js"></script><![endif]-->
+<link href="./Day 2 - Advent of Code 2016_files/css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="./Day 2 - Advent of Code 2016_files/style.css">
+<link rel="shortcut icon" href="http://adventofcode.com/favicon.ico?2">
+</head><!--
+
+
+
+
+Oh, hello!  Funny seeing you here.
+
+I appreciate your enthusiasm, but you aren't going to find much down here.
+There certainly aren't clues to any of the puzzles.  The best surprises don't
+even appear in the source until you unlock them for real.
+
+Please be careful with automated requests; I'm not Google, and I can only take
+so much traffic.  Please be considerate so that everyone gets to play.
+
+If you're curious about how Advent of Code works, it's running on some custom
+Perl code. Other than a few integrations (auth, analytics, ads, social media),
+I built the whole thing myself, including the design, animations, prose, and
+all of the puzzles.
+
+The puzzles probably took the longest; the easiest ones were around 45 minutes
+each, but the harder ones took 2-3 hours, and a few even longer than that. A
+lot of effort went into building this thing - I hope you're enjoying playing it
+as much as I enjoyed making it for you!
+
+If you'd like to hang out, I'm @ericwastl on Twitter.
+
+- Eric Wastl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-->
+<body>
+<header><div><h1 class="title-global"><a href="http://adventofcode.com/">Advent of Code</a></h1><nav><ul><li><a href="http://adventofcode.com/2016/about">[About]</a></li><li><a href="http://adventofcode.com/2016/support">[AoC++]</a></li><li><a href="http://adventofcode.com/2016/events">[Events]</a></li><li><a href="http://adventofcode.com/2016/settings">[Settings]</a></li><li><a href="http://adventofcode.com/2016/auth/logout">[Log Out]</a></li></ul></nav><div class="user">Sam Lindsay-Levine <span class="star-count">50*</span></div></div><div><h1 class="title-event">&nbsp;&nbsp;&nbsp;<span class="title-event-wrap">&lt;y&gt;</span><a href="http://adventofcode.com/2016">2016</a><span class="title-event-wrap">&lt;/y&gt;</span></h1><nav><ul><li><a href="http://adventofcode.com/2016">[Calendar]</a></li><li><a href="http://adventofcode.com/2016/leaderboard">[Leaderboard]</a></li><li><a href="http://adventofcode.com/2016/stats">[Stats]</a></li><li><a href="http://adventofcode.com/2016/sponsors">[Sponsors]</a></li></ul></nav></div></header>
+
+<div id="sidebar">
+<div id="sponsor"><div class="quiet">Our <a href="http://adventofcode.com/2016/sponsors">sponsors</a> help make AoC possible:</div><p><a href="https://infi.nl/vacature/infi-zoekt-een-ontwikkelaar/" target="_blank" onclick="if(ga)ga(&#39;send&#39;,&#39;event&#39;,&#39;sponsor&#39;,&#39;click&#39;,this.href);" rel="noopener">Infi</a> - Fvzcry gbpu? Xbz arkg-yriry glcra va Hgerpug bc baf areqxjnegvre!</p></div>
+<div id="ad">
+<script async="" src="./Day 2 - Advent of Code 2016_files/analytics.js"></script><script async="" src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Advent of Code Wide Skyscraper -->
+<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px" data-ad-client="ca-pub-9420604735624631" data-ad-slot="8014013294"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div><!--/ad-->
+</div><!--/sidebar-->
+
+<main>
+<style>article *[title]{border-bottom:1px dotted #ffff66;}</style><article class="day-desc"><h2>--- Day 2: Bathroom Security ---</h2><p>You arrive at <em>Easter Bunny Headquarters</em> under cover of darkness. However, you left in such a rush that you forgot to use the bathroom! Fancy office buildings like this one usually have keypad locks on their bathrooms, so you search the front desk for the code.</p>
+<p>"In order to improve security," the document you find says, "bathroom codes will no longer be written down.  Instead, please memorize and follow the procedure below to access the bathrooms."</p>
+<p>The document goes on to explain that each button to be pressed can be found by starting on the previous button and moving to adjacent buttons on the keypad: <code>U</code> moves up, <code>D</code> moves down, <code>L</code> moves left, and <code>R</code> moves right. Each line of instructions corresponds to one button, starting at the previous button (or, for the first line, <em>the "5" button</em>); press whatever button you're on at the end of each line. If a move doesn't lead to a button, ignore it.</p>
+<p>You can't hold it much longer, so you decide to figure out the code as you walk to the bathroom. You picture a keypad like this:</p>
+<pre><code>1 2 3
+4 5 6
+7 8 9
+</code></pre>
+<p>Suppose your instructions are:</p>
+<pre><code>ULL
+RRDDD
+LURDL
+UUUUD
+</code></pre>
+<ul>
+<li>You start at "5" and move up (to "2"), left (to "1"), and left (you can't, and stay on "1"), so the first button is <code>1</code>.</li>
+<li>Starting from the previous button ("1"), you move right twice (to "3") and then down three times (stopping at "9" after two moves and ignoring the third), ending up with <code>9</code>.</li>
+<li>Continuing from "9", you move left, up, right, down, and left, ending with <code>8</code>.</li>
+<li>Finally, you move up four times (stopping at "2"), then down once, ending with <code>5</code>.</li>
+</ul>
+<p>So, in this example, the bathroom code is <code>1985</code>.</p>
+<p>Your puzzle input is the instructions from the document you found at the front desk. What is the <em>bathroom code</em>?</p>
+</article>
+<p>Your puzzle answer was <code>53255</code>.</p><article class="day-desc"><h2>--- Part Two ---</h2><p>You finally arrive at the bathroom (it's a several minute walk from the lobby so visitors can behold the many fancy conference rooms and water coolers on this floor) and go to punch in the code.  Much to your bladder's dismay, the keypad is not at all like you imagined it.  Instead, you are confronted with the result of hundreds of man-hours of <span title="User Group 143 found a diamond shape to be the most environmentally friendly.">bathroom-keypad-design meetings:</span></p>
+<pre><code>    1
+  2 3 4
+5 6 7 8 9
+  A B C
+    D
+</code></pre>
+<p>You still start at "5" and stop when you're at an edge, but given the same instructions as above, the outcome is very different:</p>
+<ul>
+<li>You start at "5" and don't move at all (up and left are both edges), ending at <code>5</code>.</li>
+<li>Continuing from "5", you move right twice and down three times (through "6", "7", "B", "D", "D"), ending at <code>D</code>.</li>
+<li>Then, from "D", you move five more times (through "D", "B", "C", "C", "B"), ending at <code>B</code>.</li>
+<li>Finally, after five more moves, you end at <code>3</code>.</li>
+</ul>
+<p>So, given the actual keypad layout, the code would be <code>5DB3</code>.</p>
+<p>Using the same instructions in your puzzle input, what is the correct <em>bathroom code</em>?</p>
+</article>
+<p>Your puzzle answer was <code>7423A</code>.</p><p class="day-success">Both parts of this puzzle are complete! They provide two gold stars: **</p>
+<p>At this point, all that is left is for you to <a href="http://adventofcode.com/2016">admire your advent calendar</a>.</p>
+<p>If you still want to see it, you can <a href="http://adventofcode.com/2016/day/2/input" target="_blank">get your puzzle input</a>.</p>
+<p>You can also <span class="share">[Share<span class="share-content">on
+  <a href="https://twitter.com/intent/tweet?text=I%27ve+completed+%22Bathroom+Security%22+%2D+Day+2+%2D+Advent+of+Code+2016&amp;url=http%3A%2F%2Fadventofcode%2Ecom%2F2016%2Fday%2F2&amp;related=ericwastl&amp;hashtags=AdventOfCode" target="_blank">Twitter</a>
+  <a href="https://plus.google.com/share?url=http%3A%2F%2Fadventofcode%2Ecom%2F2016%2Fday%2F2" target="_blank">Google+</a>
+  <a href="http://www.reddit.com/submit?url=http%3A%2F%2Fadventofcode%2Ecom%2F2016%2Fday%2F2&amp;title=I%27ve+completed+%22Bathroom+Security%22+%2D+Day+2+%2D+Advent+of+Code+2016" target="_blank">Reddit</a></span>]</span> this puzzle.</p>
+</main>
+
+<!-- ga -->
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-69522494-1', 'auto');
+ga('send', 'pageview');
+</script>
+<!-- /ga -->
+
+</body></html>
