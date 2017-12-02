@@ -24,13 +24,15 @@ class CorruptedSpreadsheet(private val rows: List<List<Int>>) {
 
     fun evenlyDivisibleSum(): Int = rows.map { evenDivisionResult(it) }.sum()
 
-    private fun evenDivisionResult(values: List<Int>): Int {
-        for (value in values) {
-            values.filter { value > it && (value % it == 0) }
-                    .forEach { return value / it }
-        }
+    private fun evenDivisionResult(row: List<Int>): Int {
+        return row.asSequence().mapNotNull { evenDivisionResult(it, row) }
+                .first()
+    }
 
-        throw IllegalArgumentException("No even division in $values")
+    private fun evenDivisionResult(numerator: Int, values: List<Int>): Int? {
+        return values.asSequence().filter { numerator > it && numerator % it == 0 }
+                .map { numerator / it }
+                .firstOrNull()
     }
 
 }
