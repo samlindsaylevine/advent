@@ -54,13 +54,14 @@ class SpiralMemory {
         val grid = mutableMapOf<Pair<Int, Int>, Int>()
         grid.put(Pair(0, 0), 1)
         var currentSquare = 1
+        yield(1)
 
         while (true) {
-            yield(grid[position(currentSquare)] ?: 0)
             currentSquare++
-            val currentPos = position(currentSquare)
-            val newValue = neighbors(currentPos).mapNotNull { grid[it] }.sum()
-            grid.put(currentPos, newValue)
+            val currentPosition = position(currentSquare)
+            val newValue = neighbors(currentPosition).mapNotNull { grid[it] }.sum()
+            grid.put(currentPosition, newValue)
+            yield(newValue)
         }
     }
 
