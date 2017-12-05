@@ -38,7 +38,7 @@ class SpiralMemoryTest {
         assertThat(position).isEqualTo(Pair(x, y))
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "distanceFromOrigin -- square {0} -- has distance {1}")
     @CsvSource(
             "1, 0",
             "12, 3",
