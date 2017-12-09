@@ -33,7 +33,7 @@ class RegisterInstructions(lines: Sequence<String>) {
 
     fun highestValueEverHeld(): Int = highestValueEverHeld
 
-    class RegisterInstruction(instruction: String) {
+    private class RegisterInstruction(instruction: String) {
         val registerName: String
         val incrementAmount: Int
         val testRegisterName: String
