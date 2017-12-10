@@ -41,13 +41,50 @@ class KnotList(size: Int = 256) {
 
 }
 
+class KnotHash(input: String) {
+
+    companion object {
+        // Unexplained numbers used in algorithm description - possible NSA backdoor?
+        private val MAGIC_END_SEQUENCE = listOf(17, 31, 73, 47, 23)
+
+        private val NUM_ROUNDS = 64
+
+        private val BLOCK_SIZE = 16
+
+        private fun <T> blocks(blockSize: Int, input: List<T>): List<List<T>> =
+                (0 until input.size / blockSize).map { input.subList(it * blockSize, (it + 1) * blockSize) }
+
+        fun toHex(input: Int, minDigits: Int = 2): String {
+            var hex = input.toString(16)
+
+            while (hex.length < minDigits) {
+                hex = "0" + hex
+            }
+
+            return hex
+        }
+    }
+
+    val hex: String
+
+    init {
+        val lengths = input.toCharArray().map { it.toInt() }.toList() + MAGIC_END_SEQUENCE
+        val list = KnotList()
+        (1..NUM_ROUNDS).forEach { list.applyLengths(lengths) }
+        val sparseHash = list.values()
+        val denseHash = blocks(BLOCK_SIZE, sparseHash).map { it.reduce { x, y -> x.xor(y) } }
+        hex = denseHash.joinToString(separator = "", transform = { toHex(it) })
+    }
+}
+
 fun main(args: Array<String>) {
-    val input = File("src/main/kotlin/advent/year2017/day10/input.txt").readText()
-            .trim()
-            .split(",")
-            .map { it.toInt() }
+    val input = File("src/main/kotlin/advent/year2017/day10/input.txt").readText().trim()
+
     val knotList = KnotList()
-    knotList.applyLengths(input)
+    knotList.applyLengths(input.split(",")
+            .map { it.toInt() })
 
     println(knotList.productOfFirstTwo())
+
+    println(KnotHash(input).hex)
 }
