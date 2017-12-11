@@ -5,8 +5,8 @@ import java.io.File
 class KnotList(size: Int = 256) {
 
     private var values = (0 until size).toList()
-    var currentPosition = 0
-    var skipSize = 0
+    private var currentPosition = 0
+    private var skipSize = 0
 
     fun productOfFirstTwo(): Int = values[0] * values[1]
 
@@ -55,13 +55,8 @@ class KnotHash(input: String) {
                 (0 until input.size / blockSize).map { input.subList(it * blockSize, (it + 1) * blockSize) }
 
         fun toHex(input: Int, minDigits: Int = 2): String {
-            var hex = input.toString(16)
-
-            while (hex.length < minDigits) {
-                hex = "0" + hex
-            }
-
-            return hex
+            val hex = input.toString(16)
+            return "0".repeat(Math.max(0, minDigits - hex.length)) + hex
         }
     }
 
