@@ -8,12 +8,12 @@ import org.junit.jupiter.params.provider.EnumSource
 class HexPathTest {
 
     @ParameterizedTest(name = "endpoint distance -- {0} -- {1} steps away")
-    @CsvSource(delimiter = '=', value = *arrayOf(
-            "ne,ne,ne = 3",
-            "ne,ne,sw,sw = 0",
-            "ne,ne,s,s = 2",
-            "se,sw,se,sw,sw = 3"
-    ))
+    @CsvSource(delimiter = '=', value = *[
+    "ne,ne,ne = 3",
+    "ne,ne,sw,sw = 0",
+    "ne,ne,s,s = 2",
+    "se,sw,se,sw,sw = 3"
+    ])
     fun `endpoint distance -- reference input -- reference output`(input: String, expected: Int) {
         val path = HexPath(input)
 
@@ -33,12 +33,12 @@ class HexPathTest {
     }
 
     @ParameterizedTest(name = "furthestDistance -- {0} -- {1} steps away")
-    @CsvSource(delimiter = '=', value = *arrayOf(
-            "ne,ne,ne = 3",
-            "ne,ne,sw,sw = 2",
-            "ne,ne,s,s = 2",
-            "se,sw,se,sw,sw = 3"
-    ))
+    @CsvSource(delimiter = '=', value = *[
+    "ne,ne,ne = 3",
+    "ne,ne,sw,sw = 2",
+    "ne,ne,s,s = 2",
+    "se,sw,se,sw,sw = 3"
+    ])
     fun `furthestDistance -- reference inputs -- hand calculated output`(input: String, expected: Int) {
         val path = HexPath(input)
 
