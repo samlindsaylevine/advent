@@ -41,8 +41,6 @@ class PipeGraph(lines: Sequence<String>) {
         val nextNodeName = nextEdges.first()
         val nextNode = nodesByName[nextNodeName] ?: throw IllegalStateException("Missing node $nextNodeName")
 
-
-
         return findSubgraph(nextEdges - nextNodeName + (nextNode.edges - visitedNodes),
                 visitedNodes + nextNodeName)
     }
