@@ -29,6 +29,9 @@ class PipeGraph(lines: Sequence<String>) {
      * Returns all connected subgraphs.
      */
     fun connectedSubgraphs(): Set<Set<Int>> {
+
+        // This is not very efficient because we check the subgraph for every node and then eliminate duplicates,
+        // so if a subgraph has 100 nodes we calculate that subgraph 100 times.
         return nodesByName.values
                 .mapTo(mutableSetOf()) { connectedSubgraph(it.name) }
     }

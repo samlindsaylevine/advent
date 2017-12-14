@@ -56,7 +56,7 @@ class KnotHash(input: String) {
 
         fun toHex(input: Int, minDigits: Int = 2): String {
             val hex = input.toString(16)
-            return "0".repeat(Math.max(0, minDigits - hex.length)) + hex
+            return hex.leftPad('0', minDigits)
         }
     }
 
@@ -70,6 +70,10 @@ class KnotHash(input: String) {
         val denseHash = blocks(BLOCK_SIZE, sparseHash).map { it.reduce { x, y -> x.xor(y) } }
         hex = denseHash.joinToString(separator = "", transform = { toHex(it) })
     }
+}
+
+fun String.leftPad(char: Char, desiredLength: Int): String {
+    return char.toString().repeat(Math.max(0, desiredLength - this.length)) + this
 }
 
 fun main(args: Array<String>) {

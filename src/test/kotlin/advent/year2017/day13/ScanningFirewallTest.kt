@@ -1,4 +1,4 @@
-package advent.year2017
+package advent.year2017.day13
 
 import advent.year2017.day13.ScanningFirewall
 import advent.year2017.day13.ScanningFirewall.SecurityScanner
