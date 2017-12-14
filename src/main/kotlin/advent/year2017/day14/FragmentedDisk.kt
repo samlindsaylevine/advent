@@ -33,12 +33,12 @@ class FragmentedDisk(val key: String, val width: Int = 128, val height: Int = 12
 
     private fun adjacentUsedPositions(position: Position): Set<Position> {
         return position.neighbors
-                .filter { valuesByPosition[position] ?: false }
+                .filter { valuesByPosition[it] ?: false }
                 .toSet()
     }
 
     private data class Position(val x: Int, val y: Int) {
-        // Not diagonals.
+        // No diagonals.
         val neighbors by lazy {
             setOf(Position(x - 1, y),
                     Position(x, y + 1),
