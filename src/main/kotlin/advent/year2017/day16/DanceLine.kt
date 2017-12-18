@@ -4,12 +4,6 @@ import java.io.File
 
 data class DanceLine(val order: String) {
 
-    companion object {
-        val SPIN_REGEX = "s(\\d+)".toRegex()
-        val EXCHANGE_REGEX = "x(\\d+)/(\\d+)".toRegex()
-        val PARTNER_REGEX = "p(\\w+)/(\\w+)".toRegex()
-    }
-
     constructor(count: Int) : this((0 until count).map { 'a' + it }.joinToString(separator = ""))
 
     fun spin(count: Int): DanceLine = DanceLine(order.substring(order.length - count) +
@@ -30,11 +24,11 @@ data class DanceLine(val order: String) {
 
     fun partner(nameA: Char, nameB: Char): DanceLine = exchange(order.indexOf(nameA), order.indexOf(nameB))
 
-    private fun dance(move: DanceMove): DanceLine = move.action(this)
-
     fun dance(moves: List<String>): DanceLine = danceMoves(moves.map { DanceMove(it) })
 
     private fun danceMoves(moves: List<DanceMove>) = moves.fold(this, { line, move -> line.dance(move) })
+
+    private fun dance(move: DanceMove): DanceLine = move.action(this)
 
     fun dance(moveStrings: List<String>, times: Int): DanceLine {
         val moves = moveStrings.map { DanceMove(it) }
@@ -69,6 +63,10 @@ data class DanceLine(val order: String) {
         val action: (DanceLine) -> DanceLine = actionLambda(move)
 
         companion object {
+            private val SPIN_REGEX = "s(\\d+)".toRegex()
+            private val EXCHANGE_REGEX = "x(\\d+)/(\\d+)".toRegex()
+            private val PARTNER_REGEX = "p(\\w+)/(\\w+)".toRegex()
+
             private fun actionLambda(move: String): (DanceLine) -> DanceLine {
                 SPIN_REGEX.matchEntire(move)?.let { match ->
                     return { line -> line.spin(match.groupValues[1].toInt()) }
