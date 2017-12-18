@@ -19,7 +19,7 @@ class SpinlockTest {
             "8, 0 5 7 2 4 3 8 6 1",
             "9, 0 9 5 7 2 4 3 8 6 1")
     fun `values -- reference input -- reference output`(numSteps: Int, expectedValueString: String) {
-        val spinlock = Spinlock(stepsPerInsert = 3, numInsertions = numSteps)
+        val spinlock = AllValuesSpinlock(stepsPerInsert = 3, numInsertions = numSteps)
         val expected = expectedValueString.split(" ").map { it.toInt() }
 
         assertThat(spinlock.values).isEqualTo(expected)
@@ -27,10 +27,27 @@ class SpinlockTest {
 
     @Test
     fun `valueAfterLastInsert -- reference input -- reference output`() {
-        val spinlock = Spinlock(stepsPerInsert = 3)
+        val spinlock = AllValuesSpinlock(stepsPerInsert = 3)
 
         val afterLastInsert = spinlock.valueAfterLastInsert()
 
         assertThat(afterLastInsert).isEqualTo(638)
+    }
+
+    @ParameterizedTest(name = "valueAfterZero -- 3 steps per insert, {0} inserts -- {1}")
+    @CsvSource("0, ",
+            "1, 1",
+            "2, 2",
+            "3, 2",
+            "4, 2",
+            "5, 5",
+            "6, 5",
+            "7, 5",
+            "8, 5",
+            "9, 9")
+    fun `valueAfterZero -- reference input -- reference output`(numSteps: Int, expected: Int?) {
+        val spinlock = ZeroTrackingSpinlock(stepsPerInsert = 3, numInsertions = numSteps)
+
+        assertThat(spinlock.numberAfterZero).isEqualTo(expected)
     }
 }
