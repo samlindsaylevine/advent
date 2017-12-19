@@ -2,7 +2,7 @@ package advent.year2017.day18
 
 import java.io.File
 
-class DuetComputer {
+class DuetSoundComputer {
 
     private var lastPlayedSound: Long? = null
     private val registers: MutableMap<String, Long> = mutableMapOf()
@@ -40,9 +40,9 @@ class DuetComputer {
             private val JGZ_REGEX = "jgz (\\w) (-?\\w+)".toRegex()
         }
 
-        val action: (DuetComputer) -> InstructionResult by lazy { parse() }
+        val action: (DuetSoundComputer) -> InstructionResult by lazy { parse() }
 
-        private fun parse(): (DuetComputer) -> InstructionResult {
+        private fun parse(): (DuetSoundComputer) -> InstructionResult {
             SND_REGEX.matchEntire(text)?.let { match ->
                 return { c ->
                     c.lastPlayedSound = c.get(match.groupValues[1])
@@ -103,7 +103,7 @@ fun main(args: Array<String>) {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
-    val computer = DuetComputer()
+    val computer = DuetSoundComputer()
 
     println(computer.executeUntilRecover(input))
 }

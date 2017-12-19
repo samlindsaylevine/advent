@@ -3,7 +3,7 @@ package advent.year2017.day18
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class DuetComputerTest {
+class DuetSoundComputerTest {
 
     @Test
     fun `executeUntilRecover -- reference input -- reference output`() {
@@ -17,7 +17,7 @@ rcv a
 jgz a -1
 set a 1
 jgz a -2""".split("\n")
-        val computer = DuetComputer()
+        val computer = DuetSoundComputer()
 
         val result = computer.executeUntilRecover(input)
 
