@@ -19,7 +19,7 @@ class FractalArtBook(private val rules: List<FractalArtRule>) {
     private fun nextSquare(square: FractalArtImage): FractalArtImage {
         val keys = square.equivalentRuleKeys()
 
-        val rule = rules.firstOrNull() { rule -> square.equivalentRuleKeys().contains(rule.from) }
+        val rule = rules.firstOrNull { rule -> square.equivalentRuleKeys().contains(rule.from) }
                 ?: throw IllegalArgumentException("Could not find rule from any key $keys")
 
         return rule.to
@@ -108,6 +108,8 @@ fun main(args: Array<String>) {
             ###
         """.trimIndent())
 
-    val finalImage = (1..5).fold(starterImage) { image, i -> book.next(image) }
+    val finalImage = (1..5).fold(starterImage) { image, _ -> book.next(image) }
     println(finalImage.onPixelCount())
+    val secondPartImage = (1..18).fold(starterImage) { image, _ -> book.next(image) }
+    println(secondPartImage.onPixelCount())
 }
