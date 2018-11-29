@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.CsvSource
 
 class VirusGridTest {
 
-    @ParameterizedTest(name = "after \"{0}\" bursts -- with reference input -- \"{1}\" of them caused an infection")
+    @ParameterizedTest(name = "after {0} bursts -- with reference input -- {1} of them caused an infection")
     @CsvSource("7, 5",
             "70, 41",
             "10000, 5587")
@@ -19,12 +19,12 @@ class VirusGridTest {
             ...
         """.trimIndent())
 
-        val result = CarrierTrip(referenceGrid).afterBursts(numBursts)
+        val result = referenceGrid.infectionsCaused(numBursts)
 
-        assertThat(result.causedAnInfectionBursts).isEqualTo(expected)
+        assertThat(result).isEqualTo(expected)
     }
 
-    @ParameterizedTest(name = "in the parsed input grid -- position \"{0}\", \"{1}\" -- is infected \"{2}\"")
+    @ParameterizedTest(name = "in the parsed input grid -- position {0}, {1} -- is infected {2}")
     @CsvSource("-12, 12, false",
             "-11, 12, false",
             "-10, 12, false",
@@ -78,9 +78,10 @@ class VirusGridTest {
         assertThat(Direction.LEFT.right()).isEqualTo(Direction.UP)
     }
 
-    @ParameterizedTest(name = "after \"{0}\" bursts of evolved virus -- with reference input -- \"{1}\" of them caused an infection")
-    @CsvSource("100, 26",
-            "10000000, 2511944")
+    @ParameterizedTest(name = "after {0} bursts of evolved virus -- with reference input -- {1} of them caused an infection")
+    @CsvSource("100, 26")
+    // This takes several seconds - let's not run it in CI every time.
+    //            "10000000, 2511944")
     fun `after x bursts of evolved virus -- with reference input -- y of them caused an infection`(numBursts: Int,
                                                                                                    expected: Int) {
         val referenceGrid = VirusGrid.fromInput("""
@@ -89,8 +90,8 @@ class VirusGridTest {
             ...
         """.trimIndent())
 
-        val result = CarrierTrip(referenceGrid, EvolvedVirus()).afterBursts(numBursts)
+        val result = referenceGrid.infectionsCaused(numBursts, EvolvedVirus())
 
-        assertThat(result.causedAnInfectionBursts).isEqualTo(expected)
+        assertThat(result).isEqualTo(expected)
     }
 }
