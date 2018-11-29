@@ -2,7 +2,8 @@ package advent.year2017.day22
 
 import java.io.File
 
-class VirusGrid(private val infectedPositions: Set<Pair<Int, Int>>) {
+class VirusGrid(// We don't keep anything in state CLEAN in this map - anything not in the map is CLEAN.
+        private val nodeStates: Map<Pair<Int, Int>, NodeState>) {
 
     companion object {
         fun fromInput(input: String): VirusGrid {
@@ -14,58 +15,70 @@ class VirusGrid(private val infectedPositions: Set<Pair<Int, Int>>) {
             val yOffset = (height - 1) / 2
             val xOffset = (width - 1) / 2
 
-            val infectedPositions = (-xOffset..xOffset).flatMap { x ->
+            val initialStates = (-xOffset..xOffset).flatMap { x ->
                 (-yOffset..yOffset).map { y -> Pair(x, y) }
             }
                     .asSequence()
                     .filter { pair -> lines[-pair.second + yOffset][pair.first + xOffset] == '#' }
-                    .toSet()
+                    .map { coordinates -> Pair(coordinates, NodeState.INFECTED) }
+                    .toMap()
 
-            return VirusGrid(infectedPositions)
+            return VirusGrid(initialStates)
         }
     }
 
-    fun isInfected(x: Int, y: Int): Boolean = infectedPositions.contains(Pair(x, y))
+    fun isInfected(x: Int, y: Int): Boolean = (nodeState(x, y) == NodeState.INFECTED)
+    fun nodeState(x: Int, y: Int): NodeState = nodeStates[Pair(x, y)] ?: NodeState.CLEAN
 
-    fun withInfected(x: Int, y: Int): VirusGrid = VirusGrid(infectedPositions + Pair(x, y))
+    fun withNodeState(x: Int, y: Int, newState: NodeState): VirusGrid = if (newState == NodeState.CLEAN) {
+        VirusGrid(nodeStates - Pair(x, y))
+    } else {
+        VirusGrid(nodeStates + Pair(Pair(x, y), newState))
+    }
+}
 
-    fun withCleaned(x: Int, y: Int): VirusGrid = VirusGrid(infectedPositions - Pair(x, y))
+enum class NodeState {
+    CLEAN,
+    INFECTED,
+    WEAKENED,
+    FLAGGED
 }
 
 class CarrierTrip(val causedAnInfectionBursts: Int,
                   private val totalBursts: Int,
                   private val carrier: Carrier,
-                  val grid: VirusGrid) {
+                  val grid: VirusGrid,
+                  val behavior: VirusBehavior) {
 
-    constructor(grid: VirusGrid) : this(0,
+    constructor(grid: VirusGrid, behavior: VirusBehavior = OriginalVirus()) : this(0,
             0,
             Carrier(0, 0, Direction.UP),
-            grid)
+            grid,
+            behavior)
 
     fun next(): CarrierTrip {
-        val currentNodeIsInfected = grid.isInfected(carrier.x, carrier.y)
+        val currentNodeState = grid.nodeState(carrier.x, carrier.y)
 
-        val turnedCarrier = if (currentNodeIsInfected) {
-            carrier.copy(direction = carrier.direction.right())
-        } else {
-            carrier.copy(direction = carrier.direction.left())
-        }
+        val (newNodeState, newDirection) = behavior.next(currentNodeState, carrier.direction)
 
-        val (nextGrid, newInfectionCount) = if (currentNodeIsInfected) {
-            Pair(grid.withCleaned(carrier.x, carrier.y), causedAnInfectionBursts)
-        } else {
-            Pair(grid.withInfected(carrier.x, carrier.y), causedAnInfectionBursts + 1)
-        }
+        val turnedCarrier = carrier.copy(direction = newDirection)
+
+        val newInfectionCount = if (newNodeState == NodeState.INFECTED) causedAnInfectionBursts + 1 else causedAnInfectionBursts
+        val nextGrid = grid.withNodeState(carrier.x, carrier.y, newNodeState)
 
         val nextCarrier = turnedCarrier.movedForward()
 
         return CarrierTrip(newInfectionCount,
                 totalBursts + 1,
                 nextCarrier,
-                nextGrid)
+                nextGrid,
+                behavior)
     }
 
-    fun afterBursts(count: Int): CarrierTrip = (0 until count).fold(this) { trip, _ -> trip.next() }
+    fun afterBursts(count: Int): CarrierTrip = (0 until count).fold(this) { trip, i ->
+        if (i % 10000 == 0) println(i)
+        trip.next()
+    }
 }
 
 data class Carrier(val x: Int, val y: Int, val direction: Direction) {
@@ -87,6 +100,27 @@ enum class Direction(val x: Int, val y: Int) {
     fun left() = getByOrdinal(this.ordinal - 1)
 }
 
+interface VirusBehavior {
+    fun next(currentState: NodeState, currentDirection: Direction): Pair<NodeState, Direction>
+}
+
+class OriginalVirus : VirusBehavior {
+    override fun next(currentState: NodeState, currentDirection: Direction) = when (currentState) {
+        NodeState.CLEAN -> Pair(NodeState.INFECTED, currentDirection.left())
+        NodeState.INFECTED -> Pair(NodeState.CLEAN, currentDirection.right())
+        else -> Pair(NodeState.CLEAN, currentDirection.left())
+    }
+}
+
+class EvolvedVirus : VirusBehavior {
+    override fun next(currentState: NodeState, currentDirection: Direction) = when (currentState) {
+        NodeState.CLEAN -> Pair(NodeState.WEAKENED, currentDirection.left())
+        NodeState.WEAKENED -> Pair(NodeState.INFECTED, currentDirection)
+        NodeState.INFECTED -> Pair(NodeState.FLAGGED, currentDirection.right())
+        NodeState.FLAGGED -> Pair(NodeState.CLEAN, currentDirection.right().right())
+    }
+}
+
 fun main(args: Array<String>) {
     val input = File("src/main/kotlin/advent/year2017/day22/input.txt")
             .readText()
@@ -95,4 +129,13 @@ fun main(args: Array<String>) {
     val grid = VirusGrid.fromInput(input)
 
     println(CarrierTrip(grid).afterBursts(10_000).causedAnInfectionBursts)
+
+    // The actual sane way to do this would probably be to either
+    // a) look for when the grid cycles, i.e., the grid & carrier state is exactly the same at any point in the trip as
+    // it has been once before; and then calculate how many cycles are taken up by 10,000,000 steps and not have to
+    // simulate them all, then simply calculate the number of those steps that would have caused an infection;
+    // or b) if it is not cycling, figure out if there is some other kind of periodicity / curve fitting possible
+    // in order to extrapolate a value.
+
+    // But, hell, developer time is expensive and execution time is cheap. I just ran it and let it go for
 }

@@ -77,4 +77,20 @@ class VirusGridTest {
     fun `turn left -- from UP -- get LEFT`() {
         assertThat(Direction.LEFT.right()).isEqualTo(Direction.UP)
     }
+
+    @ParameterizedTest(name = "after \"{0}\" bursts of evolved virus -- with reference input -- \"{1}\" of them caused an infection")
+    @CsvSource("100, 26",
+            "10000000, 2511944")
+    fun `after x bursts of evolved virus -- with reference input -- y of them caused an infection`(numBursts: Int,
+                                                                                                   expected: Int) {
+        val referenceGrid = VirusGrid.fromInput("""
+            ..#
+            #..
+            ...
+        """.trimIndent())
+
+        val result = CarrierTrip(referenceGrid, EvolvedVirus()).afterBursts(numBursts)
+
+        assertThat(result.causedAnInfectionBursts).isEqualTo(expected)
+    }
 }
