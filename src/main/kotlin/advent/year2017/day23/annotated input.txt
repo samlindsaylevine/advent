@@ -1,0 +1,71 @@
+This annotation of the input program, for analyzing the second half of the problem, consists of the
+input with line numbers and comments.
+
+     0	set b 93
+     1	set c b
+     2	jnz a 2
+
+This instruction is always executed in the second part and we go to line 4.
+
+     3	jnz 1 5
+
+To line 8. Executed only in the first part. We end up with b=93, c=93.
+
+     4	mul b 100
+     5	sub b -100000
+     6	set c b
+     7	sub c -17000
+
+This section is executed in (and only in) the second part. We end up with b=109300, c=126300.
+
+Nothing before this point is ever revisited under any circumstances, and a and c are never changed.
+
+     8	set f 1
+     9	set d 2
+    10	set e 2
+
+
+    11	set g d
+    12	mul g e
+    13	sub g b
+    14	jnz g 2
+    15	set f 0
+
+If d * e = b, then set f to 0. Otherwise leave it at 1.
+
+    16	sub e -1
+    17	set g e
+    18	sub g b
+    19	jnz g -8
+
+Add one to e. Then, if e = b, continue. Otherwise return to line 11 (leaving the current values of e, d, and f).
+
+    20	sub d -1
+    21	set g d
+    22	sub g b
+    23	jnz g -13
+
+Add one to d. Then, if d = b, continue. Otherwise return to line 10. (Resetting e to 2,
+but leaving the current values of d and f.)
+
+    24	jnz f 2
+    25	sub h -1
+
+If f is 0 (i.e., if d * e = b for any values of d and e ranging from 2 up to b - i.e., b is composite) then
+add one to h. Otherwise, move on.
+
+    26	set g b
+    27	sub g c
+    28	jnz g 2
+    29	jnz 1 3
+
+If b = c, end the program; otherwise, continue to line 30.
+
+    30	sub b -17
+    31	jnz 1 -23
+
+Add 17 to b, then start over from line 8.
+
+The entire program can thus be summarized as
+
+"Ranging from 109300 to 126300 (inclusive), stepping by 17s, how many of those numbers are composite?"
