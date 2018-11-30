@@ -2,9 +2,12 @@ package advent.year2017.day24
 
 import com.google.common.collect.*
 import java.io.File
+import java.util.Comparator
+import java.util.Comparator.comparing
 
 data class MagneticBridge(private val components: List<BridgeComponent>) {
     fun strength() = components.sumBy { it.left + it.right }
+    fun length() = components.size
 
     operator fun plus(other: MagneticBridge) = MagneticBridge(this.components + other.components)
 }
@@ -61,7 +64,14 @@ class ComponentPile private constructor(private val componentsByLeftPort: ListMu
                 }
     }
 
-    fun strongestBridge(): MagneticBridge = bridgesStartingWith(0).maxBy { it.strength() }
+    private fun allBridges() = bridgesStartingWith(0)
+
+    fun strongestBridge(): MagneticBridge = allBridges()
+            .maxBy { it.strength() }
+            ?: MagneticBridge(listOf())
+
+    fun longestBridge(): MagneticBridge = allBridges()
+            .maxWith(comparing(MagneticBridge::length).thenComparing(MagneticBridge::strength))
             ?: MagneticBridge(listOf())
 
 }
@@ -75,4 +85,6 @@ fun main(args: Array<String>) {
     val pile = ComponentPile(input)
 
     println(pile.strongestBridge().strength())
+
+    println(pile.longestBridge().strength())
 }
