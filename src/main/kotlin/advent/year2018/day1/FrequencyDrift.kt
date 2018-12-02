@@ -12,7 +12,7 @@ class FrequencyDrift(deltas: List<Int>) {
         }
     }
 
-    constructor(input: String) : this(input.trim().lines().map(::parseDelta))
+    constructor(input: String) : this(input.trim().lines().map { FrequencyDrift.parseDelta(it) })
 
     val result = deltas.sum()
 
