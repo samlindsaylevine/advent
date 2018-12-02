@@ -20,4 +20,30 @@ class BoxIdsTest {
 
         assertThat(checksum).isEqualTo(12)
     }
+
+    @Test
+    fun `lettersInCommon -- differing by one character -- has all other characters`() {
+        val first = BoxId("fghij")
+        val second = BoxId("fguij")
+
+        val inCommon = first.lettersInCommonWith(second)
+
+        assertThat(inCommon).isEqualTo("fgij")
+    }
+
+    @Test
+    fun `lettersInCommonBetweenCorrectBoxIds -- reference input -- has reference output`() {
+        val ids = BoxIds(listOf(
+                "abcde",
+                "fghij",
+                "klmno",
+                "pqrst",
+                "fguij",
+                "axcye",
+                "wvxyz"))
+
+        val letters = ids.lettersInCommonBetweenCorrectBoxIds
+
+        assertThat(letters).isEqualTo("fgij")
+    }
 }
