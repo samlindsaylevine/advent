@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 
 class SleepyGuards(val events: List<GuardEvent>) {
 
-    val guards: Set<SleepyGuard>
+    private val guards: Set<SleepyGuard>
 
     constructor(input: String) : this(input.trim().split("\n")
             .map { GuardEvent.parse(it) }
