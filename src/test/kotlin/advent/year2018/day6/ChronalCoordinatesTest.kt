@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test
 
 class ChronalCoordinatesTest {
 
-    @Test
-    fun `largestFiniteAreaSize -- reference input -- 17`() {
-        val input = """
+    private val referenceInput = """
             1, 1
             1, 6
             8, 3
@@ -15,10 +13,31 @@ class ChronalCoordinatesTest {
             5, 5
             8, 9
         """.trimIndent()
-        val coordinates = ChronalCoordinates(input)
+
+    @Test
+    fun `largestFiniteAreaSize -- reference input -- 17`() {
+        val coordinates = ChronalCoordinates(referenceInput)
 
         val areaSize = coordinates.largestFiniteAreaSize()
 
         assertThat(areaSize).isEqualTo(17)
+    }
+
+    @Test
+    fun `areaWithinTotalDistance -- reference input, distance 32 -- 16`() {
+        val coordinates = ChronalCoordinates(referenceInput)
+
+        val area = coordinates.areaWithinTotalDistance(32)
+
+        assertThat(area).isEqualTo(16)
+    }
+
+    @Test
+    fun `total distance -- reference input, 4, 3 -- 30`() {
+        val coordinates = ChronalCoordinates(referenceInput)
+
+        val distance = coordinates.totalDistance(Point(4, 3))
+
+        assertThat(distance).isEqualTo(30)
     }
 }

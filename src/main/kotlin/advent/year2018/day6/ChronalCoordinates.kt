@@ -23,7 +23,9 @@ class ChronalCoordinates(private val coordinates: Set<Point>) {
         return if (closest.size == 1) closest.first() else null
     }
 
-    private val pointsInBoundingBox: Set<Point> = (minX until maxX).flatMap { x ->
+    private val pointsInBoundingBox: Set<Point> = pointsInRectangle(minX, maxX, minY, maxY)
+
+    private fun pointsInRectangle(minX: Int, maxX: Int, minY: Int, maxY: Int) = (minX until maxX).flatMap { x ->
         (minY until maxY).map { y -> Point(x, y) }
     }.toSet()
 
@@ -40,6 +42,20 @@ class ChronalCoordinates(private val coordinates: Set<Point>) {
     private val coordinatesWithFiniteArea = coordinates.filter { coordinate ->
         pointsOnBoundary.none { closestCoordinateTo(it) == coordinate }
     }
+
+    fun areaWithinTotalDistance(distance: Int): Int {
+        if (coordinates.isEmpty()) throw IllegalStateException("Undefined for 0 points - the entire plane?")
+
+        // Nothing more than this far away can possibly match our total distance.
+        val maxDistance = distance / coordinates.size
+
+        val possiblePoints = pointsInRectangle(minX - maxDistance, maxX + maxDistance,
+                minY - maxDistance, maxY + maxDistance)
+
+        return possiblePoints.count { totalDistance(it) < distance }
+    }
+
+    fun totalDistance(point: Point) = coordinates.sumBy { it.distanceFrom(point) }
 }
 
 fun <T, R : Comparable<R>> Iterable<T>.allMinBy(function: (T) -> R): Set<T> {
@@ -86,4 +102,5 @@ fun main(args: Array<String>) {
     val coordinates = ChronalCoordinates(input)
 
     println(coordinates.largestFiniteAreaSize())
+    println(coordinates.areaWithinTotalDistance(10000))
 }
