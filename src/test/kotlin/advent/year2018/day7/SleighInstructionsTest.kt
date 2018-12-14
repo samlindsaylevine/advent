@@ -23,4 +23,13 @@ class SleighInstructionsTest {
 
         assertThat(steps).containsExactly("C", "A", "B", "D", "F", "E")
     }
+
+    @Test
+    fun `timeToComplete -- reference input, 2 workers, 0 base duration -- 15 seconds`() {
+        val instructions = SleighInstructions(referenceInput, numWorkers = 2, baseStepDuration = 0)
+
+        val time = instructions.timeToComplete()
+
+        assertThat(time).isEqualTo(15)
+    }
 }
