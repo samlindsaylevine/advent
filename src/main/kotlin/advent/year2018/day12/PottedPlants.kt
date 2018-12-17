@@ -63,6 +63,7 @@ class PottedPlants(private val potsWithPlants: Set<Int>,
     fun after(generations: Int) = (1..generations).fold(this) { plants, _ -> plants.nextGeneration() }
 
     fun sumOfPotNumbers() = potsWithPlants.sum()
+    fun numPots() = potsWithPlants.size
 }
 
 data class PlantRuleCondition(val twoLeft: Boolean,
@@ -79,4 +80,26 @@ fun main(args: Array<String>) {
     val plants = PottedPlants.parse(input)
 
     println(plants.after(20).sumOfPotNumbers())
+
+    // We definitely can't actually execute 50 billion generations. There isn't an actual loop in states (I checked) -
+    // the sum increases without bound. Furthermore, there isn't even a loop in patterns (if you see if the whole
+    // state could be translated a fixed distance and match a previous state). Some parts of the pattern must be moving
+    // while others are stable.
+    // However, we did notice that we eventually hit a fixed number of pots!
+    // The following investigation checks the long term behavior of the sum:
+
+    var currentPlants = plants
+    var previous = currentPlants
+    for (i in 1..500) {
+        currentPlants = previous.after(1)
+        val delta = currentPlants.sumOfPotNumbers() - previous.sumOfPotNumbers()
+        println("Step $i, ${currentPlants.numPots()} pots, sum ${currentPlants.sumOfPotNumbers()}, delta $delta")
+        previous = currentPlants
+    }
+
+    // After step 124 there are always 109 pots, and after step 126 the sum always increases by 109 per step.
+    // Step 126 has a sum of 14900, so...
+    val longRunSum = { stepNum: Long -> (stepNum - 126) * 109 + 14900 }
+
+    println(longRunSum(50_000_000_000))
 }
