@@ -11,7 +11,7 @@ class RecipeScoreboard(private var recipes: MutableList<Int> = mutableListOf(3, 
                        private var firstElfIndex: Int = 0,
                        private var secondElfIndex: Int = 1) {
 
-    fun advance() {
+    private fun advance() {
         val firstElfValue = recipes[firstElfIndex]
         val secondElfValue = recipes[secondElfIndex]
         recipes.addAll(digitSum(firstElfValue, secondElfValue))
