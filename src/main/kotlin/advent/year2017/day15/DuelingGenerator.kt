@@ -1,7 +1,5 @@
 package advent.year2017.day15
 
-import kotlin.coroutines.experimental.buildSequence
-
 class DuelingGenerator(val factor: Int,
                        val startingValue: Int,
                        val criterion: (Int) -> Boolean = { true }) {
@@ -18,7 +16,7 @@ class DuelingGenerator(val factor: Int,
         fun lowest16Bits(input: Int) = input.and(0b1111_1111_1111_1111)
     }
 
-    val sequence = buildSequence {
+    val sequence = sequence {
         var current = startingValue
         while (true) {
             current = ((current * factor.toLong()) % 2147483647).toInt()

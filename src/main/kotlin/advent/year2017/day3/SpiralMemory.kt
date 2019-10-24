@@ -1,7 +1,5 @@
 package advent.year2017.day3
 
-import kotlin.coroutines.experimental.buildSequence
-
 class SpiralMemory {
 
     /**
@@ -50,7 +48,7 @@ class SpiralMemory {
      *
      * This is an infinite sequence of all the stress test values.
      */
-    fun stressTestValues(): Sequence<Int> = buildSequence {
+    fun stressTestValues(): Sequence<Int> = sequence {
         val grid = mutableMapOf<Pair<Int, Int>, Int>()
         grid.put(Pair(0, 0), 1)
         var currentSquare = 1
