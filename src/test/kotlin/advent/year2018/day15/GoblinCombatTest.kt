@@ -191,7 +191,7 @@ class GoblinCombatTest {
         val outcome = combat.battle()
 
         assertThat(outcome).isEqualTo(GoblinCombat.Outcome(turnsElapsed = 47,
-                hpRemaining = 590))
+                hpRemaining = 590, numberOfDeadElves = 2))
         assertThat(outcome.value).isEqualTo(27730)
     }
 
@@ -211,7 +211,7 @@ class GoblinCombatTest {
         val outcome = combat.battle()
 
         assertThat(outcome).isEqualTo(GoblinCombat.Outcome(turnsElapsed = 37,
-                hpRemaining = 982))
+                hpRemaining = 982, numberOfDeadElves = 1))
     }
 
     @Test
@@ -230,7 +230,7 @@ class GoblinCombatTest {
         val outcome = combat.battle()
 
         assertThat(outcome).isEqualTo(GoblinCombat.Outcome(turnsElapsed = 46,
-                hpRemaining = 859))
+                hpRemaining = 859, numberOfDeadElves = 1))
     }
 
     @Test
@@ -251,7 +251,60 @@ class GoblinCombatTest {
         val outcome = combat.battle()
 
         assertThat(outcome).isEqualTo(GoblinCombat.Outcome(turnsElapsed = 20,
-                hpRemaining = 937))
+                hpRemaining = 937, numberOfDeadElves = 1))
+    }
+
+    @Test
+    fun `outcomeAtMinElfAttackPowerToWin -- reference input -- reference result`() {
+        val input = """
+            #######
+            #.G...#
+            #...EG#
+            #.#.#G#
+            #..G#E#
+            #.....#
+            #######
+        """.trimIndent()
+
+        val minPowerOutcome = GoblinCombat.outcomeAtMinElfAttackPowerToWin(input)
+
+        assertThat(minPowerOutcome.value).isEqualTo(4988)
+    }
+
+    @Test
+    fun `minElfAttackPowerToWin -- reference input 2 -- is 31284`() {
+        val input = """
+            #######
+            #E..EG#
+            #.#G.E#
+            #E.##E#
+            #G..#.#
+            #..E#.#
+            #######
+        """.trimIndent()
+
+        val minPowerOutcome = GoblinCombat.outcomeAtMinElfAttackPowerToWin(input)
+
+        assertThat(minPowerOutcome.value).isEqualTo(31284)
+    }
+
+    @Test
+    fun `outcomeAtMinElfAttackPowerToWin -- lone elf -- is 114`() {
+        val input = """
+            #########
+            #G......#
+            #.E.#...#
+            #..##..G#
+            #...##..#
+            #...#...#
+            #.G...G.#
+            #.....G.#
+            #########
+        """.trimIndent()
+
+        val minPowerOutcome = GoblinCombat.outcomeAtMinElfAttackPowerToWin(input)
+
+        assertThat(minPowerOutcome.value).isEqualTo(1140)
     }
 
 

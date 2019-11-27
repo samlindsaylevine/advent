@@ -10,7 +10,7 @@ class GoblinCombat private constructor(val height: Int,
     private val pathFinder = ShortestPathFinder()
 
     companion object {
-        fun parse(input: String): GoblinCombat {
+        fun parse(input: String, elfAttackPower: Int = 3): GoblinCombat {
             val lines = input.split("\n")
             val height = lines.size
             val width = lines.map { it.length }.max() ?: 0
@@ -23,7 +23,7 @@ class GoblinCombat private constructor(val height: Int,
                     .toSet()
             val elves = charsByPosition.entries
                     .filter { it.value == 'E' }
-                    .map { Elf(it.key) }
+                    .map { Elf(it.key, elfAttackPower) }
                     .toSet()
             val combatants = (goblins + elves).toMutableSet()
             val walls = charsByPosition.entries
@@ -32,6 +32,14 @@ class GoblinCombat private constructor(val height: Int,
                     .toSet()
             return GoblinCombat(height, width, combatants, walls)
         }
+
+        fun outcomeAtMinElfAttackPowerToWin(input: String): Outcome = generateSequence(4, { it + 1 })
+                .map {
+                    println("Attempting attack power $it")
+                    GoblinCombat.parse(input, it).battle()
+                }
+                .filter { it.numberOfDeadElves == 0 }
+                .first()
     }
 
     private var elapsedRounds = 0
@@ -45,7 +53,9 @@ class GoblinCombat private constructor(val height: Int,
             val targets = findTargets(combatant)
 
             if (targets.isEmpty()) {
-                return Outcome(elapsedRounds, combatants.filter { it.isAlive() }.sumBy { it.hitPoints })
+                return Outcome(elapsedRounds,
+                        combatants.filter { it.isAlive() }.sumBy { it.hitPoints },
+                        combatants.count { it is Elf && !it.isAlive() })
             }
 
 
@@ -65,6 +75,7 @@ class GoblinCombat private constructor(val height: Int,
         }
 
         elapsedRounds++
+        println("End round $elapsedRounds")
         return null
     }
 
@@ -112,7 +123,9 @@ class GoblinCombat private constructor(val height: Int,
 
     }
 
-    data class Outcome(val turnsElapsed: Int, val hpRemaining: Int) {
+    data class Outcome(val turnsElapsed: Int,
+                       val hpRemaining: Int,
+                       val numberOfDeadElves: Int) {
         val value = turnsElapsed * hpRemaining
     }
 }
@@ -134,17 +147,17 @@ data class Position(val x: Int, val y: Int) : Comparable<Position> {
 }
 
 sealed class Combatant(var position: Position,
-                       val attackPower: Int = 3,
+                       val attackPower: Int,
                        var hitPoints: Int = 200) {
     abstract fun isEnemy(other: Combatant): Boolean
     fun isAlive() = hitPoints > 0
 }
 
-class Elf(position: Position) : Combatant(position) {
+class Elf(position: Position, attackPower: Int) : Combatant(position, attackPower) {
     override fun isEnemy(other: Combatant) = other is Goblin
 }
 
-class Goblin(position: Position) : Combatant(position) {
+class Goblin(position: Position) : Combatant(position, attackPower = 3) {
     override fun isEnemy(other: Combatant) = other is Elf
 }
 
@@ -162,9 +175,10 @@ fun main() {
     val input = File("src/main/kotlin/advent/year2018/day15/input.txt")
             .readText()
 
-    val combat = GoblinCombat.parse(input)
+//    val combat = GoblinCombat.parse(input)
+//    val outcome = combat.battle()
+//    println("Outcome is ${outcome.value}")
 
-    val outcome = combat.battle()
-
-    print(outcome.value)
+    val minPowerOutcome = GoblinCombat.outcomeAtMinElfAttackPowerToWin(input)
+    println("Outcome at min power to win is ${minPowerOutcome.value}")
 }
