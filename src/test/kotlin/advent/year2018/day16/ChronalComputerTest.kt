@@ -15,10 +15,10 @@ class ChronalComputerTest {
         val sample = SampleComputation.parse(input)
 
         assertThat(sample.beforeRegisters).containsExactly(1, 1, 0, 3)
-        assertThat(sample.opCode).isEqualTo(3)
-        assertThat(sample.inputA).isEqualTo(0)
-        assertThat(sample.inputB).isEqualTo(2)
-        assertThat(sample.output).isEqualTo(0)
+        assertThat(sample.instruction.opCode).isEqualTo(3)
+        assertThat(sample.instruction.inputA).isEqualTo(0)
+        assertThat(sample.instruction.inputB).isEqualTo(2)
+        assertThat(sample.instruction.output).isEqualTo(0)
         assertThat(sample.afterRegisters).containsExactly(0, 1, 0, 3)
     }
 
