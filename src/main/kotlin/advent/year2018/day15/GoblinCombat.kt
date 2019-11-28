@@ -175,9 +175,9 @@ fun main() {
     val input = File("src/main/kotlin/advent/year2018/day15/input.txt")
             .readText()
 
-//    val combat = GoblinCombat.parse(input)
-//    val outcome = combat.battle()
-//    println("Outcome is ${outcome.value}")
+    val combat = GoblinCombat.parse(input)
+    val outcome = combat.battle()
+    println("Outcome is ${outcome.value}")
 
     val minPowerOutcome = GoblinCombat.outcomeAtMinElfAttackPowerToWin(input)
     println("Outcome at min power to win is ${minPowerOutcome.value}")
