@@ -25,111 +25,120 @@ class WaterReservoir private constructor(rows: List<Row>,
     private val minX by lazy { clay.map { it.x }.min() ?: 0 }
     private val maxX by lazy { clay.map { it.x }.max() ?: 0 }
 
-    private val waterTiles by lazy {
-        waterTiles(emptySet(), setOf(Point(500, 0)))
+    private fun waterTiles() = waterTiles(setOf(Point(500, 0)))
+
+    fun waterTileCount() = waterTiles().all.count { it.y in minY..maxY }
+
+    private data class Point(val x: Int, val y: Int) {
+        operator fun plus(other: Point) = Point(this.x + other.x, this.y + other.y)
     }
 
-    val waterTileCount by lazy { waterTiles.count { it.y in minY..maxY } }
+    private data class WaterTiles(val settledWater: Set<Point>,
+                                  val flowingWater: Set<Point>) {
+        val all = settledWater + flowingWater
+    }
 
-    private data class Point(val x: Int, val y: Int)
+    private tailrec fun waterTiles(springs: Set<Point>,
+                                   settledWater: Set<Point> = emptySet(),
+                                   flowingWater: Set<Point> = emptySet()): WaterTiles {
+        if (springs.isEmpty()) return WaterTiles(settledWater, flowingWater)
 
-    private tailrec fun waterTiles(water: Set<Point>,
-                                   remainingSprings: Set<Point>,
-                                   allSprings: Set<Point> = remainingSprings): Set<Point> {
-        if (remainingSprings.isEmpty()) return water
+        val spring = springs.first()
+        val otherSprings = springs - spring
 
-        val spring = remainingSprings.first()
-        val otherSprings = remainingSprings - spring
+        val underneath = spring + Point(0, 1)
 
-        // Trace the location of the spring downwards.
-        val waterfall = waterfall(spring)
-
-        // Either it hits:
-        // 1) The bottom of the map (maxY), in which case it is finished there
-        // 2) A water or clay tile, in which case it expands to the sides
-        val lastWater = waterfall.last()
-        val belowLast = Point(lastWater.x, lastWater.y + 1)
-        val expand = clay.contains(belowLast) || water.contains(belowLast)
-
-        return if (expand) {
-            //   a) It expands from that impact point all the way to the left and right
-            //   b) If it expands to extend over nothing on either or both sides, stop, and those over-nothing points
-            //      are now spring tiles
-            //   c) If it is contained on both sides, check back up the downward cascade one level as the impact point
-            //      and go to step 3a
-            val expansion = expansion(lastWater, water)
-
-            // Just a double check to make sure we never infinite loop.
-            val newSprings = expansion.newSprings.filter { !allSprings.contains(it) }
-
-            waterTiles(water + waterfall + expansion.moreWater,
-                    otherSprings + newSprings,
-                    allSprings + newSprings)
+        return if (spring.y >= maxY) {
+            // This spring made it to the bottom of the map and we can stop now.
+            waterTiles(otherSprings, settledWater, flowingWater + spring)
+        } else if (flowingWater.contains(underneath)) {
+            // If the spot underneath us has flowing water, we can be done with this spring -- it will join with that
+            // flow and its point is flowing water.
+            waterTiles(otherSprings, settledWater, flowingWater + spring)
+        } else if (clay.contains(underneath) || settledWater.contains(underneath)) {
+            // The water spreads out to both sides. It might be contained or not. If it is contained, then this
+            // contained row is settled water and we need to move the spring up one.
+            val row = checkRow(spring, settledWater, flowingWater)
+            val newSprings = otherSprings + row.newSprings +
+                    (if (row.contained) setOf(spring + Point(0, -1)) else emptySet())
+            waterTiles(newSprings,
+                    settledWater + row.newSettledWater,
+                    flowingWater - row.newSettledWater + row.newFlowingWater)
         } else {
-            waterTiles(water + waterfall, otherSprings, allSprings)
+            // Air is underneath. Move the spring point down one and mark this point as flowing water.
+            waterTiles(otherSprings + underneath, settledWater, flowingWater + spring)
         }
     }
 
-    /**
-     * Trace the fall of a spring downwards until it ends (at the bottom of the
-     * map, or on top of wtater or a clay tile).
-     *
-     * @return A list of points that will be full of water.
-     */
-    private fun waterfall(spring: Point) = generateSequence(spring) { Point(it.x, it.y + 1) }
-            .takeWhile { !clay.contains(it) && it.y <= maxY }
-            .toList()
+    private fun checkRow(spring: Point, settledWater: Set<Point>, flowingWater: Set<Point>): SpreadResult {
+        val left = checkDirection(spring, -1, settledWater, flowingWater)
+        val right = checkDirection(spring, 1, settledWater, flowingWater)
 
-    private tailrec fun expansion(impactPoint: Point, water: Set<Point>): ExpansionResult {
-        println("Expanding, water = $water")
+        val newWater = (left.newWater + right.newWater + spring).toSet()
+        val contained = left.terminus.blocksFlow && right.terminus.blocksFlow
+        val newSprings = listOfNotNull(left.newSpring, right.newSpring).toSet()
 
-        val left = sideExpand(impactPoint, water, true)
-        val right = sideExpand(impactPoint, water, false)
+        return SpreadResult(contained,
+                if (contained) newWater else emptySet(),
+                if (contained) emptySet() else newWater,
+                newSprings)
+    }
 
-        val newSprings = listOfNotNull(left.newSpring, right.newSpring)
+    private data class SpreadResult(val contained: Boolean,
+                                    val newSettledWater: Set<Point>,
+                                    val newFlowingWater: Set<Point>,
+                                    val newSprings: Set<Point>)
 
-        val newWater = water + left.moreWater + right.moreWater
+    private fun checkDirection(spring: Point,
+                               delta: Int,
+                               settledWater: Set<Point>,
+                               flowingWater: Set<Point>): DirectionResult {
+        return checkDirection(listOf(spring), delta, settledWater, flowingWater)
+    }
 
-        return if (newSprings.isEmpty()) {
-            expansion(Point(impactPoint.x, impactPoint.y - 1), newWater)
-        } else {
-            ExpansionResult(newWater, newSprings.toSet())
+    private tailrec fun checkDirection(newWater: List<Point>,
+                                       delta: Int,
+                                       settledWater: Set<Point>,
+                                       flowingWater: Set<Point>): DirectionResult {
+        val last = newWater.last()
+        val next = last + Point(delta, 0)
+        val underneath = last + Point(0, 1)
+
+        fun isEmpty(point: Point) = !clay.contains(point) &&
+                !settledWater.contains(point) &&
+                !flowingWater.contains(point)
+
+        return when {
+            isEmpty(underneath) -> DirectionResult(newWater, DirectionTerminus.NEW_SPRING)
+            clay.contains(next) -> DirectionResult(newWater, DirectionTerminus.CLAY)
+            flowingWater.contains(next) -> DirectionResult(newWater, DirectionTerminus.FLOWING_WATER)
+            settledWater.contains(next) -> DirectionResult(newWater, DirectionTerminus.SETTLED_WATER)
+            else -> checkDirection(newWater + next, delta, settledWater, flowingWater)
         }
     }
 
-    private data class ExpansionResult(val moreWater: Set<Point>,
-                                       val newSprings: Set<Point>)
+    private enum class DirectionTerminus(val blocksFlow: Boolean) {
+        CLAY(blocksFlow = true),
+        NEW_SPRING(blocksFlow = false),
+        SETTLED_WATER(blocksFlow = true),
+        FLOWING_WATER(blocksFlow = false)
+    }
 
+    private data class DirectionResult(val newWater: List<Point>,
+                                       val terminus: DirectionTerminus) {
+        val newSpring: Point? = if (terminus == DirectionTerminus.NEW_SPRING) newWater.last() else null
+    }
 
-    private fun sideExpand(impactPoint: Point, water: Set<Point>, left: Boolean): SideExpandResult {
-        val delta = if (left) -1 else 1
-
-        val newWater = generateSequence(impactPoint) { Point(it.x + delta, it.y) }
-                .takeWhileInclusive {
-                    val underneath = Point(it.x, it.y + 1)
-                    val nextSpace = Point(it.x + delta, it.y)
-
-                    (clay.contains(underneath) || water.contains(underneath)) &&
-                            !clay.contains(nextSpace)
+    fun display(): String {
+        val waterTiles = waterTiles()
+        return (0..maxY).joinToString("\n") { y ->
+            ((minX - 1)..(maxX + 1)).joinToString("") { x ->
+                when {
+                    clay.contains(Point(x, y)) -> "#"
+                    waterTiles.settledWater.contains(Point(x, y)) -> "~"
+                    waterTiles.flowingWater.contains(Point(x, y)) -> "|"
+                    else -> "."
                 }
-                .toList()
-
-        val underLast = Point(newWater.last().x, newWater.last().y + 1)
-        val newSpring = if (clay.contains(underLast) || water.contains(underLast)) null else newWater.last()
-
-
-        return SideExpandResult(newWater.toSet(), newSpring)
-    }
-
-    private data class SideExpandResult(val moreWater: Set<Point>,
-                                        val newSpring: Point?)
-
-    override fun toString(): String = (0..maxY).joinToString("\n") { y ->
-        ((minX - 1)..(maxX + 1)).joinToString("") { x ->
-            when {
-                clay.contains(Point(x, y)) -> "#"
-                waterTiles.contains(Point(x, y)) -> "~"
-                else -> "."
             }
         }
     }
@@ -185,5 +194,5 @@ fun main() {
 
     //920 is too low
     //29138 is too high
-    println(reservoir.waterTileCount)
+    println(reservoir.waterTileCount())
 }

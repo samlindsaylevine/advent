@@ -20,8 +20,8 @@ class WaterReservoirTest {
 
         val reservoir = WaterReservoir.parse(input)
 
-        println(reservoir.toString())
-        assertThat(reservoir.waterTileCount).isEqualTo(57)
+        println(reservoir.display())
+        assertThat(reservoir.waterTileCount()).isEqualTo(57)
     }
 
     @Test
@@ -37,18 +37,18 @@ class WaterReservoirTest {
         """.trimIndent()
 
         val reservoir = WaterReservoir.parse(input)
-        val actual = reservoir.toString()
+        val actual = reservoir.display()
 
         val expected = """
-            ....~......
-            ....~....#.
-            ~~~~~~~~~..
-            ~#~~~~~#~..
-            ~#~#~#~#~..
-            ~#~#~#~#~..
-            ~#~###~#~..
-            ~#~~~~~#~..
-            ~#######~..
+            ....|......
+            ....|....#.
+            |||||||||..
+            |#~~~~~#|..
+            |#~#~#~#|..
+            |#~#~#~#|..
+            |#~###~#|..
+            |#~~~~~#|..
+            |#######|..
         """.trimIndent()
         assertThat(actual).isEqualTo(expected)
     }
@@ -66,17 +66,17 @@ class WaterReservoirTest {
         """.trimIndent()
 
         val reservoir = WaterReservoir.parse(input)
-        val actual = reservoir.toString()
+        val actual = reservoir.display()
 
         val expected = """
-            ....~......
-            ..~~~~~..#.
-            ..~#~#~....
-            ..~###~....
-            ~~~~~~~~~..
-            ~#~~~~~#~..
-            ~#~~~~~#~..
-            ~#######~..
+            ....|......
+            ..|||||..#.
+            ..|#~#|....
+            ..|###|....
+            |||||||||..
+            |#~~~~~#|..
+            |#~~~~~#|..
+            |#######|..
         """.trimIndent()
         assertThat(actual).isEqualTo(expected)
     }
@@ -94,17 +94,17 @@ class WaterReservoirTest {
         """.trimIndent()
 
         val reservoir = WaterReservoir.parse(input)
-        val actual = reservoir.toString()
+        val actual = reservoir.display()
 
         val expected = """
-            ....~......
-            ..~~~~~..#.
-            ..~#~#~....
-            ..~###~....
-            ..~...~....
-            .#~~~~~~~..
-            .#~~~~~#~..
-            .#######~..
+            ....|......
+            ..|||||..#.
+            ..|#~#|....
+            ..|###|....
+            ..|...|....
+            .#|||||||..
+            .#~~~~~#|..
+            .#######|..
         """.trimIndent()
         assertThat(actual).isEqualTo(expected)
     }
@@ -125,19 +125,19 @@ class WaterReservoirTest {
         """.trimIndent()
 
         val reservoir = WaterReservoir.parse(input)
-        val actual = reservoir.toString()
+        val actual = reservoir.display()
 
         val expected = """
-            ....~......
-            ..~~~~~..#.
-            ..~#~#~....
-            ..~###~....
-            ..~...~....
-            .#~~~~~~~..
-            .#~#~#~#~..
-            .#~###~#~..
-            .#~~~~~#~..
-            .#######~..
+            ....|......
+            ..|||||..#.
+            ..|#~#|....
+            ..|###|....
+            ..|...|....
+            .#|||||||..
+            .#~#~#~#|..
+            .#~###~#|..
+            .#~~~~~#|..
+            .#######|..
         """.trimIndent()
         assertThat(actual).isEqualTo(expected)
     }
