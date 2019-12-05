@@ -1,7 +1,6 @@
 package advent.year2018.day18
 
 import java.io.File
-import javax.annotation.Generated
 
 class LumberArea private constructor(private val state: Map<Point, Acre>) {
 
@@ -54,7 +53,7 @@ class LumberArea private constructor(private val state: Map<Point, Acre>) {
         }
     }
 
-    @Generated
+    // IntelliJ generated.
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -66,7 +65,7 @@ class LumberArea private constructor(private val state: Map<Point, Acre>) {
         return true
     }
 
-    @Generated
+    // IntelliJ generated.
     override fun hashCode(): Int {
         return state.hashCode()
     }

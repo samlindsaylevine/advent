@@ -1,4 +1,4 @@
-package advent.year2019
+package advent.year2019.day4
 
 import advent.year2019.day4.FuelDepotPassword
 import org.assertj.core.api.Assertions.assertThat
