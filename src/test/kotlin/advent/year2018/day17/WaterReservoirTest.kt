@@ -20,8 +20,8 @@ class WaterReservoirTest {
 
         val reservoir = WaterReservoir.parse(input)
 
-        println(reservoir.display())
         assertThat(reservoir.waterTileCount()).isEqualTo(57)
+        assertThat(reservoir.settledWaterCount()).isEqualTo(29)
     }
 
     @Test

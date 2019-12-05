@@ -20,6 +20,7 @@ class WaterReservoir private constructor(rows: List<Row>,
             .fold(emptySet(), { acc, points -> acc.union(points) })
 
     fun waterTileCount() = flowResult().waterCount()
+    fun settledWaterCount() = flowResult().settledWaterCount()
 
     fun display() = flowResult().toString()
 
@@ -110,7 +111,7 @@ private class FlowResult constructor(clay: Set<Point>, spring: Point) {
             flow(right)
         }
 
-        if (hasWalls(flowPoint)) {
+        if (hasWalls(flowPoint) && this[underneath] != PointState.FLOWING_WATER) {
             fillLevel(flowPoint)
         }
     }
@@ -149,6 +150,8 @@ private class FlowResult constructor(clay: Set<Point>, spring: Point) {
     fun waterCount() = this.points
             .filter { it.key.y in minY..maxY }
             .count { it.value == PointState.FLOWING_WATER || it.value == PointState.SETTLED_WATER }
+
+    fun settledWaterCount() = this.points.count { it.value == PointState.SETTLED_WATER }
 }
 
 fun main() {
@@ -159,7 +162,6 @@ fun main() {
 
     println(reservoir.display())
 
-    //27994 is too low
-    //29138 is too high
     println(reservoir.waterTileCount())
+    println(reservoir.settledWaterCount())
 }
