@@ -87,11 +87,14 @@ private class FlowResult constructor(clay: Set<Point>, spring: Point) {
         points[point] = state
     }
 
+    // Going to be imperative and mutate all our state on construction time for speed.
     private fun flow(flowPoint: Point) {
         if (flowPoint.y > maxY) return
 
         val underneath = flowPoint + Point(0, 1)
 
+        // We're going to recursively flow out the "downstream" spaces from this space first, before handling this
+        // space's ultimate fate. So, after this call, we know that the space underneath us will be properly decided.
         if (this[underneath] == PointState.EMPTY) {
             this[underneath] = PointState.FLOWING_WATER
             flow(underneath)
@@ -99,6 +102,9 @@ private class FlowResult constructor(clay: Set<Point>, spring: Point) {
 
         val left = flowPoint + Point(-1, 0)
 
+        // Now that the space underneath us is decided, we can see if it causes backpressure and the water has to flow
+        // to the sides. If so, we'll do that. (After these calls to the side, we might still have things on this
+        // y level marked as FLOWING that will ultimately be overwritten as SETTLED.)
         if (this[underneath].causesPressure && this[left] == PointState.EMPTY) {
             this[left] = PointState.FLOWING_WATER
             flow(left)
@@ -111,6 +117,10 @@ private class FlowResult constructor(clay: Set<Point>, spring: Point) {
             flow(right)
         }
 
+        // We flowed to the sides - now see if this level is trapped - i.e., has walls. If it does, overwrite all the
+        // FLOWING_WATER that is trapped, as SETTLED_WATER. (If underneath us is flowing, this is definitely not
+        // settled! This criterion had to be added because otherwise flowing water that was contained by two walls,
+        // but dropped out between them, was incorrectly marked as SETTLED.)
         if (hasWalls(flowPoint) && this[underneath] != PointState.FLOWING_WATER) {
             fillLevel(flowPoint)
         }
