@@ -3,7 +3,7 @@ package advent.year2018.day16
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class ChronalComputerTest {
+class ChronalComputerInstructionsTest {
 
     @Test
     fun `parse sample -- first item in file -- gives expected output`() {

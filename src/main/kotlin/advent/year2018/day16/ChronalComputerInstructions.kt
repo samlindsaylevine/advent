@@ -1,3 +1,5 @@
+package advent.year2018.day16
+
 import java.io.File
 
 enum class ChronalOpCode {
