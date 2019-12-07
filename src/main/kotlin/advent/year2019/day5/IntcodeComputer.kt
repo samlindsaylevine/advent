@@ -9,8 +9,18 @@ class IntcodeComputer {
 
     fun execute(program: List<Int>,
                 input: () -> Int = { throw IllegalStateException("no input available") }): ProgramResult {
-        val state = program.toMutableList()
+
         val output = mutableListOf<Int>()
+
+        val finalState = execute(program, input) { output.add(it) }
+
+        return ProgramResult(finalState, output)
+    }
+
+    fun execute(program: List<Int>,
+                input: () -> Int,
+                output: (Int) -> Unit): List<Int> {
+        val state = program.toMutableList()
         var instructionPointer = 0
 
         try {
@@ -22,12 +32,12 @@ class IntcodeComputer {
                         state,
                         input)
 
-                if (instructionResult.outputValue != null) output.add(instructionResult.outputValue)
+                if (instructionResult.outputValue != null) output(instructionResult.outputValue)
 
                 instructionPointer = instructionResult.pointerUpdate(instructionPointer)
             }
         } catch (halt: ProgramHaltedException) {
-            return ProgramResult(state, output)
+            return state
         }
     }
 
