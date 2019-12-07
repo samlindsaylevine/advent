@@ -24,4 +24,11 @@ class ChronalComputerTest {
 
         assertThat(computer.registers).containsExactly(7, 5, 6, 0, 0, 9)
     }
+
+    @Test
+    fun `sumOfDivisors -- number for part one -- gives answer for part one`() {
+        val sum = sumOfDivisors(893)
+
+        assertThat(sum).isEqualTo(960)
+    }
 }
