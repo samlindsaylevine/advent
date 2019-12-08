@@ -1,11 +1,10 @@
 package advent.year2018.day20
 
+import advent.year2018.day20.Direction.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import advent.year2018.day20.Direction.N
-import advent.year2018.day20.Direction.S
-import advent.year2018.day20.Direction.W
-import advent.year2018.day20.Direction.E
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 class RoomsGridTest {
 
@@ -117,5 +116,19 @@ class RoomsGridTest {
             ###############
         """.trimIndent()
         assertThat(map).isEqualTo(expected)
+    }
+
+    @ParameterizedTest(name = "distanceToFurthestRoom -- {0} -- {1}")
+    @CsvSource("^WNE\$, 3",
+            "^ENWWW(NEEE|SSE(EE|N))\$, 10",
+            "^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN\$, 18",
+            "^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))\$, 23",
+            "^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))\$, 31")
+    fun `distanceToFurthestRoom -- reference examples -- reference values`(input: String, expected: Int) {
+        val roomsGrid = RoomsGrid.fromPaths(RoomPaths.parse(input))
+
+        val distance = roomsGrid.distanceToFurthestRoom()
+
+        assertThat(distance).isEqualTo(expected)
     }
 }

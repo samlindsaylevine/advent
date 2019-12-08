@@ -1,5 +1,8 @@
 package advent.year2018.day20
 
+import advent.year2015.day24.Ticker
+import java.io.File
+
 class RoomsGrid(private val rooms: Set<Point>,
                 private val doors: Set<Door>) {
     companion object {
@@ -7,7 +10,12 @@ class RoomsGrid(private val rooms: Set<Point>,
             val rooms = mutableSetOf<Point>()
             val doors = mutableSetOf<Door>()
 
-            paths.allPaths().forEach { it.walkPath(rooms, doors) }
+            val ticker = Ticker(1000)
+
+            paths.allPaths().forEach {
+                it.walkPath(rooms, doors)
+                ticker.tick()
+            }
 
             return RoomsGrid(rooms, doors)
         }
@@ -68,6 +76,40 @@ class RoomsGrid(private val rooms: Set<Point>,
         val crappyJavaMod = this % other
         return if (crappyJavaMod < 0) crappyJavaMod + other else crappyJavaMod
     }
+
+    fun distanceToFurthestRoom() = roomCrawl.maxDistance
+    fun farAwayRoomCount() = roomCrawl.farAwayRoomCount
+
+    private val roomCrawl by lazy {
+        // The naivest approach, calculating the distance to any particular room individually, and then taking the max,
+        // is too slow for the 10,000 rooms in our problem input. Instead, we'll walk all the rooms at once and mark
+        // how many steps that takes.
+        var stepsTaken = 0
+        val visited = mutableSetOf(Point(0, 0))
+        var lastVisited = setOf(Point(0, 0))
+        var farAwayRoomCount = 0
+
+        while (!visited.containsAll(rooms)) {
+            val nextRooms = lastVisited.flatMap { reachableFromRoom(it) }
+                    .filter { !visited.contains(it) }
+                    .toSet()
+            visited.addAll(nextRooms)
+            stepsTaken++
+            if (stepsTaken >= 1000) {
+                farAwayRoomCount += nextRooms.size
+            }
+            lastVisited = nextRooms
+        }
+
+        CrawlResult(stepsTaken, farAwayRoomCount)
+    }
+
+    private data class CrawlResult(val maxDistance: Int, val farAwayRoomCount: Int)
+
+    private fun reachableFromRoom(room: Point) = doors.filter { it.contains(room) }
+            .flatMap { it.elements }
+            .filter { it != room }
+            .toSet()
 }
 
 class UnorderedPair<T>(private val a: T, private val b: T) {
@@ -120,7 +162,6 @@ class RoomPaths private constructor(private val steps: SerialOptions) {
                     }
                 }
             }
-
 
             return RoomPaths(steps)
         }
@@ -212,4 +253,15 @@ enum class Direction(val x: Int, val y: Int) {
 
 data class Point(val x: Int, val y: Int) {
     operator fun plus(other: Point) = Point(this.x + other.x, this.y + other.y)
+}
+
+fun main() {
+    val input = File("src/main/kotlin/advent/year2018/day20/input.txt")
+            .readText()
+            .trim()
+
+    val roomsGrid = RoomsGrid.fromPaths(RoomPaths.parse(input))
+
+    println(roomsGrid.distanceToFurthestRoom())
+    println(roomsGrid.farAwayRoomCount())
 }
