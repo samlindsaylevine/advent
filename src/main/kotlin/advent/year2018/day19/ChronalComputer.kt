@@ -108,7 +108,7 @@ fun main() {
     // 18   mulr 4 4 4  Set register 4 to 2 * 2 = 4
     // 19   mulr 5 4 4  Set register 4 to 19 * 4 = 76
     // 20   muli 4 11 4 Set register 4 to 76 * 11 = 836
-    // 21   addi 3 2 3  Set register 3 to (uniniatilized register 3 + 2) = 2
+    // 21   addi 3 2 3  Set register 3 to (uninitialized register 3 + 2) = 2
     // 22   mulr 3 5 3  Set register 3 to 2 * 22 = 44
     // 23   addi 3 13 3 Set register 3 to 44 + 13 = 57
     // 24   addr 4 3 4  Set register 4 to 836 + 57 = 893

@@ -46,7 +46,7 @@ enum class ChronalOpCode {
         }
     },
 
-    borri {
+    bori {
         override fun execute(registers: MutableList<Int>, inputA: Int, inputB: Int, output: Int) {
             registers[output] = registers[inputA] or inputB
         }
