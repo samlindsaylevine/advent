@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 
 class SensorBoostTest {
 
-    @Disabled("Relative mode NYI")
     @Test
     fun `execute -- quine -- outputs itself`() {
         val computer = IntcodeComputer()

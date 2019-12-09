@@ -25,11 +25,15 @@ class IntcodeComputer {
                 .toMutableMap()
         val memory = Memory(initialState)
         var instructionPointer = 0L
+        var relativeBase = 0L
 
         try {
             while (true) {
                 val instructionAndModes = InstructionAndModes.parse(memory[instructionPointer])
-                val values = ValueReader(memory, instructionPointer, instructionAndModes.modes)
+                val values = ValueReader(memory,
+                        instructionPointer,
+                        relativeBase,
+                        instructionAndModes.modes)
 
                 val instructionResult = instructionAndModes.instruction.execute(values,
                         memory,
@@ -38,6 +42,7 @@ class IntcodeComputer {
                 if (instructionResult.outputValue != null) output(instructionResult.outputValue)
 
                 instructionPointer = instructionResult.pointerUpdate(instructionPointer)
+                relativeBase += instructionResult.relativeBaseChange
             }
         } catch (halt: ProgramHaltedException) {
             return memory
@@ -48,6 +53,7 @@ class IntcodeComputer {
 
 private class ValueReader(private val memory: Memory,
                           private val instructionPointer: Long,
+                          private val relativeBase: Long,
                           private val modes: List<ParameterMode>) {
     private fun getMode(index: Int) = if (index > modes.size) ParameterMode.POSITION else modes[index - 1]
 
@@ -55,14 +61,21 @@ private class ValueReader(private val memory: Memory,
      * Get the value to be used as a parameter, this many steps after the current instruction pointer.
      */
     operator fun get(index: Int): Long = when (getMode(index)) {
-        ParameterMode.POSITION -> memory[memory[instructionPointer + index]]
-        ParameterMode.IMMEDIATE -> memory[instructionPointer + index]
+        ParameterMode.POSITION -> memory[getImmediate(index)]
+        ParameterMode.IMMEDIATE -> getImmediate(index)
+        ParameterMode.RELATIVE -> memory[getImmediate(index) + relativeBase]
     }
+
+    private fun getImmediate(index: Int) = memory[instructionPointer + index]
 
     /**
      * Get the target index to be used for setting values.
      */
-    fun getTarget(index: Int) = memory[instructionPointer + index]
+    fun getTarget(index: Int) = when (getMode(index)) {
+        ParameterMode.IMMEDIATE -> getImmediate(index)
+        ParameterMode.POSITION -> getImmediate(index)
+        ParameterMode.RELATIVE -> getImmediate(index) + relativeBase
+    }
 }
 
 data class Memory(private val state: MutableMap<Long, Long> = mutableMapOf()) {
@@ -144,6 +157,13 @@ private object Equals : IntcodeInstruction() {
     }
 }
 
+private object RelativeBaseOffset : IntcodeInstruction() {
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        return InstructionResult({ it + 2 }, relativeBaseChange = values[1])
+    }
+
+}
+
 private object Halt : IntcodeInstruction() {
     override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
         throw ProgramHaltedException()
@@ -151,11 +171,12 @@ private object Halt : IntcodeInstruction() {
 }
 
 private class InstructionResult(val pointerUpdate: (Long) -> Long,
-                                val outputValue: Long? = null)
+                                val outputValue: Long? = null,
+                                val relativeBaseChange: Long = 0)
 
 private class ProgramHaltedException : Exception("The program halted.")
 
-private enum class ParameterMode { POSITION, IMMEDIATE }
+private enum class ParameterMode { POSITION, IMMEDIATE, RELATIVE }
 
 
 private data class InstructionAndModes(val instruction: IntcodeInstruction,
@@ -169,6 +190,7 @@ private data class InstructionAndModes(val instruction: IntcodeInstruction,
                 6 to JumpIfFalse,
                 7 to LessThan,
                 8 to Equals,
+                9 to RelativeBaseOffset,
                 99 to Halt)
 
         fun parse(number: Long): InstructionAndModes {
@@ -178,6 +200,7 @@ private data class InstructionAndModes(val instruction: IntcodeInstruction,
                 when (it) {
                     0 -> ParameterMode.POSITION
                     1 -> ParameterMode.IMMEDIATE
+                    2 -> ParameterMode.RELATIVE
                     else -> throw IllegalArgumentException("Bad mode $it")
                 }
             }
