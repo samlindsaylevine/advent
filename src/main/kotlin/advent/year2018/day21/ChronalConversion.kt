@@ -1,5 +1,6 @@
 package advent.year2018.day21
 
+import advent.year2015.day24.Ticker
 import advent.year2018.day19.ChronalComputer
 import advent.year2018.day19.ChronalProgram
 import java.io.File
@@ -80,13 +81,13 @@ import java.io.File
 //      register 3 = register 3 / 256
 //  register 5 = weirdFun(register 3, register 5)
 //
+// In short, we can consider this a loop where we repeatedly transform the value of register 5, within the
+// outermost while loop, until it hits the input value of register 0.
 
 private fun weirdFun(x: Int, y: Int) = ((((x and 255) + y) and 16777215) * 65899) and 16777215
 
-private fun solvePartOne() {
-    // In order to get the fewest number of iterations, we want to input the value that register 5 has the first time
-    // we make it to SECTION: Check for completion; i.e., the first time we exit SECTION: Subloop. That looks like this:
-    var reg3 = 65536
+private fun transform(input: Int): Int {
+    var reg3 = input or 65536
     var reg5 = 10828530
 
     while (reg3 >= 256) {
@@ -95,9 +96,30 @@ private fun solvePartOne() {
     }
     reg5 = weirdFun(reg3, reg5)
 
-    println(reg5)
+    return reg5
+}
+
+private fun solvePartOne(): Int {
+    // In order to get the fewest number of iterations, we want to input the value that register 5 has the first time
+    // we make it to SECTION: Check for completion; i.e., the first time we exit SECTION: Subloop; i.e., the first
+    // result of the transform function when given an input of register 5's initial state, 0.
+    return transform(0)
+}
+
+private fun solvePartTwo(): Int {
+    // As we go through values of register 5, eventually we will hit a loop. The final value of register 5 before we
+    // reach the loop is the one that will cause the most instructions to be executed.
+    var reg5 = 0
+    val visited = mutableSetOf<Int>()
+    while (true) {
+        visited.add(reg5)
+        val next = transform(reg5)
+        if (next in visited) return reg5
+        reg5 = next
+    }
 }
 
 fun main() {
-    solvePartOne()
+    println(solvePartOne())
+    println(solvePartTwo())
 }
