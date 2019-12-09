@@ -26,7 +26,7 @@ class AmplifierControls(private val numAmplifiers: Int = 5,
 
         val output = computers.withIndex()
                 .map { it.value to settings[it.index] }
-                .fold(0, { previousOutput, computerAndPhase ->
+                .fold(0L, { previousOutput, computerAndPhase ->
                     runAmplifier(computerAndPhase.first, computerAndPhase.second, previousOutput)
                 })
 
@@ -43,9 +43,9 @@ class AmplifierControls(private val numAmplifiers: Int = 5,
 
         // The Nth queue is the input to the Nth computer, and the output of the N-1th computer. (The first queue,
         // at index 0, is naturally the output of the final computer.)
-        val queues = List(numAmplifiers) { LinkedBlockingQueue<Int>() }
+        val queues = List(numAmplifiers) { LinkedBlockingQueue<Long>() }
 
-        var lastThrusterOutput: Int? = null
+        var lastThrusterOutput: Long? = null
 
         // Ensure that we have enough threads for our parallelization.
         val executor = Executors.newFixedThreadPool(settings.size)
@@ -57,8 +57,8 @@ class AmplifierControls(private val numAmplifiers: Int = 5,
                         val inputQueue = queues[it.index]
                         val outputQueue = queues[it.index + 1]
                         val computer = it.value
-                        computer.execute(program,
-                                settings[it.index] andThen { inputQueue.take() },
+                        computer.execute(program.map { it.toLong() },
+                                settings[it.index].toLong() andThen { inputQueue.take() },
                                 { value -> outputQueue.put(value) })
                     }
                 }
@@ -66,8 +66,8 @@ class AmplifierControls(private val numAmplifiers: Int = 5,
         // Special behavior for the last computer because it a) loops around and writes to the first queue and b) we
         // capture its output as our thruster output.
         val lastFuture = executor.submit {
-            computers.last().execute(program,
-                    settings.last() andThen { queues.last().take() },
+            computers.last().execute(program.map { it.toLong() },
+                    settings.last().toLong() andThen { queues.last().take() },
                     { value -> lastThrusterOutput = value; queues.first().put(value) })
         }
 
@@ -84,8 +84,8 @@ class AmplifierControls(private val numAmplifiers: Int = 5,
 
     private fun runAmplifier(computer: IntcodeComputer,
                              phaseSetting: Int,
-                             input: Int): Int {
-        val result = computer.execute(program, phaseSetting andThen { input })
+                             input: Long): Long {
+        val result = computer.execute(program.map { it.toLong() }, phaseSetting.toLong() andThen { input })
         return result.output.first()
     }
 }
@@ -102,7 +102,7 @@ private infix fun <T> T.andThen(supplier: Supplier<T>): Supplier<T> {
 }
 
 data class PhaseSettings(val settings: List<Int>,
-                         val thrusterSignal: Int)
+                         val thrusterSignal: Long)
 
 fun main() {
     val input = File("src/main/kotlin/advent/year2019/day7/input.txt")

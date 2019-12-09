@@ -7,29 +7,32 @@ import java.io.File
  */
 class IntcodeComputer {
 
-    fun execute(program: List<Int>,
-                input: () -> Int = { throw IllegalStateException("no input available") }): ProgramResult {
+    fun execute(program: List<Long>,
+                input: () -> Long = { throw IllegalStateException("no input available") }): ProgramResult {
 
-        val output = mutableListOf<Int>()
+        val output = mutableListOf<Long>()
 
         val finalState = execute(program, input) { output.add(it) }
 
         return ProgramResult(finalState, output)
     }
 
-    fun execute(program: List<Int>,
-                input: () -> Int,
-                output: (Int) -> Unit): List<Int> {
-        val state = program.toMutableList()
-        var instructionPointer = 0
+    fun execute(program: List<Long>,
+                input: () -> Long,
+                output: (Long) -> Unit): Memory {
+        val initialState = program.withIndex()
+                .associate { it.index.toLong() to it.value }
+                .toMutableMap()
+        val memory = Memory(initialState)
+        var instructionPointer = 0L
 
         try {
             while (true) {
-                val instructionAndModes = InstructionAndModes.parse(state[instructionPointer])
-                val values = ValueReader(state, instructionPointer, instructionAndModes.modes)
+                val instructionAndModes = InstructionAndModes.parse(memory[instructionPointer])
+                val values = ValueReader(memory, instructionPointer, instructionAndModes.modes)
 
                 val instructionResult = instructionAndModes.instruction.execute(values,
-                        state,
+                        memory,
                         input)
 
                 if (instructionResult.outputValue != null) output(instructionResult.outputValue)
@@ -37,102 +40,118 @@ class IntcodeComputer {
                 instructionPointer = instructionResult.pointerUpdate(instructionPointer)
             }
         } catch (halt: ProgramHaltedException) {
-            return state
+            return memory
         }
     }
 
 }
 
-private class ValueReader(private val state: List<Int>,
-                          private val instructionPointer: Int,
+private class ValueReader(private val memory: Memory,
+                          private val instructionPointer: Long,
                           private val modes: List<ParameterMode>) {
     private fun getMode(index: Int) = if (index > modes.size) ParameterMode.POSITION else modes[index - 1]
 
     /**
      * Get the value to be used as a parameter, this many steps after the current instruction pointer.
      */
-    operator fun get(index: Int) = when (getMode(index)) {
-        ParameterMode.POSITION -> state[state[instructionPointer + index]]
-        ParameterMode.IMMEDIATE -> state[instructionPointer + index]
+    operator fun get(index: Int): Long = when (getMode(index)) {
+        ParameterMode.POSITION -> memory[memory[instructionPointer + index]]
+        ParameterMode.IMMEDIATE -> memory[instructionPointer + index]
     }
 
     /**
      * Get the target index to be used for setting values.
      */
-    fun getTarget(index: Int) = state[instructionPointer + index]
+    fun getTarget(index: Int) = memory[instructionPointer + index]
 }
 
+data class Memory(private val state: MutableMap<Long, Long> = mutableMapOf()) {
+    operator fun get(index: Long) = state[index] ?: 0
+    operator fun set(index: Long, value: Long) {
+        state[index] = value
+    }
+
+    fun asList(): List<Long> {
+        val max = state.keys.max() ?: 0
+        if (max + 1 > Int.MAX_VALUE) throw IllegalStateException("Can't represent as list - too large! $max")
+        val output = MutableList<Long>(max.toInt() + 1) { 0 }
+
+        state.forEach { (index, value) -> output[index.toInt()] = value }
+
+        return output
+    }
+}
 
 private sealed class IntcodeInstruction {
     /**
      * @return A value to be added to the output, if any.
      */
     abstract fun execute(values: ValueReader,
-                         state: MutableList<Int>,
-                         input: () -> Int): InstructionResult
+                         memory: Memory,
+                         input: () -> Long): InstructionResult
 }
 
 private object Add : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        state[values.getTarget(3)] = values[1] + values[2]
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        memory[values.getTarget(3)] = values[1] + values[2]
         return InstructionResult({ it + 4 })
     }
 }
 
 private object Multiply : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        state[values.getTarget(3)] = values[1] * values[2]
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        memory[values.getTarget(3)] = values[1] * values[2]
         return InstructionResult({ it + 4 })
     }
 }
 
 private object Input : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        state[values.getTarget(1)] = input()
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        memory[values.getTarget(1)] = input()
         return InstructionResult({ it + 2 })
     }
 }
 
 private object Output : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
         return InstructionResult({ it + 2 }, values[1])
     }
 }
 
 private object JumpIfTrue : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        return if (values[1] != 0) InstructionResult({ values[2] }) else InstructionResult({ it + 3 })
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        return if (values[1] != 0L) InstructionResult({ values[2] }) else InstructionResult({ it + 3 })
     }
 }
 
 private object JumpIfFalse : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        return if (values[1] == 0) InstructionResult({ values[2] }) else InstructionResult({ it + 3 })
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        return if (values[1] == 0L) InstructionResult({ values[2] }) else InstructionResult({ it + 3 })
     }
 }
 
 private object LessThan : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        state[values.getTarget(3)] = if (values[1] < values[2]) 1 else 0
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        memory[values.getTarget(3)] = if (values[1] < values[2]) 1 else 0
         return InstructionResult({ it + 4 })
     }
 }
 
 private object Equals : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
-        state[values.getTarget(3)] = if (values[1] == values[2]) 1 else 0
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
+        memory[values.getTarget(3)] = if (values[1] == values[2]) 1 else 0
         return InstructionResult({ it + 4 })
     }
 }
 
 private object Halt : IntcodeInstruction() {
-    override fun execute(values: ValueReader, state: MutableList<Int>, input: () -> Int): InstructionResult {
+    override fun execute(values: ValueReader, memory: Memory, input: () -> Long): InstructionResult {
         throw ProgramHaltedException()
     }
 }
 
-private class InstructionResult(val pointerUpdate: (Int) -> Int,
-                                val outputValue: Int? = null)
+private class InstructionResult(val pointerUpdate: (Long) -> Long,
+                                val outputValue: Long? = null)
 
 private class ProgramHaltedException : Exception("The program halted.")
 
@@ -152,8 +171,8 @@ private data class InstructionAndModes(val instruction: IntcodeInstruction,
                 8 to Equals,
                 99 to Halt)
 
-        fun parse(number: Int): InstructionAndModes {
-            val instruction = instructionsByOpCode[number % 100]
+        fun parse(number: Long): InstructionAndModes {
+            val instruction = instructionsByOpCode[(number % 100).toInt()]
                     ?: throw java.lang.IllegalArgumentException("Bad instruction ${number % 100}")
             val modes = number.digits().reversed().drop(2).map {
                 when (it) {
@@ -165,12 +184,12 @@ private data class InstructionAndModes(val instruction: IntcodeInstruction,
             return InstructionAndModes(instruction, modes)
         }
 
-        private fun Int.digits() = this.toString().split("").filter { it.isNotEmpty() }.map { it.toInt() }
+        private fun Long.digits() = this.toString().split("").filter { it.isNotEmpty() }.map { it.toInt() }
     }
 }
 
-data class ProgramResult(val finalState: List<Int>,
-                         val output: List<Int>)
+data class ProgramResult(val finalState: Memory,
+                         val output: List<Long>)
 
 
 fun main() {
@@ -178,7 +197,7 @@ fun main() {
             .readText()
             .trim()
             .split(",")
-            .map { it.toInt() }
+            .map { it.toLong() }
 
     val result = IntcodeComputer().execute(program, input = { 1 })
     println(result.output)

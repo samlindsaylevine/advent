@@ -9,7 +9,7 @@ class IntcodeComputerTest {
 
     @Test
     fun `execute -- input and output example -- outputs input`() {
-        val program = listOf(3, 0, 4, 0, 99)
+        val program = listOf<Long>(3, 0, 4, 0, 99)
 
         val result = IntcodeComputer().execute(program, input = { 1000 })
 
@@ -18,28 +18,28 @@ class IntcodeComputerTest {
 
     @Test
     fun `execute -- parameter modes example -- operates as example defines`() {
-        val program = listOf(1002, 4, 3, 4, 33)
+        val program = listOf<Long>(1002, 4, 3, 4, 33)
 
         val result = IntcodeComputer().execute(program)
 
-        assertThat(result.finalState).containsExactly(1002, 4, 3, 4, 99)
+        assertThat(result.finalState.asList()).containsExactly(1002, 4, 3, 4, 99)
     }
 
     @Test
     fun `execute -- negative integer example -- operates as example defines`() {
-        val program = listOf(1101, 100, -1, 4, 0)
+        val program = listOf<Long>(1101, 100, -1, 4, 0)
 
         val result = IntcodeComputer().execute(program)
 
-        assertThat(result.finalState).containsExactly(1101, 100, -1, 4, 99)
+        assertThat(result.finalState.asList()).containsExactly(1101, 100, -1, 4, 99)
     }
 
     @ParameterizedTest(name = "equal to 8 position program -- input {0} -- outputs {1}")
     @CsvSource("7, 0",
             "8, 1",
             "9, 0")
-    fun `equal to 8 position program -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8)
+    fun `equal to 8 position program -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8)
 
         val result = IntcodeComputer().execute(program, input = { input })
 
@@ -50,8 +50,8 @@ class IntcodeComputerTest {
     @CsvSource("7, 1",
             "8, 0",
             "9, 0")
-    fun `less than 8 position program -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8)
+    fun `less than 8 position program -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8)
 
         val result = IntcodeComputer().execute(program, input = { input })
 
@@ -62,8 +62,8 @@ class IntcodeComputerTest {
     @CsvSource("7, 0",
             "8, 1",
             "9, 0")
-    fun `equal to 8 immediate program -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 3, 1108, -1, 8, 3, 4, 3, 99)
+    fun `equal to 8 immediate program -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 3, 1108, -1, 8, 3, 4, 3, 99)
 
         val result = IntcodeComputer().execute(program, input = { input })
 
@@ -74,8 +74,8 @@ class IntcodeComputerTest {
     @CsvSource("7, 1",
             "8, 0",
             "9, 0")
-    fun `less than 8 immediate program -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 3, 1107, -1, 8, 3, 4, 3, 99)
+    fun `less than 8 immediate program -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 3, 1107, -1, 8, 3, 4, 3, 99)
 
         val result = IntcodeComputer().execute(program, input = { input })
 
@@ -86,8 +86,8 @@ class IntcodeComputerTest {
     @CsvSource("-100, 1",
             "0, 0",
             "9, 1")
-    fun `non-zero position program -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9)
+    fun `non-zero position program -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9)
 
         val result = IntcodeComputer().execute(program, input = { input })
 
@@ -98,8 +98,8 @@ class IntcodeComputerTest {
     @CsvSource("-100, 1",
             "0, 0",
             "9, 1")
-    fun `non-zero immediate program -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1)
+    fun `non-zero immediate program -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1)
 
         val result = IntcodeComputer().execute(program, input = { input })
 
@@ -110,8 +110,8 @@ class IntcodeComputerTest {
     @CsvSource("7, 999",
             "8, 1000",
             "9, 1001")
-    fun `larger example -- reference inputs -- reference outputs`(input: Int, expected: Int) {
-        val program = listOf(3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
+    fun `larger example -- reference inputs -- reference outputs`(input: Long, expected: Long) {
+        val program = listOf<Long>(3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
                 1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
                 999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99)
 

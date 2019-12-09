@@ -1,4 +1,4 @@
-package advent.year2019
+package advent.year2019.day8
 
 import advent.year2019.day8.SpaceImage
 import org.assertj.core.api.Assertions.assertThat
