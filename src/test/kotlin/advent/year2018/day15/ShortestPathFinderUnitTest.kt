@@ -14,7 +14,7 @@ class ShortestPathFinderUnitTest {
                 end = 100,
                 nextSteps = { setOf(it * 2, it - 1) })
 
-        val expected = setOf(Path(listOf(2, 4, 8, 7, 14, 13, 26, 25, 50, 100)))
+        val expected = setOf(Path(listOf(2, 4, 8, 7, 14, 13, 26, 25, 50, 100), 10))
 
         assertThat(paths).isEqualTo(expected)
     }
@@ -35,11 +35,11 @@ class ShortestPathFinderUnitTest {
                 Path(listOf(Position(-1, 0),
                         Position(-1, 1),
                         Position(0, 1),
-                        Position(1, 1))),
+                        Position(1, 1)), 4),
                 Path(listOf(Position(0, -1),
                         Position(1, -1),
                         Position(1, 0),
-                        Position(1, 1))))
+                        Position(1, 1)), 4))
     }
 
     /**
@@ -62,5 +62,24 @@ class ShortestPathFinderUnitTest {
                 collapseKey = { Pair(it.first(), it.last()) })
 
         assertThat(paths).hasSize(2)
+    }
+
+    @Test
+    fun `findWithCosts -- a simple example -- finds cheapest path, not the shortest`() {
+        fun next(point: String) = when (point) {
+            "A" -> setOf(Step("B", 1), Step("D", 2), Step("G", 12))
+            "B" -> setOf(Step("C", 1))
+            "C" -> setOf(Step("D", 1))
+            "D" -> setOf(Step("E", 1), Step("G", 2))
+            "E" -> setOf(Step("F", 1))
+            "F" -> setOf(Step("G", 1))
+            else -> emptySet()
+        }
+
+        val paths = ShortestPathFinder().findWithCosts("A", "G", ::next)
+
+        assertThat(paths).hasSize(1)
+        assertThat(paths.first().steps).containsExactly("D", "G")
+        assertThat(paths.first().totalCost).isEqualTo(4)
     }
 }
