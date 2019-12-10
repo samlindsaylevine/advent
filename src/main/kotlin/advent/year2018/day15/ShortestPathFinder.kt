@@ -27,6 +27,7 @@ class ShortestPathFinder {
                 PathsInProgress(start),
                 setOf(start),
                 nextSteps.withCostOne(),
+                { false },
                 0,
                 collapseKey)
     }
@@ -44,25 +45,40 @@ class ShortestPathFinder {
      * total cost, not just the number of steps.
      *
      * The shortest path is actually a special case of this where all the steps have a cost of 1.
+     *
+     * @param collapseKey As in the shortest path, no-cost case; except that we collapse together any paths with the
+     *                    same key where one has a smaller total cost than the other (instead of just collapsing them
+     *                    when they have the _same_ cost exactly).
      */
-    fun <T> findWithCosts(start: T,
-                          end: T,
-                          nextSteps: (T) -> Set<Step<T>>): Set<Path<T>> {
+    fun <T, K> findWithCosts(start: T,
+                             end: T,
+                             nextSteps: (T) -> Set<Step<T>>,
+                             collapseKey: (List<T>) -> K,
+                             filterOut: (List<T>) -> Boolean = { false }): Set<Path<T>> {
         return find(end,
                 PathsInProgress(start),
                 setOf(start),
                 nextSteps,
+                filterOut,
                 0,
-                { it })
+                collapseKey)
     }
+
+    fun <T> findWithCosts(start: T,
+                          end: T,
+                          nextSteps: (T) -> Set<Step<T>>) =
+            findWithCosts(start, end, nextSteps, { it })
 
     private tailrec fun <T, K> find(end: T,
                                     inProgress: PathsInProgress<T>,
                                     visited: Set<T>,
                                     nextSteps: (T) -> Set<Step<T>>,
+                                    filterOut: (List<T>) -> Boolean,
                                     costIncurred: Int,
                                     collapseKey: (List<T>) -> K): Set<Path<T>> {
+
         val currentPaths = inProgress.current()
+        println("cost $costIncurred, visited ${visited.size}, current ${currentPaths.size}, upcoming ${inProgress.size()}")
         val successfulPaths = currentPaths.filter { it.steps.isNotEmpty() && it.steps.last() == end }
 
         return when {
@@ -70,16 +86,14 @@ class ShortestPathFinder {
             inProgress.isEmpty() -> emptySet()
             else -> {
                 val nextPaths: Set<PathAndCost<T>> = currentPaths.flatMap { it.next(nextSteps, visited) }
-                        .groupBy { collapseKey(it.path.steps) }
-                        .values
-                        .map { it.first() }
+                        .filter { !filterOut(it.path.steps) }
                         .toSet()
 
-                val nextInProgress: PathsInProgress<T> = (inProgress + nextPaths).advanced()
+                val nextInProgress: PathsInProgress<T> = (inProgress.plus(nextPaths, collapseKey)).advanced()
 
                 val nextVisited: Set<T> = visited + nextInProgress.current().map { it.currentPoint }
 
-                find(end, nextInProgress, nextVisited, nextSteps, costIncurred + 1, collapseKey)
+                find(end, nextInProgress, nextVisited, nextSteps, filterOut, costIncurred + 1, collapseKey)
             }
         }
     }
@@ -116,21 +130,31 @@ private data class PathInProgress<T>(val steps: List<T>,
 private data class PathAndCost<T>(val path: PathInProgress<T>, val cost: Int)
 
 /**
- * The key is how much additional cost it would be to proceed onto one of those paths.
+ * The cost for each item in the set is how much additional cost it would be to proceed onto one of those paths from
+ * the current state.
  */
-private class PathsInProgress<T>(private val nextPathsByCost: Map<Int, Set<PathInProgress<T>>>) {
-    constructor(start: T) : this(mapOf(0 to setOf(PathInProgress(emptyList(), start))))
+private class PathsInProgress<T>(private val nextPathsByCost: Set<PathAndCost<T>>) {
+    constructor(start: T) : this(setOf(PathAndCost(PathInProgress(emptyList(), start), 0)))
 
-    fun current() = nextPathsByCost[0] ?: emptySet()
+    fun current() = nextPathsByCost.filter { it.cost == 0 }.map { it.path }
 
-    fun advanced(): PathsInProgress<T> = PathsInProgress(nextPathsByCost.filter { it.key > 0 }
-            .mapKeys { it.key - 1 })
+    fun advanced(): PathsInProgress<T> = PathsInProgress(nextPathsByCost.filter { it.cost > 0 }
+            .map { PathAndCost(it.path, it.cost - 1) }
+            .toSet())
 
     fun isEmpty() = nextPathsByCost.isEmpty()
 
-    operator fun plus(paths: Set<PathAndCost<T>>): PathsInProgress<T> {
-        val nextMap = nextPathsByCost.toMutableMap()
-        paths.forEach { (path, cost) -> nextMap.merge(cost, setOf(path)) { existing, new -> existing + new } }
-        return PathsInProgress(nextMap)
+    fun size() = nextPathsByCost.size
+
+    fun <K> plus(newPaths: Set<PathAndCost<T>>,
+                 collapseKey: (List<T>) -> K): PathsInProgress<T> {
+
+        val allNext = nextPathsByCost + newPaths
+
+        val collapsed = allNext.groupBy { if (it.path.steps.isEmpty()) null else collapseKey(it.path.steps) }
+                .values
+                .mapNotNull { paths -> paths.minBy { it.cost } }
+
+        return PathsInProgress(collapsed.toSet())
     }
 }

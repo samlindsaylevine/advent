@@ -10,4 +10,10 @@ data class Point(val x: Int, val y: Int) {
      * Manhattan distance.
      */
     fun distanceFrom(other: Point) = Math.abs(this.x - other.x) + Math.abs(this.y - other.y)
+
+    val adjacentNeighbors by lazy {
+        sequenceOf(Point(-1, 0), Point(0, 1), Point(1, 0), Point(0, -1))
+                .map { it + this }
+                .toSet()
+    }
 }

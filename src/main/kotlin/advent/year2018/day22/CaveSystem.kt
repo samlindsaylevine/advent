@@ -1,6 +1,8 @@
 package advent.year2018.day22
 
 import advent.utils.Point
+import advent.year2018.day15.ShortestPathFinder
+import advent.year2018.day15.Step
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 
@@ -48,18 +50,56 @@ class CaveSystem(val depth: Int,
     fun totalRisk() = rectangle(Point(0, 0), target).sumBy { row -> row.sumBy { regionType(it).riskLevel } }
 
     fun rescueTime(): Int {
-        TODO()
+        val finder = ShortestPathFinder()
+
+        val shortestPaths = finder.findWithCosts(start = RescuerState(Point(0, 0), CaveTool.TORCH),
+                end = RescuerState(target, CaveTool.TORCH),
+                filterOut = {
+                    val last = it.last()
+                    // This is kind of a hack - we don't expect to have to go too far beyond the bounds of where
+                    // our target's X and Y are so we will prune those branches aggressively. If this is wrong, we
+                    // might end up with an answer that is too high. Without this aggressive pruning, the path finding
+                    // takes uncomfortably long.
+                    last.position.x > 2 * target.x || last.position.y > 2 * target.y
+                },
+                // We don't care about any 2 paths that share the same current state - we can just pick one of those
+                // arbitrarily.
+                collapseKey = { it.last() },
+                nextSteps = { it.nextSteps(this) })
+
+        return shortestPaths.first().totalCost
     }
 }
 
-enum class RegionType(val riskLevel: Int, val char: Char) {
-    ROCKY(riskLevel = 0, char = '.'),
-    WET(riskLevel = 1, char = '='),
-    NARROW(riskLevel = 2, char = '|')
+enum class RegionType(val riskLevel: Int,
+                      val char: Char,
+                      val legalTools: Set<CaveTool>) {
+    ROCKY(riskLevel = 0, char = '.', legalTools = setOf(CaveTool.CLIMBING_GEAR, CaveTool.TORCH)),
+    WET(riskLevel = 1, char = '=', legalTools = setOf(CaveTool.CLIMBING_GEAR, CaveTool.NEITHER)),
+    NARROW(riskLevel = 2, char = '|', legalTools = setOf(CaveTool.TORCH, CaveTool.NEITHER))
+}
+
+enum class CaveTool { CLIMBING_GEAR, TORCH, NEITHER }
+
+private data class RescuerState(val position: Point, val tool: CaveTool) {
+    fun nextSteps(cave: CaveSystem): Set<Step<RescuerState>> {
+        val toolChanges = CaveTool.values()
+                .filter { it != tool && cave.regionType(position).legalTools.contains(it) }
+                .map { Step(next = RescuerState(position, it), cost = 7) }
+                .toSet()
+
+        val moves = position.adjacentNeighbors
+                .filter { it.x >= 0 && it.y >= 0 }
+                .filter { cave.regionType(it).legalTools.contains(tool) }
+                .map { Step(next = RescuerState(it, tool), cost = 1) }
+
+        return toolChanges + moves
+    }
 }
 
 fun main() {
     val cave = CaveSystem(depth = 5355, target = Point(14, 796))
 
     println(cave.totalRisk())
+    println(cave.rescueTime())
 }

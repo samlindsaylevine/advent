@@ -2,7 +2,6 @@ package advent.year2018.day22
 
 import advent.utils.Point
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -56,7 +55,6 @@ class CaveSystemTest {
         assertThat(map).isEqualTo(expected)
     }
 
-    @Disabled("Not yet implemented")
     @Test
     fun `rescueTime -- reference cave -- is 45`() {
         val cave = CaveSystem(510, Point(10, 10))
