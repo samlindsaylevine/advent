@@ -1,6 +1,6 @@
 package advent.year2018.day22
 
-import advent.year2018.day20.Point
+import advent.utils.Point
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 

@@ -1,6 +1,6 @@
 package advent.year2018.day22
 
-import advent.year2018.day20.Point
+import advent.utils.Point
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

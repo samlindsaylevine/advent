@@ -1,5 +1,6 @@
 package advent.year2018.day20
 
+import advent.utils.Point
 import advent.year2015.day24.Ticker
 import java.io.File
 
@@ -249,10 +250,6 @@ enum class Direction(val x: Int, val y: Int) {
     W(-1, 0);
 
     fun toPoint() = Point(x, y)
-}
-
-data class Point(val x: Int, val y: Int) {
-    operator fun plus(other: Point) = Point(this.x + other.x, this.y + other.y)
 }
 
 fun main() {
