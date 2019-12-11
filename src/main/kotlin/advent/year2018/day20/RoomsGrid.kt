@@ -1,5 +1,6 @@
 package advent.year2018.day20
 
+import advent.utils.Direction
 import advent.utils.Point
 import advent.year2015.day24.Ticker
 import java.io.File
@@ -241,15 +242,6 @@ private fun List<PathOption>.allPaths(): Sequence<List<Direction>> {
         is MultipleChoice -> first.choices.asSequence().flatMap { listOf(it).allPaths() }
                 .flatMap { it.combinedWithRest() }
     }
-}
-
-enum class Direction(val x: Int, val y: Int) {
-    N(0, 1),
-    E(1, 0),
-    S(0, -1),
-    W(-1, 0);
-
-    fun toPoint() = Point(x, y)
 }
 
 fun main() {

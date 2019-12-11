@@ -1,5 +1,7 @@
 package advent.year2018.day23
 
+import advent.year2015.day24.Ticker
+import advent.year2018.day6.allMinBy
 import java.io.File
 import java.lang.IllegalArgumentException
 
@@ -17,6 +19,13 @@ data class TeleporterNanobot(val location: Point3D, val range: Int) {
     }
 
     infix fun isInRangeOf(other: TeleporterNanobot) = (this.location.distanceTo(other.location)) <= other.range
+
+    fun originDistanceRange(): IntRange {
+        val distanceToOrigin = this.location.distanceTo(Point3D(0, 0, 0))
+        val lower = Math.max(0, distanceToOrigin - range)
+        val upper = distanceToOrigin + range
+        return lower..upper
+    }
 }
 
 data class Point3D(val x: Int, val y: Int, val z: Int) {
@@ -36,6 +45,13 @@ class TeleporterNanobots(val bots: List<TeleporterNanobot>) {
     }
 }
 
+fun List<IntRange>.maxOverlapPoint(): Int {
+    val lowerBounds = this.map { it.first }.toSet()
+    return lowerBounds.maxBy { i ->
+        this.count { it.contains(i) }
+    } ?: 0
+}
+
 fun main() {
     val input = File("src/main/kotlin/advent/year2018/day23/input.txt")
             .readText()
@@ -43,4 +59,7 @@ fun main() {
 
     val nanobots = TeleporterNanobots.parse(input)
     println(nanobots.botCountInRangeOfStrongest())
+
+    // 94481123 is too low
+    println(nanobots.bots.map { it.originDistanceRange() }.sortedBy { it.first })
 }

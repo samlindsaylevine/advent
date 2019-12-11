@@ -1,6 +1,6 @@
 package advent.year2018.day20
 
-import advent.year2018.day20.Direction.*
+import advent.utils.Direction.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
