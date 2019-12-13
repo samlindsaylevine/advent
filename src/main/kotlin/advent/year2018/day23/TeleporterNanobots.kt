@@ -20,6 +20,7 @@ data class TeleporterNanobot(val location: Point3D, val range: Int) {
 
     infix fun isInRangeOf(other: TeleporterNanobot) = (this.location.distanceTo(other.location)) <= other.range
 
+
     fun originDistanceRange(): IntRange {
         val distanceToOrigin = this.location.distanceTo(Point3D(0, 0, 0))
         val lower = Math.max(0, distanceToOrigin - range)
@@ -43,13 +44,41 @@ class TeleporterNanobots(val bots: List<TeleporterNanobot>) {
         val strongest = bots.maxBy { it.range } ?: return 0
         return bots.count { it isInRangeOf strongest }
     }
-}
 
-fun List<IntRange>.maxOverlapPoint(): Int {
-    val lowerBounds = this.map { it.first }.toSet()
-    return lowerBounds.maxBy { i ->
-        this.count { it.contains(i) }
-    } ?: 0
+    /**
+     * The second half of this problem is very difficult.
+     *
+     * The challenge is an implementation that is both performant and correct.
+     *
+     * Obviously we cannot just check points exhaustively - the possible space is too large.
+     *
+     * We could attempt to repeatedly split the space and investigate only whichever half overlapped with more bots -
+     * but just because a rectilinear volume overlaps with N bots, does not mean that there is an actual point of
+     * overlap N within that volume, so we wouldn't be justified in discarding the other half.
+     *
+     * One option is to make some simplifying, or unproved, assumptions.
+     *
+     * Based on some experimentation, it seems like if any three bots all pairwise-overlap with each other, then there
+     * must be an area of mutual overlap. (This comes from the octohedral shape of the bots' regions.) I can't prove
+     * this, but I think if it is true for 3 is must be true for any number, based on some informal inductive
+     * reasoning.
+     *
+     * So, one option would be to find the maximal connected subgraph of bots (where edges in the graph indicate
+     * an overlap). That would tell us what bots overlap in the maximal region ... but then could we determine distance?
+     *
+     * I conjecture that it would be the largest value, among those bots, of its minimum distance from the origin...
+     * but I'm not sure I really have a proof for that either.
+     *
+     * Here's an approach similar to the "repeatedly split" above - split the space, but do not _discard_ either half.
+     * Instead, keep both in a "possiblity list". Keep the possibility list sorted by
+     * comparing { it.numberOfOverlappingBots }.thenComparing { it.minimumDistanceFromOrigin }.
+     * After splitting, examine the next thing at the head of the possibility list. If it is only a single voxel, then
+     * it is our result. Otherwise, split it, and add both the resulting possiblities back into the possibility list,
+     * and repeat.
+     */
+    fun originDistanceOfMostOverlap(): Int {
+        TODO()
+    }
 }
 
 fun main() {
@@ -60,6 +89,4 @@ fun main() {
     val nanobots = TeleporterNanobots.parse(input)
     println(nanobots.botCountInRangeOfStrongest())
 
-    // 94481123 is too low
-    println(nanobots.bots.map { it.originDistanceRange() }.sortedBy { it.first })
 }

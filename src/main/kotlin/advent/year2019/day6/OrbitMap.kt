@@ -28,18 +28,12 @@ class OrbitMap(private val orbits: Map<String, Set<String>>) {
     private val reverseOrbits = orbits.flatMap { entry -> entry.value.map { it to entry.key } }
             .toMap()
 
-    fun totalDirectAndIndirect(): Int {
-        val cacheByObject = mutableMapOf<String, Int>()
+    fun totalDirectAndIndirect() = orbits.keys.sumBy { directAndIndiretFrom(it) }
 
-        return orbits.keys.sumBy { calculate(it, cacheByObject) }
-    }
-
-    private fun calculate(objectName: String, cache: MutableMap<String, Int>): Int {
+    private fun directAndIndiretFrom(objectName: String): Int {
         val children = orbits[objectName] ?: emptyList<String>()
 
-        val result = children.size + children.sumBy { calculate(it, cache) }
-        cache[objectName] = result
-        return result
+        return children.size + children.sumBy { directAndIndiretFrom(it) }
     }
 
     fun transfers(start: String, target: String): Int? {

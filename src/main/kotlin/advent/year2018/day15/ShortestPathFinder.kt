@@ -22,15 +22,11 @@ class ShortestPathFinder {
     fun <T, K> find(start: T,
                     end: T,
                     nextSteps: (T) -> Set<T>,
-                    collapseKey: (List<T>) -> K): Set<Path<T>> {
-        return find(end,
-                PathsInProgress(start),
-                setOf(start),
-                nextSteps.withCostOne(),
-                { false },
-                0,
-                collapseKey)
-    }
+                    collapseKey: (List<T>) -> K): Set<Path<T>> =
+            findWithCosts(start,
+                    end,
+                    nextSteps.withCostOne(),
+                    collapseKey)
 
     /**
      * Find with no collapsing of paths.
@@ -49,6 +45,8 @@ class ShortestPathFinder {
      * @param collapseKey As in the shortest path, no-cost case; except that we collapse together any paths with the
      *                    same key where one has a smaller total cost than the other (instead of just collapsing them
      *                    when they have the _same_ cost exactly).
+     * @param filterOut If provided, any path that returns true from this check is filtered out and discarded. This is
+     *                  another opportunity for providing speed-up optimications.
      */
     fun <T, K> findWithCosts(start: T,
                              end: T,
@@ -64,6 +62,9 @@ class ShortestPathFinder {
                 collapseKey)
     }
 
+    /**
+     * Find with costs but no collapsing of paths.
+     */
     fun <T> findWithCosts(start: T,
                           end: T,
                           nextSteps: (T) -> Set<Step<T>>) =
@@ -78,7 +79,6 @@ class ShortestPathFinder {
                                     collapseKey: (List<T>) -> K): Set<Path<T>> {
 
         val currentPaths = inProgress.current()
-        println("cost $costIncurred, visited ${visited.size}, current ${currentPaths.size}, upcoming ${inProgress.size()}")
         val successfulPaths = currentPaths.filter { it.steps.isNotEmpty() && it.steps.last() == end }
 
         return when {

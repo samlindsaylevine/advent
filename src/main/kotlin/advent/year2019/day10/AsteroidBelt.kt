@@ -82,6 +82,9 @@ class AsteroidBelt(private val asteroids: Set<Point>) {
  */
 tailrec fun gcd(a: Int, b: Int): Int = if (b == 0) Math.abs(a) else gcd(b, a % b)
 
+tailrec fun gcd(a: Long, b: Long): Long = if (b == 0L) Math.abs(a) else gcd(b, a % b)
+
+
 /**
  * Arctan only returns in the range -pi/2 to +pi/2. We want a range that goes from 0 to 2*pi. Furthermore,
  * we want the angle 0 to be pointing up, and increase positively in the clockwise direction.
