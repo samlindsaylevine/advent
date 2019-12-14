@@ -36,8 +36,6 @@ class IntcodeArcadeCabinet(val program: List<Long>) {
         val newProgram = program.toMutableList()
         newProgram[0] = 2
 
-        sleep(10000)
-
         computer.execute(newProgram,
                 { player.nextInput(display).input.toLong() },
                 consumeChunked(3) {
@@ -60,6 +58,7 @@ private class HumanArcadePlayer : ArcadePlayer {
 
 private class BotArcadePlayer : ArcadePlayer {
     override fun nextInput(display: IntcodeArcadeDisplay): JoystickState {
+        // Just to make it more enjoyable to watch.
         sleep(20)
         return when {
             display.ballX() < display.paddleX() -> JoystickState.LEFT
@@ -135,7 +134,7 @@ private class IntcodeArcadeDisplay {
 
     fun draw(x: Int, y: Int, tile: Tile) {
         val newWidth = Math.max(panel.width, (x + 1) * PIXELS_PER_SPACE)
-        val newHeight = Math.max(panel.height, (x + 1) * PIXELS_PER_SPACE)
+        val newHeight = Math.max(panel.height, (y + 1) * PIXELS_PER_SPACE)
         if (newWidth > panel.width || newHeight > panel.height) {
             panel.setSize(newWidth, newHeight)
             panel.preferredSize = panel.size

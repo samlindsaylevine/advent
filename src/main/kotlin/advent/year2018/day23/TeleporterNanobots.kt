@@ -1,9 +1,8 @@
 package advent.year2018.day23
 
-import advent.year2015.day24.Ticker
-import advent.year2018.day6.allMinBy
 import java.io.File
-import java.lang.IllegalArgumentException
+import java.util.*
+import java.util.Comparator.comparing
 
 data class TeleporterNanobot(val location: Point3D, val range: Int) {
     companion object {
@@ -19,14 +18,6 @@ data class TeleporterNanobot(val location: Point3D, val range: Int) {
     }
 
     infix fun isInRangeOf(other: TeleporterNanobot) = (this.location.distanceTo(other.location)) <= other.range
-
-
-    fun originDistanceRange(): IntRange {
-        val distanceToOrigin = this.location.distanceTo(Point3D(0, 0, 0))
-        val lower = Math.max(0, distanceToOrigin - range)
-        val upper = distanceToOrigin + range
-        return lower..upper
-    }
 }
 
 data class Point3D(val x: Int, val y: Int, val z: Int) {
@@ -35,7 +26,7 @@ data class Point3D(val x: Int, val y: Int, val z: Int) {
             Math.abs(this.z - other.z)
 }
 
-class TeleporterNanobots(val bots: List<TeleporterNanobot>) {
+class TeleporterNanobots(private val bots: List<TeleporterNanobot>) {
     companion object {
         fun parse(input: String) = TeleporterNanobots(input.lines().map { TeleporterNanobot.parse(it) })
     }
@@ -77,7 +68,78 @@ class TeleporterNanobots(val bots: List<TeleporterNanobot>) {
      * and repeat.
      */
     fun originDistanceOfMostOverlap(): Int {
-        TODO()
+        val possibilities = PriorityQueue<OverlapPossibility>(100, OverlapPossibility.best)
+
+        val initialVolume = RectangularVolume(
+                (bots.map { it.location.x }.min() ?: 0)..(bots.map { it.location.x }.max() ?: 0),
+                (bots.map { it.location.y }.min() ?: 0)..(bots.map { it.location.y }.max() ?: 0),
+                (bots.map { it.location.z }.min() ?: 0)..(bots.map { it.location.z }.max() ?: 0))
+
+        possibilities.add(evaluate(initialVolume))
+
+        return findBest(possibilities)
+    }
+
+    private tailrec fun findBest(possiblities: PriorityQueue<OverlapPossibility>): Int {
+        val candidate = possiblities.poll()
+
+        return if (candidate.volume.volume() == 1L) {
+            candidate.distanceToOrigin
+        } else {
+            val newVolumes = candidate.volume.split()
+            possiblities.add(evaluate(newVolumes.first))
+            possiblities.add(evaluate(newVolumes.second))
+            findBest(possiblities)
+        }
+    }
+
+    private fun evaluate(volume: RectangularVolume) = OverlapPossibility(
+            bots.count { volume.distanceTo(it.location) <= it.range },
+            volume)
+}
+
+private data class RectangularVolume(val x: IntRange,
+                                     val y: IntRange,
+                                     val z: IntRange) {
+
+    private fun IntRange.size() = (this.endInclusive - this.first + 1)
+    private fun IntRange.closestValueTo(number: Int) = when {
+        number < this.first -> this.first
+        number > this.endInclusive -> this.endInclusive
+        else -> number
+    }
+
+    fun volume(): Long = x.size().toLong() * y.size() * z.size()
+
+    fun closestPointTo(point: Point3D) = Point3D(
+            x.closestValueTo(point.x),
+            y.closestValueTo(point.y),
+            z.closestValueTo(point.z)
+    )
+
+    fun distanceTo(point: Point3D) = this.closestPointTo(point).distanceTo(point)
+
+    fun split(): Pair<RectangularVolume, RectangularVolume> = when (listOf(x, y, z).map { it.size() }.max()) {
+        x.size() -> RectangularVolume(x.split().first, y, z) to RectangularVolume(x.split().second, y, z)
+        y.size() -> RectangularVolume(x, y.split().first, z) to RectangularVolume(x, y.split().second, z)
+        else -> RectangularVolume(x, y, z.split().first) to RectangularVolume(x, y, z.split().second)
+    }
+}
+
+fun IntRange.split(): Pair<IntRange, IntRange> {
+    val mid = (this.endInclusive + this.first) / 2
+    return (this.first..mid) to ((mid + 1)..this.endInclusive)
+}
+
+private data class OverlapPossibility(val overlapCount: Int,
+                                      val volume: RectangularVolume) {
+    val distanceToOrigin = volume.distanceTo(Point3D(0, 0, 0))
+    private val size = volume.volume()
+
+    companion object {
+        val best: Comparator<OverlapPossibility> = comparing(OverlapPossibility::overlapCount).reversed()
+                .thenComparing(OverlapPossibility::distanceToOrigin)
+                .thenComparing(OverlapPossibility::size)
     }
 }
 
@@ -88,5 +150,6 @@ fun main() {
 
     val nanobots = TeleporterNanobots.parse(input)
     println(nanobots.botCountInRangeOfStrongest())
+    println(nanobots.originDistanceOfMostOverlap())
 
 }

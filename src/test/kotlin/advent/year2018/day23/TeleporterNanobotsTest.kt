@@ -3,6 +3,8 @@ package advent.year2018.day23
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 class TeleporterNanobotsTest {
 
@@ -26,7 +28,23 @@ class TeleporterNanobotsTest {
         assertThat(inRange).isEqualTo(7)
     }
 
-    @Disabled("Not yet implemented")
+    @ParameterizedTest(name = "intRange split -- {0} to {1} -- yields {2} to {3} and {4} to {5}")
+    @CsvSource("1, 10, 1, 5, 6, 10",
+            "1, 3, 1, 2, 3, 3",
+            "1, 2, 1, 1, 2, 2")
+    fun `intRange split -- sample values -- sample output`(inputMin: Int,
+                                                           inputMax: Int,
+                                                           firstMin: Int,
+                                                           firstMax: Int,
+                                                           secondMin: Int,
+                                                           secondMax: Int) {
+        val input = inputMin..inputMax
+
+        val result = input.split()
+
+        assertThat(result).isEqualTo(firstMin..firstMax to secondMin..secondMax)
+    }
+
     @Test
     fun `originDistanceOfMostOverlap -- reference input -- is 36`() {
         val input = """
