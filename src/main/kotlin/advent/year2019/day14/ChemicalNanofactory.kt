@@ -30,12 +30,14 @@ class ChemicalNanofactory private constructor(private val reactionsByProduct: Ma
 
         val reaction = reactionsByProduct[chemical] ?: throw IllegalStateException("No reaction producing $chemical")
 
+        val times = amount.ceilingDivide(reaction.product.second)
+
         val nextQuantities = neededQuantities.toMutableMap()
 
-        nextQuantities[chemical] = amount - reaction.product.second
+        nextQuantities[chemical] = amount - times * reaction.product.second
 
         reaction.reagants.forEach { (reagant, reagantAmount) ->
-            nextQuantities.merge(reagant, reagantAmount, Long::plus)
+            nextQuantities.merge(reagant, times * reagantAmount, Long::plus)
         }
 
         return oreCost(nextQuantities)
@@ -45,6 +47,8 @@ class ChemicalNanofactory private constructor(private val reactionsByProduct: Ma
         TODO()
     }
 }
+
+fun Long.ceilingDivide(other: Long) = if (this % other == 0L) (this / other) else (this / other + 1)
 
 private data class Reaction(val reagants: Map<Chemical, Long>,
                             val product: Pair<Chemical, Long>) {
