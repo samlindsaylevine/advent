@@ -58,7 +58,6 @@ class FlawedFrequencyTransmissionTest {
         assertThat(output.take(8)).isEqualTo(expected.digits())
     }
 
-    @Disabled("Too slow with the same process that we use in part 1, must optimize!")
     @ParameterizedTest(name = "message -- {0} -- {1}")
     @CsvSource("03036732577212944063491565474664, 84462026",
             "02935109699940807407585447034323, 78725270",
