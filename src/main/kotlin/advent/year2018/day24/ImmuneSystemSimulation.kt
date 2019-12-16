@@ -1,7 +1,6 @@
 package advent.year2018.day24
 
 import java.io.File
-import java.util.Comparator.comparing
 
 class ImmuneSystemSimulation private constructor(private val immuneSystem: MutableList<ArmyGroup>,
                                                  private val infection: MutableList<ArmyGroup>) {
@@ -20,8 +19,13 @@ class ImmuneSystemSimulation private constructor(private val immuneSystem: Mutab
                 .toMutableList()
     }
 
-    private fun fight() {
+    /**
+     * @return The total number of kills in this fight.
+     */
+    private fun fight(): Int {
         val targets = findTargets()
+
+        var totalKills = 0
 
         (immuneSystem + infection).sortedByDescending { it.unit.initiative }
                 .forEach { group ->
@@ -30,28 +34,47 @@ class ImmuneSystemSimulation private constructor(private val immuneSystem: Mutab
                         if (target != null) {
                             val kills = group.wouldDealDamage(target) / target.unit.hitPoints
                             target.count -= kills
+                            totalKills += kills
                         }
                     }
                 }
 
         immuneSystem.removeIf { it.count <= 0 }
         infection.removeIf { it.count <= 0 }
+
+        return totalKills
     }
 
     /**
      * Returns the number of units remaining in the winning army. (Mutates the state.)
      */
-    fun runEntireCombat(): Int {
+    fun runEntireCombat(): CombatResult {
         while (immuneSystem.numUnits() > 0 && infection.numUnits() > 0) {
-            fight()
+            val kills = fight()
+            // In part 2 it's possible to get into a situation where neither side is killing anything. We need to
+            // detect this and not loop forever.
+            if (kills == 0) return CombatResult(ArmySide.DEADLOCK,
+                    immuneSystem.numUnits() + infection.numUnits())
         }
 
         return if (immuneSystem.isEmpty()) {
-            infection.numUnits()
+            CombatResult(winner = ArmySide.INFECTION,
+                    unitsLeft = infection.numUnits())
         } else {
-            immuneSystem.numUnits()
+            CombatResult(winner = ArmySide.IMMUNE_SYSTEM,
+                    unitsLeft = immuneSystem.numUnits())
         }
     }
+
+    fun boosted(boost: Int) = ImmuneSystemSimulation(this.immuneSystem.map { it.boosted(boost) }.toMutableList(),
+            this.infection.map { it.boosted(0) }.toMutableList())
+
+    fun minBoostToWin() = generateSequence(1) { it + 1 }
+            .first {
+                val combatResult = this.boosted(it).runEntireCombat()
+                // println("$it: $combatResult")
+                combatResult.winner == ArmySide.IMMUNE_SYSTEM
+            }
 
     private fun List<ArmyGroup>.numUnits() = this.sumBy { it.count }
 
@@ -92,6 +115,10 @@ class ImmuneSystemSimulation private constructor(private val immuneSystem: Mutab
                     { it.effectivePower() },
                     { it.unit.initiative }))
 }
+
+data class CombatResult(val winner: ArmySide, val unitsLeft: Int)
+
+enum class ArmySide { INFECTION, IMMUNE_SYSTEM, DEADLOCK }
 
 private class ArmyGroup(var count: Int,
                         val index: Int,
@@ -172,6 +199,10 @@ private class ArmyGroup(var count: Int,
         other.unit.weaknesses.contains(this.unit.attackType) -> 2 * this.effectivePower()
         else -> this.effectivePower()
     }
+
+    fun boosted(boost: Int) = ArmyGroup(this.count,
+            this.index,
+            this.unit.boosted(boost))
 }
 
 private data class ArmyUnit(val hitPoints: Int,
@@ -179,7 +210,9 @@ private data class ArmyUnit(val hitPoints: Int,
                             val initiative: Int,
                             val attackType: DamageType,
                             val weaknesses: Set<DamageType>,
-                            val immunities: Set<DamageType>)
+                            val immunities: Set<DamageType>) {
+    fun boosted(boost: Int) = this.copy(damage = this.damage + boost)
+}
 
 typealias DamageType = String
 
@@ -189,7 +222,12 @@ fun main() {
 
     val simulation = ImmuneSystemSimulation.parse(input)
 
-    val unitsLeft = simulation.runEntireCombat()
+    val unitsLeft = simulation.boosted(0).runEntireCombat().unitsLeft
 
     println(unitsLeft)
+
+    val minToWin = simulation.minBoostToWin()
+    val unitsLeftAfterBoost = simulation.boosted(minToWin).runEntireCombat().unitsLeft
+
+    println(unitsLeftAfterBoost)
 }
