@@ -1,4 +1,4 @@
-package advent.year2018.day15
+package advent.utils
 
 class ShortestPathFinder {
 

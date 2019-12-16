@@ -1,6 +1,6 @@
 package advent.year2019.day6
 
-import advent.year2018.day15.ShortestPathFinder
+import advent.utils.ShortestPathFinder
 import java.io.File
 
 /**

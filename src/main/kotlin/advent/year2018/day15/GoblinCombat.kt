@@ -1,5 +1,6 @@
 package advent.year2018.day15
 
+import advent.utils.ShortestPathFinder
 import java.io.File
 
 class GoblinCombat private constructor(val height: Int,

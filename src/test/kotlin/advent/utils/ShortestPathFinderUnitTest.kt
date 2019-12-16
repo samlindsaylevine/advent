@@ -1,5 +1,6 @@
-package advent.year2018.day15
+package advent.utils
 
+import advent.year2018.day15.Position
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

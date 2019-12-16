@@ -1,8 +1,8 @@
 package advent.year2018.day22
 
 import advent.utils.Point
-import advent.year2018.day15.ShortestPathFinder
-import advent.year2018.day15.Step
+import advent.utils.ShortestPathFinder
+import advent.utils.Step
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 
