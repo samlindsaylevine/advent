@@ -1,5 +1,6 @@
 package advent.year2019.day5
 
+import advent.utils.digits
 import java.io.File
 
 /**
@@ -207,7 +208,7 @@ private data class InstructionAndModes(val instruction: IntcodeInstruction,
             return InstructionAndModes(instruction, modes)
         }
 
-        private fun Long.digits() = this.toString().split("").filter { it.isNotEmpty() }.map { it.toInt() }
+        private fun Long.digits() = this.toString().digits()
     }
 }
 
