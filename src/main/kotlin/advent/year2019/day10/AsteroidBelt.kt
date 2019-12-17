@@ -1,6 +1,7 @@
 package advent.year2019.day10
 
 import advent.utils.Point
+import advent.utils.times
 import advent.year2018.day6.allMinBy
 import java.io.File
 

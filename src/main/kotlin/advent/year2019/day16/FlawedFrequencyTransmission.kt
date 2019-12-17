@@ -99,8 +99,8 @@ class FlawedFrequencyTransmission {
         return result.take(8)
     }
 
-    fun recur(digits: List<Int>,
-              numPhases: Int): List<Int> = if (numPhases == 0) {
+    private fun recur(digits: List<Int>,
+                      numPhases: Int): List<Int> = if (numPhases == 0) {
         digits
     } else {
         val next = MutableList(digits.size) { 0 }
