@@ -25,48 +25,25 @@ class ShortestPathFinder {
                  end: EndOptions<T>,
                  nextSteps: StepOptions<T>,
                  filter: FilterOptions<T> = NoFilter(),
-                 collapse: CollapseOptions<T, *> = NoCollapse()): Set<Path<T>> =
+                 collapse: CollapseOptions<T, *> = NoCollapse(),
+                 verbose: Boolean = false): Set<Path<T>> =
             find(end::matches,
                     PathsInProgress(start),
                     setOf(start),
                     nextSteps::next,
                     filter::discard,
-                    0,
-                    collapse::collapseKey)
-
-    /**
-     * Find the least-expensive path in the case where steps have a differing _cost_ and we wish to minimize the
-     * total cost, not just the number of steps.
-     *
-     * The shortest path is actually a special case of this where all the steps have a cost of 1.
-     *
-     * @param collapseKey As in the shortest path, no-cost case; except that we collapse together any paths with the
-     *                    same key where one has a smaller total cost than the other (instead of just collapsing them
-     *                    when they have the _same_ cost exactly).
-     * @param filterOut If provided, any path that returns true from this check is filtered out and discarded. This is
-     *                  another opportunity for providing speed-up optimications.
-     */
-//    fun <T, K> findWithCosts(start: T,
-//                             end: T,
-//                             nextSteps: (T) -> Set<Step<T>>,
-//                             collapseKey: (List<T>) -> K,
-//                             filterOut: (List<T>) -> Boolean = { false }): Set<Path<T>> {
-//        return find({ it == end },
-//                PathsInProgress(start),
-//                setOf(start),
-//                nextSteps,
-//                filterOut,
-//                0,
-//                collapseKey)
-//    }
+                    collapse::collapseKey,
+                    verbose,
+                    0)
 
     private tailrec fun <T, K> find(endCondition: (T) -> Boolean,
                                     inProgress: PathsInProgress<T>,
                                     visited: Set<T>,
                                     nextSteps: (T) -> Set<Step<T>>,
                                     filterOut: (List<T>) -> Boolean,
-                                    costIncurred: Int,
-                                    collapseKey: (List<T>) -> K): Set<Path<T>> {
+                                    collapseKey: (List<T>) -> K,
+                                    verbose: Boolean,
+                                    costIncurred: Int): Set<Path<T>> {
 
         val currentPaths = inProgress.current()
         val successfulPaths = currentPaths.filter { it.steps.isNotEmpty() && endCondition(it.steps.last()) }
@@ -79,11 +56,21 @@ class ShortestPathFinder {
                         .filter { !filterOut(it.path.steps) }
                         .toSet()
 
+                if (verbose) {
+                    println("At step $costIncurred, considering ${nextPaths.size} options")
+                }
+
                 val nextInProgress: PathsInProgress<T> = (inProgress.plus(nextPaths, collapseKey)).advanced()
 
                 val nextVisited: Set<T> = visited + nextInProgress.current().map { it.currentPoint }
 
-                find(endCondition, nextInProgress, nextVisited, nextSteps, filterOut, costIncurred + 1, collapseKey)
+                find(endCondition,
+                        nextInProgress,
+                        nextVisited,
+                        nextSteps, filterOut,
+                        collapseKey,
+                        verbose,
+                        costIncurred + 1)
             }
         }
     }
