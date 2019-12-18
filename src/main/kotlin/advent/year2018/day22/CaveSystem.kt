@@ -1,8 +1,6 @@
 package advent.year2018.day22
 
-import advent.utils.Point
-import advent.utils.ShortestPathFinder
-import advent.utils.Step
+import advent.utils.*
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 
@@ -52,9 +50,9 @@ class CaveSystem(val depth: Int,
     fun rescueTime(): Int {
         val finder = ShortestPathFinder()
 
-        val shortestPaths = finder.findWithCosts(start = RescuerState(Point(0, 0), CaveTool.TORCH),
-                end = RescuerState(target, CaveTool.TORCH),
-                filterOut = {
+        val shortestPaths = finder.find(start = RescuerState(Point(0, 0), CaveTool.TORCH),
+                end = EndState(RescuerState(target, CaveTool.TORCH)),
+                filter = Filter {
                     val last = it.last()
                     // This is kind of a hack - we don't expect to have to go too far beyond the bounds of where
                     // our target's X and Y are so we will prune those branches aggressively. If this is wrong, we
@@ -64,8 +62,8 @@ class CaveSystem(val depth: Int,
                 },
                 // We don't care about any 2 paths that share the same current state - we can just pick one of those
                 // arbitrarily.
-                collapseKey = { it.last() },
-                nextSteps = { it.nextSteps(this) })
+                collapse = Collapse { steps: List<RescuerState> -> steps.last() },
+                nextSteps = StepsWithCost { it.nextSteps(this) })
 
         return shortestPaths.first().totalCost
     }

@@ -1,6 +1,8 @@
 package advent.year2019.day6
 
+import advent.utils.EndState
 import advent.utils.ShortestPathFinder
+import advent.utils.Steps
 import java.io.File
 
 /**
@@ -42,7 +44,7 @@ class OrbitMap(private val orbits: Map<String, Set<String>>) {
 
         val finder = ShortestPathFinder()
 
-        val shortestPaths = finder.find(startChild, targetChild, ::adjacent)
+        val shortestPaths = finder.find(startChild, EndState(targetChild), Steps(::adjacent))
         return shortestPaths.map { it.steps.size }.min()
     }
 

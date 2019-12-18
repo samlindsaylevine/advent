@@ -12,8 +12,8 @@ class ShortestPathFinderUnitTest {
     @Test
     fun `find -- double or subtract 1 -- returns expected path`() {
         val paths = ShortestPathFinder().find(start = 1,
-                end = 100,
-                nextSteps = { setOf(it * 2, it - 1) })
+                end = EndState(100),
+                nextSteps = Steps { setOf(it * 2, it - 1) })
 
         val expected = setOf(Path(listOf(2, 4, 8, 7, 14, 13, 26, 25, 50, 100), 10))
 
@@ -28,8 +28,8 @@ class ShortestPathFinderUnitTest {
         fun nextSteps(pos: Position) = pos.adjacent().filter { it != Position(0, 0) }.toSet()
 
         val paths = ShortestPathFinder().find(start = Position(-1, -1),
-                end = Position(1, 1),
-                nextSteps = ::nextSteps)
+                end = EndState(Position(1, 1)),
+                nextSteps = Steps(::nextSteps))
 
         // Either up then right, or right then up.
         assertThat(paths).containsExactlyInAnyOrder(
@@ -49,8 +49,8 @@ class ShortestPathFinderUnitTest {
     @Test
     fun `find -- no legal paths -- returns empty set`() {
         val paths = ShortestPathFinder().find(start = 1,
-                end = 5,
-                nextSteps = { setOf(it - 1, it + 1).filter { x -> x != 3 && x > 0 }.toSet() })
+                end = EndState(5),
+                nextSteps = Steps { setOf(it - 1, it + 1).filter { x -> x != 3 && x > 0 }.toSet() })
 
         assertThat(paths).isEmpty()
     }
@@ -58,9 +58,9 @@ class ShortestPathFinderUnitTest {
     @Test
     fun `find -- go from 0,0 to 5,5 while collapsing on first & last space -- returns only two paths`() {
         val paths = ShortestPathFinder().find(start = Position(0, 0),
-                end = Position(5, 5),
-                nextSteps = { it.adjacent().toSet() },
-                collapseKey = { Pair(it.first(), it.last()) })
+                end = EndState(Position(5, 5)),
+                nextSteps = Steps { it.adjacent().toSet() },
+                collapse = Collapse { steps: List<Position> -> Pair(steps.first(), steps.last()) })
 
         assertThat(paths).hasSize(2)
     }
@@ -77,10 +77,42 @@ class ShortestPathFinderUnitTest {
             else -> emptySet()
         }
 
-        val paths = ShortestPathFinder().findWithCosts("A", "G", ::next)
+        val paths = ShortestPathFinder().find("A",
+                EndState("G"),
+                StepsWithCost(::next))
 
         assertThat(paths).hasSize(1)
         assertThat(paths.first().steps).containsExactly("D", "G")
         assertThat(paths.first().totalCost).isEqualTo(4)
+    }
+
+    @Test
+    fun `find -- walk on grid, avoid the origin, filter out -1, 1 -- returns only one path`() {
+        fun nextSteps(pos: Position) = pos.adjacent().filter { it != Position(0, 0) }.toSet()
+
+        val paths = ShortestPathFinder().find(start = Position(-1, -1),
+                end = EndState(Position(1, 1)),
+                nextSteps = Steps(::nextSteps),
+                filter = Filter { it.last() == Position(-1, 1) })
+
+        assertThat(paths).containsExactly(
+                Path(listOf(Position(0, -1),
+                        Position(1, -1),
+                        Position(1, 0),
+                        Position(1, 1)), 4))
+    }
+
+    @Test
+    fun `find -- walk on grid, get to 2 distance away -- returns 12 paths`() {
+        fun nextSteps(pos: Point) = pos.adjacentNeighbors
+
+        val paths = ShortestPathFinder().find(start = Point(0, 0),
+                end = EndCondition { it.distanceFrom(Point(0, 0)) == 2 },
+                nextSteps = Steps(::nextSteps))
+
+        assertThat(paths).hasSize(12)
+        assertThat(paths).allSatisfy {
+            assertThat(it.steps).hasSize(2)
+        }
     }
 }

@@ -12,29 +12,27 @@ class ShortestPathFinder {
      * it cannot then be one of the shortest paths).
      *
      * @param start The starting point of the path.
-     * @param end The target ending point.
-     * @param nextSteps Given a point, what are the next points that can be taken in a path?
-     * @param collapseKey A speed up optimization choice: we can optionally collapse some paths and only
+     * @param end The target [EndOptions].
+     * @param nextSteps Given a point, what are the next [StepOptions] that can be taken in a path?
+     * @param filter A speed up optimization: [FilterOptions] can control the discarding of paths that we know are
+     *               irrelevant.
+     * @param collapse A speed up optimization choice: [CollapseOptions] can optionally collapse some paths and only
      * consider the first one, if our problem statement allows it.
      *
      * @return All the shortest paths (i.e., of equal length) from start to end, or empty set if there are none.
      */
-    fun <T, K> find(start: T,
-                    end: T,
-                    nextSteps: (T) -> Set<T>,
-                    collapseKey: (List<T>) -> K): Set<Path<T>> =
-            findWithCosts(start,
-                    end,
-                    nextSteps.withCostOne(),
-                    collapseKey)
-
-    /**
-     * Find with no collapsing of paths.
-     */
     fun <T> find(start: T,
-                 end: T,
-                 nextSteps: (T) -> Set<T>) =
-            find(start, end, nextSteps, { it })
+                 end: EndOptions<T>,
+                 nextSteps: StepOptions<T>,
+                 filter: FilterOptions<T> = NoFilter(),
+                 collapse: CollapseOptions<T, *> = NoCollapse()): Set<Path<T>> =
+            find(end::matches,
+                    PathsInProgress(start),
+                    setOf(start),
+                    nextSteps::next,
+                    filter::discard,
+                    0,
+                    collapse::collapseKey)
 
     /**
      * Find the least-expensive path in the case where steps have a differing _cost_ and we wish to minimize the
@@ -48,29 +46,21 @@ class ShortestPathFinder {
      * @param filterOut If provided, any path that returns true from this check is filtered out and discarded. This is
      *                  another opportunity for providing speed-up optimications.
      */
-    fun <T, K> findWithCosts(start: T,
-                             end: T,
-                             nextSteps: (T) -> Set<Step<T>>,
-                             collapseKey: (List<T>) -> K,
-                             filterOut: (List<T>) -> Boolean = { false }): Set<Path<T>> {
-        return find(end,
-                PathsInProgress(start),
-                setOf(start),
-                nextSteps,
-                filterOut,
-                0,
-                collapseKey)
-    }
+//    fun <T, K> findWithCosts(start: T,
+//                             end: T,
+//                             nextSteps: (T) -> Set<Step<T>>,
+//                             collapseKey: (List<T>) -> K,
+//                             filterOut: (List<T>) -> Boolean = { false }): Set<Path<T>> {
+//        return find({ it == end },
+//                PathsInProgress(start),
+//                setOf(start),
+//                nextSteps,
+//                filterOut,
+//                0,
+//                collapseKey)
+//    }
 
-    /**
-     * Find with costs but no collapsing of paths.
-     */
-    fun <T> findWithCosts(start: T,
-                          end: T,
-                          nextSteps: (T) -> Set<Step<T>>) =
-            findWithCosts(start, end, nextSteps, { it })
-
-    private tailrec fun <T, K> find(end: T,
+    private tailrec fun <T, K> find(endCondition: (T) -> Boolean,
                                     inProgress: PathsInProgress<T>,
                                     visited: Set<T>,
                                     nextSteps: (T) -> Set<Step<T>>,
@@ -79,7 +69,7 @@ class ShortestPathFinder {
                                     collapseKey: (List<T>) -> K): Set<Path<T>> {
 
         val currentPaths = inProgress.current()
-        val successfulPaths = currentPaths.filter { it.steps.isNotEmpty() && it.steps.last() == end }
+        val successfulPaths = currentPaths.filter { it.steps.isNotEmpty() && endCondition(it.steps.last()) }
 
         return when {
             successfulPaths.isNotEmpty() -> successfulPaths.map { Path(it.steps, costIncurred) }.toSet()
@@ -93,20 +83,101 @@ class ShortestPathFinder {
 
                 val nextVisited: Set<T> = visited + nextInProgress.current().map { it.currentPoint }
 
-                find(end, nextInProgress, nextVisited, nextSteps, filterOut, costIncurred + 1, collapseKey)
+                find(endCondition, nextInProgress, nextVisited, nextSteps, filterOut, costIncurred + 1, collapseKey)
             }
         }
     }
+}
+
+/**
+ * A definition of when the search is completed successfully.
+ */
+interface EndOptions<T> {
+    fun matches(state: T): Boolean
+}
+
+/**
+ * The search is completed successfully when it reaches this exact state.
+ */
+data class EndState<T>(val endState: T) : EndOptions<T> {
+    override fun matches(state: T) = (state == endState)
+}
+
+/**
+ * The search is completed successfully when it reaches any state that passes this test.
+ */
+data class EndCondition<T>(val test: (T) -> Boolean) : EndOptions<T> {
+    override fun matches(state: T) = test(state)
+}
+
+/**
+ * A definition of what steps are available from a state.
+ */
+interface StepOptions<T> {
+    fun next(state: T): Set<Step<T>>
+}
+
+/**
+ * A problem definition where all steps have the same cost (1).
+ */
+data class Steps<T>(val nextSteps: (T) -> Set<T>) : StepOptions<T> {
+    override fun next(state: T) = nextSteps(state).map { Step(it, 1) }.toSet()
+}
+
+/**
+ * A problem definition where steps can have different costs and we want to find the *cheapest* path.
+ */
+data class StepsWithCost<T>(val nextSteps: (T) -> Set<Step<T>>) : StepOptions<T> {
+    override fun next(state: T) = nextSteps(state)
+}
+
+/**
+ * A definition of which paths to "collapse" and keep only one, as a speed up optimization.
+ */
+interface CollapseOptions<T, K> {
+    fun collapseKey(states: List<T>): K
+}
+
+/**
+ * Do not collapse any paths.
+ */
+class NoCollapse<T> : CollapseOptions<T, List<T>> {
+    override fun collapseKey(states: List<T>) = states
+}
+
+/**
+ * If multiple paths in progress have the same output from the "collapse" function, keep only one of those, and the one
+ * that has the smallest total cost.
+ */
+data class Collapse<T, K>(val collapse: (List<T>) -> K) : CollapseOptions<T, K> {
+    override fun collapseKey(states: List<T>) = collapse(states)
+}
+
+/**
+ * A definition of what paths in progress should be filtered out and discarded, as a speed-up optimization.
+ */
+interface FilterOptions<T> {
+    fun discard(path: List<T>): Boolean
+}
+
+/**
+ * Do not filter out any paths.
+ */
+class NoFilter<T> : FilterOptions<T> {
+    override fun discard(path: List<T>) = false
+}
+
+/**
+ * Filter out any paths that pass the "discardIf" test.
+ */
+class Filter<T>(val discardIf: (List<T>) -> Boolean) : FilterOptions<T> {
+    override fun discard(path: List<T>) = discardIf(path)
 }
 
 data class Step<T>(val next: T, val cost: Int) {
     init {
         require(cost > 0)
     }
-}
-
-private fun <T> ((T) -> Set<T>).withCostOne(): (T) -> Set<Step<T>> = { t: T ->
-    this(t).map { Step(it, 1) }.toSet()
 }
 
 /**

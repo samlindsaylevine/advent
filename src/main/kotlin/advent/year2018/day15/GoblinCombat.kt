@@ -1,6 +1,9 @@
 package advent.year2018.day15
 
+import advent.utils.Collapse
+import advent.utils.EndState
 import advent.utils.ShortestPathFinder
+import advent.utils.Steps
 import java.io.File
 
 class GoblinCombat private constructor(val height: Int,
@@ -105,10 +108,10 @@ class GoblinCombat private constructor(val height: Int,
         val paths = targetSquares.flatMap { target ->
             pathFinder.find(
                     originalPosition,
-                    target,
-                    { it.adjacent().filter(this::isOpen).toSet() },
+                    EndState(target),
+                    Steps { it.adjacent().filter(this::isOpen).toSet() },
                     // We don't care about the paths' middle elements, just their first element and their last.
-                    collapseKey = { Pair(it.first(), it.last()) })
+                    collapse = Collapse { steps: List<Position> -> Pair(steps.first(), steps.last()) })
         }
 
         if (paths.isEmpty()) {

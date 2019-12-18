@@ -1,8 +1,6 @@
 package advent.year2019.day15
 
-import advent.utils.Direction
-import advent.utils.Point
-import advent.utils.ShortestPathFinder
+import advent.utils.*
 import advent.year2019.day13.parseIntcodeFromFile
 import advent.year2019.day5.IntcodeComputer
 import java.lang.Thread.sleep
@@ -54,8 +52,8 @@ class OxygenMap(val unexplored: Set<Point>,
         val finder = ShortestPathFinder()
 
         val paths = finder.find(from,
-                to,
-                { point -> point.adjacentNeighbors.filter { open.contains(it) || it == to }.toSet() })
+                EndState(to),
+                Steps { point -> point.adjacentNeighbors.filter { open.contains(it) || it == to }.toSet() })
 
         val allPoints = listOf(from) + paths.first().steps
 
