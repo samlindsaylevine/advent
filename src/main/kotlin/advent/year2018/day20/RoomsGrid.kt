@@ -2,6 +2,7 @@ package advent.year2018.day20
 
 import advent.utils.Direction
 import advent.utils.Point
+import advent.utils.UnorderedPair
 import advent.year2015.day24.Ticker
 import java.io.File
 
@@ -112,24 +113,6 @@ class RoomsGrid(private val rooms: Set<Point>,
             .flatMap { it.elements }
             .filter { it != room }
             .toSet()
-}
-
-class UnorderedPair<T>(private val a: T, private val b: T) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as UnorderedPair<*>
-
-        return (elements == other.elements)
-    }
-
-    override fun hashCode(): Int {
-        return elements.hashCode()
-    }
-
-    fun contains(t: T) = (a == t || b == t)
-    val elements = setOf(a, b)
 }
 
 typealias Door = UnorderedPair<Point>

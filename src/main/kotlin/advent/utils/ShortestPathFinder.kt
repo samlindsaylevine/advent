@@ -18,6 +18,7 @@ class ShortestPathFinder {
      *               irrelevant.
      * @param collapse A speed up optimization choice: [CollapseOptions] can optionally collapse some paths and only
      * consider the first one, if our problem statement allows it.
+     * @param reportEvery If non-null, prints a debug statement every this number of steps.
      *
      * @return All the shortest paths (i.e., of equal length) from start to end, or empty set if there are none.
      */
@@ -26,14 +27,14 @@ class ShortestPathFinder {
                  nextSteps: StepOptions<T>,
                  filter: FilterOptions<T> = NoFilter(),
                  collapse: CollapseOptions<T, *> = NoCollapse(),
-                 verbose: Boolean = false): Set<Path<T>> =
+                 reportEvery: Int? = null): Set<Path<T>> =
             find(end::matches,
                     PathsInProgress(start),
                     setOf(start),
                     nextSteps::next,
                     filter::discard,
                     collapse::collapseKey,
-                    verbose,
+                    reportEvery,
                     0)
 
     private tailrec fun <T, K> find(endCondition: (T) -> Boolean,
@@ -42,7 +43,7 @@ class ShortestPathFinder {
                                     nextSteps: (T) -> Set<Step<T>>,
                                     filterOut: (List<T>) -> Boolean,
                                     collapseKey: (List<T>) -> K,
-                                    verbose: Boolean,
+                                    reportEvery: Int?,
                                     costIncurred: Int): Set<Path<T>> {
 
         val currentPaths = inProgress.current()
@@ -56,7 +57,7 @@ class ShortestPathFinder {
                         .filter { !filterOut(it.path.steps) }
                         .toSet()
 
-                if (verbose) {
+                if (reportEvery != null && (costIncurred % reportEvery == 0)) {
                     println("At step $costIncurred, considering ${nextPaths.size} options")
                 }
 
@@ -69,7 +70,7 @@ class ShortestPathFinder {
                         nextVisited,
                         nextSteps, filterOut,
                         collapseKey,
-                        verbose,
+                        reportEvery,
                         costIncurred + 1)
             }
         }

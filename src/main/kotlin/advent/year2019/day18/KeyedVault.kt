@@ -2,11 +2,12 @@ package advent.year2019.day18
 
 import advent.utils.*
 import java.io.File
+import kotlin.Pair
 
-class KeyedVault(val walls: Set<Point>,
-                 val doors: Map<Point, Key>,
-                 val keys: Map<Point, Key>,
-                 val start: Point) {
+class KeyedVault(private val walls: Set<Point>,
+                 private val doors: Map<Point, Key>,
+                 private val keys: Map<Point, Key>,
+                 private val start: Point) {
     companion object {
         fun parse(input: String): KeyedVault {
             val walls = mutableSetOf<Point>()
@@ -34,39 +35,101 @@ class KeyedVault(val walls: Set<Point>,
         }
     }
 
+    private val nodeLocations: Set<Point> by lazy {
+        (doors.keys + keys.keys + start).toSet()
+    }
+
+    /**
+     * Trying to find the shortest path by walking individual squares takes too long for our problem input.
+     * Instead, we  will save some time by converting our vault to a graph of nodes with paths between them, and then
+     * optimize on that.
+     */
+    fun shortestPathLength() = this.toGraph().shortestPathLength()
+
+    private fun toGraph(): KeyedVaultGraph {
+        val edges = mutableMapOf<KeyedVaultNode, Set<Pair<KeyedVaultNode, Int>>>()
+
+        val nodeToPosition: Map<KeyedVaultNode, Point> = mapOf(StartNode to start) +
+                doors.map { DoorNode(it.value) to it.key }.toMap() +
+                keys.map { KeyNode(it.value) to it.key }.toMap()
+
+        val nodePairs = nodeToPosition.keys.toList().allUnorderedPairs()
+
+        nodePairs.forEach { pair ->
+            val positions = pair.map { nodeToPosition[it] ?: throw IllegalStateException("Missing node $it") }
+            val distance = distanceBetween(positions)
+            if (distance != null) {
+                val (first, second) = pair
+                edges.merge(first, setOf(second to distance)) { a, b -> a + b }
+                edges.merge(second, setOf(first to distance)) { a, b -> a + b }
+            }
+        }
+
+        return KeyedVaultGraph(edges)
+    }
+
+    private fun distanceBetween(nodes: UnorderedPair<Point>): Int? {
+        val (first, second) = nodes
+
+        val finder = ShortestPathFinder()
+
+        val paths = finder.find(start = first,
+                end = EndState(second),
+                nextSteps = Steps {
+                    it.adjacentNeighbors.filter { neighbor ->
+                        !walls.contains(neighbor) &&
+                                (neighbor == second || !nodeLocations.contains(neighbor))
+                    }.toSet()
+                },
+                // Since we only care about the length of the shortest path, we can collapse any paths that end up
+                // at the same state, regardless of how they got there.
+                collapse = Collapse { steps: List<Point> -> steps.last() })
+
+        return paths.firstOrNull()?.totalCost
+    }
+}
+
+private class KeyedVaultGraph(val edges: Map<KeyedVaultNode, Set<Pair<KeyedVaultNode, Int>>>) {
+    val allKeys = edges.keys.filterIsInstance<KeyNode>().map { it.key }.toSet()
+
     fun shortestPathLength(): Int {
         val finder = ShortestPathFinder()
 
-        val paths = finder.find(start = VaultExplorationState(start, emptySet()),
-                end = EndCondition { it.keysOwned.containsAll(keys.values) },
-                nextSteps = Steps(::nextOptions),
+        val paths = finder.find(start = VaultGraphExplorationState(edges.keys.first { it is StartNode }, emptySet()),
+                end = EndCondition { it.keysOwned.containsAll(allKeys) },
+                nextSteps = StepsWithCost(::nextOptions),
                 // Since we only care about the length of the shortest path, we can collapse any paths that end up
                 // at the same state, regardless of how they got there.
-                collapse = Collapse { steps: List<VaultExplorationState> -> steps.last() },
-                verbose = true)
+                collapse = Collapse { steps: List<VaultGraphExplorationState> -> steps.last() },
+                reportEvery = null)
 
-        return paths.first().steps.size
+        return paths.first().totalCost
     }
 
-    private fun nextOptions(current: VaultExplorationState): Set<VaultExplorationState> =
-            current.position.adjacentNeighbors
-                    .filter { current.canWalk(it) }
-                    .map {
-                        val keyAtPoint = keys[it]
-                        if (keyAtPoint == null) {
-                            VaultExplorationState(it, current.keysOwned)
-                        } else {
-                            VaultExplorationState(it, current.keysOwned + keyAtPoint)
-                        }
-                    }
+    private fun nextOptions(state: VaultGraphExplorationState): Set<Step<VaultGraphExplorationState>> =
+            (edges[state.position] ?: emptySet())
+                    .filter { state.canVisit(it.first) }
+                    .map { Step(state.visiting(it.first), it.second) }
                     .toSet()
 
-    private fun VaultExplorationState.canWalk(target: Point) = !walls.contains(target) &&
-            (!doors.containsKey(target) || this.keysOwned.contains(doors[target]))
+    private fun VaultGraphExplorationState.canVisit(node: KeyedVaultNode) =
+            node !is DoorNode || this.keysOwned.contains(node.key)
+
+    private fun VaultGraphExplorationState.visiting(node: KeyedVaultNode) =
+            if (node is KeyNode) {
+                VaultGraphExplorationState(node, this.keysOwned + node.key)
+            } else {
+                VaultGraphExplorationState(node, this.keysOwned)
+            }
 }
 
-private data class VaultExplorationState(val position: Point,
-                                         val keysOwned: Set<Key>)
+private sealed class KeyedVaultNode
+private object StartNode : KeyedVaultNode()
+private data class KeyNode(val key: Key) : KeyedVaultNode()
+private data class DoorNode(val key: Key) : KeyedVaultNode()
+
+private data class VaultGraphExplorationState(val position: KeyedVaultNode,
+                                              val keysOwned: Set<Key>)
 
 private typealias Key = Char
 
@@ -76,5 +139,6 @@ fun main() {
 
     val vault = KeyedVault.parse(input)
 
-    println(vault.shortestPathLength())
+    // This takes a couple minutes (and is probably worth turning reportEvery to 100).
+    // println(vault.shortestPathLength())
 }
