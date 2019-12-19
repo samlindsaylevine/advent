@@ -118,8 +118,7 @@ private class KeyedVaultGraph(val edges: Map<KeyedVaultNode, Set<VaultEdge>>) {
                 // Since we only care about the length of the shortest path, we can collapse any paths that end up
                 // at the same state, regardless of how they got there.
                 collapse = Collapse { steps: List<VaultGraphExplorationState> -> steps.last() },
-                filter = FilterOnHeuristic(maxDelta = 2),
-                successHeuristic = { it.keysOwned.size },
+                filter = Filter { steps: List<VaultGraphExplorationState> -> steps.last().keysOwned.size < steps.size / 4 },
                 reportEvery = 100)
 
         println(paths.first())
