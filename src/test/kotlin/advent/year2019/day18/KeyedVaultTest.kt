@@ -1,6 +1,7 @@
 package advent.year2019.day18
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class KeyedVaultTest {
@@ -51,7 +52,7 @@ class KeyedVaultTest {
         assertThat(length).isEqualTo(132)
     }
 
-    //@Disabled("too long?")
+    @Disabled("This takes about 8 seconds")
     @Test
     fun `shortestPathLength -- fourth example -- 136`() {
         val input = """
@@ -87,5 +88,107 @@ class KeyedVaultTest {
         val length = vault.shortestPathLength()
 
         assertThat(length).isEqualTo(81)
+    }
+
+    @Test
+    fun `shortestPathLength -- first multi-start example -- 8`() {
+        val input = """
+            #######
+            #a.#Cd#
+            ##@#@##
+            #######
+            ##@#@##
+            #cB#Ab#
+            #######
+        """.trimIndent()
+        val vault = KeyedVault.parse(input)
+
+        val length = vault.shortestPathLength()
+
+        assertThat(length).isEqualTo(8)
+    }
+
+    @Test
+    fun `shortestPathLength -- second multi-start example -- 24`() {
+        val input = """
+            ###############
+            #d.ABC.#.....a#
+            ######@#@######
+            ###############
+            ######@#@######
+            #b.....#.....c#
+            ###############
+        """.trimIndent()
+        val vault = KeyedVault.parse(input)
+
+        val length = vault.shortestPathLength()
+
+        assertThat(length).isEqualTo(24)
+    }
+
+    @Test
+    fun `shortestPathLength -- third multi-start example -- 32`() {
+        val input = """
+            #############
+            #DcBa.#.GhKl#
+            #.###@#@#I###
+            #e#d#####j#k#
+            ###C#@#@###J#
+            #fEbA.#.FgHi#
+            #############
+        """.trimIndent()
+        val vault = KeyedVault.parse(input)
+
+        val length = vault.shortestPathLength()
+
+        assertThat(length).isEqualTo(32)
+    }
+
+    @Test
+    fun `shortestPathLength -- fourth multi-start example -- 72`() {
+        val input = """
+            #############
+            #g#f.D#..h#l#
+            #F###e#E###.#
+            #dCba@#@BcIJ#
+            #############
+            #nK.L@#@G...#
+            #M###N#H###.#
+            #o#m..#i#jk.#
+            #############
+        """.trimIndent()
+        val vault = KeyedVault.parse(input)
+
+        val length = vault.shortestPathLength()
+
+        assertThat(length).isEqualTo(72)
+    }
+
+    @Test
+    fun `split -- reference input --- reference output`() {
+        val input = """
+            #######
+            #a.#Cd#
+            ##...##
+            ##.@.##
+            ##...##
+            #cB#Ab#
+            #######
+        """.trimIndent()
+        val expected = """
+            #######
+            #a.#Cd#
+            ##@#@##
+            #######
+            ##@#@##
+            #cB#Ab#
+            #######
+        """.trimIndent()
+        val vault = KeyedVault.parse(input)
+        val expectedVault = KeyedVault.parse(expected)
+
+        val split = vault.split()
+
+        assertThat(split).isEqualTo(expectedVault)
     }
 }
