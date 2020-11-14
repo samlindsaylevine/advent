@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled
 class KeyedVaultTest {
 
   @Test
@@ -145,6 +144,7 @@ class KeyedVaultTest {
   }
 
   @Test
+  @Disabled("too slow")
   fun `shortestPathLength -- fourth multi-start example -- 72`() {
     val input = """
             #############
