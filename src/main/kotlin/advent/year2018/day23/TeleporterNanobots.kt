@@ -32,7 +32,7 @@ class TeleporterNanobots(private val bots: List<TeleporterNanobot>) {
     }
 
     fun botCountInRangeOfStrongest(): Int {
-        val strongest = bots.maxBy { it.range } ?: return 0
+        val strongest = bots.maxByOrNull { it.range } ?: return 0
         return bots.count { it isInRangeOf strongest }
     }
 
@@ -71,9 +71,9 @@ class TeleporterNanobots(private val bots: List<TeleporterNanobot>) {
         val possibilities = PriorityQueue<OverlapPossibility>(100, OverlapPossibility.best)
 
         val initialVolume = RectangularVolume(
-                (bots.map { it.location.x }.min() ?: 0)..(bots.map { it.location.x }.max() ?: 0),
-                (bots.map { it.location.y }.min() ?: 0)..(bots.map { it.location.y }.max() ?: 0),
-                (bots.map { it.location.z }.min() ?: 0)..(bots.map { it.location.z }.max() ?: 0))
+                (bots.map { it.location.x }.minOrNull() ?: 0)..(bots.map { it.location.x }.maxOrNull() ?: 0),
+                (bots.map { it.location.y }.minOrNull() ?: 0)..(bots.map { it.location.y }.maxOrNull() ?: 0),
+                (bots.map { it.location.z }.minOrNull() ?: 0)..(bots.map { it.location.z }.maxOrNull() ?: 0))
 
         possibilities.add(evaluate(initialVolume))
 
@@ -119,7 +119,7 @@ private data class RectangularVolume(val x: IntRange,
 
     fun distanceTo(point: Point3D) = this.closestPointTo(point).distanceTo(point)
 
-    fun split(): Pair<RectangularVolume, RectangularVolume> = when (listOf(x, y, z).map { it.size() }.max()) {
+    fun split(): Pair<RectangularVolume, RectangularVolume> = when (listOf(x, y, z).map { it.size() }.maxOrNull()) {
         x.size() -> RectangularVolume(x.split().first, y, z) to RectangularVolume(x.split().second, y, z)
         y.size() -> RectangularVolume(x, y.split().first, z) to RectangularVolume(x, y.split().second, z)
         else -> RectangularVolume(x, y, z.split().first) to RectangularVolume(x, y, z.split().second)

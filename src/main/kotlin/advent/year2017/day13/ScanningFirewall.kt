@@ -55,7 +55,7 @@ class ScanningFirewall(lines: Sequence<String>) {
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val firewall = File("src/main/kotlin/advent/year2017/day13/input.txt")
             .useLines { ScanningFirewall(it) }
 

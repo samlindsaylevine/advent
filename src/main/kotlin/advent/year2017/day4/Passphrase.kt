@@ -18,7 +18,7 @@ class Passphrase(val words: Multiset<String>) {
             ImmutableMultiset.copyOf(word.toCharArray().toList())
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val passphrases = File("src/main/kotlin/advent/year2017/day4/input.txt")
             .readLines()
             .filter { it.isNotEmpty() }

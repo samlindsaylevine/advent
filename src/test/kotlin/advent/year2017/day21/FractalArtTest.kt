@@ -2,7 +2,6 @@ package advent.year2017.day21
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.math.exp
 
 class FractalArtTest {
 

@@ -29,7 +29,7 @@ class RegisterInstructions(lines: Sequence<String>) {
         }
     }
 
-    fun largestRegisterValue(): Int = Math.max(registers.values.max() ?: 0, 0)
+    fun largestRegisterValue(): Int = Math.max(registers.values.maxOrNull() ?: 0, 0)
 
     fun highestValueEverHeld(): Int = highestValueEverHeld
 
@@ -66,7 +66,7 @@ class RegisterInstructions(lines: Sequence<String>) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val instructions = File("src/main/kotlin/advent/year2017/day8/input.txt")
             .useLines { RegisterInstructions(it) }
 

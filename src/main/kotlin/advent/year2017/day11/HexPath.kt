@@ -52,7 +52,7 @@ private class LocationAndFurthest(val location: HexLocation = HexLocation(0, 0),
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day11/input.txt").readText()
 
     val path = HexPath(input)

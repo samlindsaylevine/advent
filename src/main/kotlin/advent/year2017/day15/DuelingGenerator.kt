@@ -34,7 +34,7 @@ class DuelingGenerator(val factor: Int,
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val startingA = 512
     val startingB = 191
 

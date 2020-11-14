@@ -96,7 +96,7 @@ private fun List<FractalArtImage>.merge(): List<List<Boolean>> {
     return (0 until size).map { rowNum -> this.flatMap { image -> image.pixels[rowNum] } }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day21/input.txt")
             .readText()
 

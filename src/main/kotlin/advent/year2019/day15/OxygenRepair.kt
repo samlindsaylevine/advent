@@ -3,7 +3,6 @@ package advent.year2019.day15
 import advent.utils.*
 import advent.year2019.day13.parseIntcodeFromFile
 import advent.year2019.day5.IntcodeComputer
-import java.lang.Thread.sleep
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
 
@@ -24,7 +23,7 @@ class OxygenRepair(private val droidProgram: List<Long>) {
 
         // We're assuming, based on the problem statement, that this is a finite enclosed area with walls, and we can
         // explore all of it.
-        val nextTarget = map.unexplored.minBy { it.distanceFrom(droid.position) }
+        val nextTarget = map.unexplored.minByOrNull { it.distanceFrom(droid.position) }
                 ?: return map
         val path = map.path(droid.position, nextTarget)
 

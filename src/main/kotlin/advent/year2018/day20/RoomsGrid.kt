@@ -38,10 +38,10 @@ class RoomsGrid(private val rooms: Set<Point>,
     }
 
     override fun toString(): String {
-        val minX = rooms.map { it.x }.min() ?: 0
-        val maxX = rooms.map { it.x }.max() ?: 0
-        val minY = rooms.map { it.y }.min() ?: 0
-        val maxY = rooms.map { it.y }.max() ?: 0
+        val minX = rooms.map { it.x }.minOrNull() ?: 0
+        val maxX = rooms.map { it.x }.maxOrNull() ?: 0
+        val minY = rooms.map { it.y }.minOrNull() ?: 0
+        val maxY = rooms.map { it.y }.maxOrNull() ?: 0
 
         // Our string is going to be a total of 2 * (maxX - minX) + 3 wide and likewise for height.
         val yRange = ((2 * minY - 1)..(2 * maxY + 1)).toList().reversed()

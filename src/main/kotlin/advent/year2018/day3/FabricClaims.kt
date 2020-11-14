@@ -55,7 +55,7 @@ data class FabricClaim(val number: Int,
 data class Point(val x: Int, val y: Int)
 
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day3/input.txt")
             .readText()
             .trim()

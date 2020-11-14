@@ -43,10 +43,10 @@ class LumberArea private constructor(private val state: Map<Point, Acre>) {
     fun advanced(times: Int) = advance(times = times, start = this) { it.advanced() }
 
     override fun toString(): String {
-        val minX = state.keys.map { it.x }.min() ?: 0
-        val maxX = state.keys.map { it.x }.max() ?: 0
-        val minY = state.keys.map { it.y }.min() ?: 0
-        val maxY = state.keys.map { it.y }.max() ?: 0
+        val minX = state.keys.map { it.x }.minOrNull() ?: 0
+        val maxX = state.keys.map { it.x }.maxOrNull() ?: 0
+        val minY = state.keys.map { it.y }.minOrNull() ?: 0
+        val maxY = state.keys.map { it.y }.maxOrNull() ?: 0
 
         return (minY..maxY).joinToString("\n") { y ->
             (minX..maxX).joinToString("") { x -> this[Point(x, y)].display }

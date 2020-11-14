@@ -1,6 +1,5 @@
 package advent.year2019.day4
 
-import advent.year2019.day4.FuelDepotPassword
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource

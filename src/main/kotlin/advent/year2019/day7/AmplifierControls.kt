@@ -18,7 +18,7 @@ class AmplifierControls(private val numAmplifiers: Int = 5,
             Collections2.permutations(settingValues.toList())
                     .asSequence()
                     .map { evaluator(it) }
-                    .maxBy { it.thrusterSignal }
+                    .maxByOrNull { it.thrusterSignal }
                     ?: PhaseSettings(emptyList(), 0)
 
     private fun evaluate(settings: List<Int>): PhaseSettings {

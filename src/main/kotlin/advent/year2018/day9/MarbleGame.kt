@@ -14,7 +14,7 @@ class MarbleGame(private val numElves: Int, private val lastMarble: Int) {
             elfScores.merge(i % numElves, pointsScored.toLong()) { a, b -> a + b }
         }
 
-        return elfScores.values.max() ?: 0
+        return elfScores.values.maxOrNull() ?: 0
     }
 
     private fun takeStep(ring: MarbleRing, marbleNumber: Int): Int {
@@ -54,7 +54,7 @@ class MarbleRing(private val marbles: LinkedList<Int> = LinkedList(listOf(0))) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val game = MarbleGame(numElves = 479, lastMarble = 71035)
     println(game.highScore())
 

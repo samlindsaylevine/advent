@@ -107,7 +107,7 @@ fun Int.isComposite(): Boolean {
     return possibleDivisors.any { this % it == 0 }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day23/input.txt")
             .readText()
             .trim()

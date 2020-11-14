@@ -94,7 +94,7 @@ class RecursiveCircus(lines: Sequence<String>) {
 
         private fun <T> mode(input: Collection<T>): T? {
             val counts = input.groupingBy { it }.eachCount()
-            val maxCount = counts.values.max()
+            val maxCount = counts.values.maxOrNull()
             return counts.entries.find { it.value == maxCount }?.key
         }
 
@@ -106,7 +106,7 @@ class RecursiveCircus(lines: Sequence<String>) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val circus = File("src/main/kotlin/advent/year2017/day7/input.txt")
             .useLines { RecursiveCircus(it) }
 

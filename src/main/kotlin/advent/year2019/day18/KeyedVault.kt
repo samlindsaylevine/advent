@@ -112,7 +112,9 @@ private class KeyedVaultGraph(val edges: Map<KeyedVaultNode, Set<VaultEdge>>) {
     fun shortestPathLength(): Int {
         val finder = ShortestPathFinder()
 
-        val paths = finder.find(start = VaultGraphExplorationState(edges.keys.filter { it is StartNode }.toSet(), emptySet()),
+        val paths = finder.find(start = VaultGraphExplorationState(edges.keys.filter { it is StartNode }.toSet(),
+                emptySet(),
+                emptySet()),
                 end = EndCondition { it.keysOwned.containsAll(allKeys) },
                 nextSteps = StepsWithCost(::nextOptions),
                 // Since we only care about the length of the shortest path, we can collapse any paths that end up
@@ -136,12 +138,15 @@ private class KeyedVaultGraph(val edges: Map<KeyedVaultNode, Set<VaultEdge>>) {
     private fun VaultGraphExplorationState.canVisit(node: KeyedVaultNode) =
             node !is DoorNode || this.keysOwned.contains(node.key)
 
-    private fun VaultGraphExplorationState.moving(from: KeyedVaultNode, to: KeyedVaultNode) =
-            if (to is KeyNode) {
-                VaultGraphExplorationState(this.positions - from + to, this.keysOwned + to.key)
-            } else {
-                VaultGraphExplorationState(this.positions - from + to, this.keysOwned)
-            }
+    private fun VaultGraphExplorationState.moving(from: KeyedVaultNode, to: KeyedVaultNode) = when (to) {
+        is KeyNode -> VaultGraphExplorationState(this.positions - from + to,
+                this.keysOwned + to.key,
+                this.doorsOpened)
+        is DoorNode -> VaultGraphExplorationState(this.positions - from + to,
+                this.keysOwned,
+                this.doorsOpened + to.key)
+        else -> VaultGraphExplorationState(this.positions - from + to, this.keysOwned, this.doorsOpened)
+    }
 }
 
 private data class VaultEdge(val target: KeyedVaultNode, val distance: Int)
@@ -156,7 +161,8 @@ private data class KeyNode(val key: Key) : KeyedVaultNode()
 private data class DoorNode(val key: Key) : KeyedVaultNode()
 
 private data class VaultGraphExplorationState(val positions: Set<KeyedVaultNode>,
-                                              val keysOwned: Set<Key>)
+                                              val keysOwned: Set<Key>,
+                                              val doorsOpened: Set<Key>)
 
 private typealias Key = Char
 

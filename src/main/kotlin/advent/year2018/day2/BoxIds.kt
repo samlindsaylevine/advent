@@ -34,7 +34,7 @@ class BoxId(val id: String) {
             .joinToString("")
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day2/input.txt")
             .readText()
             .trim()

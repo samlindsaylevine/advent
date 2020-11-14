@@ -29,7 +29,7 @@ class JumpInstructionList(val instructions: List<Int>) {
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val lines = File("src/main/kotlin/advent/year2017/day5/input.txt")
             .readLines()
             .filter { it.isNotEmpty() }

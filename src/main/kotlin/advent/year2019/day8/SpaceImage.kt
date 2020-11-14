@@ -56,7 +56,7 @@ fun main() {
 
     val image = SpaceImage.parse(input, width = 25, height = 6)
 
-    val fewestZeroDigits = image.layers.minBy { it.count(0) }
+    val fewestZeroDigits = image.layers.minByOrNull { it.count(0) }
             ?: throw IllegalStateException("Should have been layers")
     println(fewestZeroDigits.count(1) * fewestZeroDigits.count(2))
 

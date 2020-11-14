@@ -1,10 +1,5 @@
 package advent.year2018.day21
 
-import advent.year2015.day24.Ticker
-import advent.year2018.day19.ChronalComputer
-import advent.year2018.day19.ChronalProgram
-import java.io.File
-
 // OK, time to analyze another Chronal program...
 //    #ip 4
 

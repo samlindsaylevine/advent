@@ -24,7 +24,7 @@ class FuelCellGrid(private val serialNumber: Int) {
     private fun mostPowerfulSquareOfSize(size: Int): SquareAndPower = box(Coordinates(0, 0), width - size + 1, height - size + 1)
             .map { Square(it, size) }
             .map { SquareAndPower(it, powerOfSquare(it)) }
-            .maxBy { it.power }
+            .maxByOrNull { it.power }
             ?: throw IllegalStateException("Box too small to contain any square")
 
     fun powerOfSquare(square: Square) = box(square.upperLeft, square.size, square.size)
@@ -42,11 +42,11 @@ class FuelCellGrid(private val serialNumber: Int) {
             // for debugging progress
             // .onEach { println(it) }
             .map { mostPowerfulSquareOfSize(it) }
-            .maxBy { it.power }
+            .maxByOrNull { it.power }
             ?.square
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val grid = FuelCellGrid(9005)
 
     println(grid.upperLeftOfMostPowerfulSquareOfSize(3))

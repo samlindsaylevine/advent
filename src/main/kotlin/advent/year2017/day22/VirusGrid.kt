@@ -84,8 +84,8 @@ enum class Direction(val x: Int, val y: Int) {
     LEFT(-1, 0);
 
     companion object {
-        private fun getByOrdinal(ordinal: Int) = Direction.values()[Math.floorMod(ordinal,
-                Direction.values().size)]
+        private fun getByOrdinal(ordinal: Int) = values()[Math.floorMod(ordinal,
+                values().size)]
     }
 
     fun right() = getByOrdinal(this.ordinal + 1)
@@ -113,7 +113,7 @@ class EvolvedVirus : VirusBehavior {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day22/input.txt")
             .readText()
             .trim()

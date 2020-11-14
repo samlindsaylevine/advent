@@ -61,7 +61,7 @@ class ZeroTrackingSpinlock(stepsPerInsert: Int, numInsertions: Int) : Spinlock(s
 }
 
 
-fun main(args: Array<String>) {
+fun main() {
     val input = 337
 
     val spinlock = AllValuesSpinlock(input)

@@ -111,7 +111,7 @@ class ImmuneSystemSimulation private constructor(private val immuneSystem: Mutab
 
     private fun chooseTarget(attacker: ArmyGroup,
                              defenders: Set<ArmyGroup>) = defenders.filter { attacker.wouldDealDamage(it) > 0 }
-            .maxWith(compareBy({ attacker.wouldDealDamage(it) },
+            .maxWithOrNull(compareBy({ attacker.wouldDealDamage(it) },
                     { it.effectivePower() },
                     { it.unit.initiative }))
 }

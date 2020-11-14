@@ -21,7 +21,7 @@ class SleighInstructions(private val requirementsByStep: Map<String, Set<String>
     fun stepsInOrder(): List<String> {
         if (allSteps.isEmpty()) return emptyList()
 
-        val nextStep = availableSteps().min() ?: throw IllegalStateException("Unreachable steps $allSteps")
+        val nextStep = availableSteps().minOrNull() ?: throw IllegalStateException("Unreachable steps $allSteps")
 
         return listOf(nextStep) + this.without(nextStep).stepsInOrder()
     }
@@ -48,7 +48,7 @@ class SleighInstructions(private val requirementsByStep: Map<String, Set<String>
             return this.working(availableWorkers().first(), availableSteps().first()).workingUntilNextTaskCompleted()
         }
 
-        val (nextToComplete, workTime) = workerTaskDurations.minBy { it?.second ?: Integer.MAX_VALUE }
+        val (nextToComplete, workTime) = workerTaskDurations.minByOrNull { it?.second ?: Integer.MAX_VALUE }
                 ?: throw IllegalStateException("No tasks underway and none available")
 
         val without = this.without(nextToComplete)
@@ -87,7 +87,7 @@ class SleighInstructions(private val requirementsByStep: Map<String, Set<String>
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day7/input.txt")
             .readText()
             .trim()

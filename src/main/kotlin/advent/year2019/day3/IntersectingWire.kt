@@ -21,7 +21,7 @@ class IntersectingWire(input: String) {
             points.intersect(other.points)
                     .filter { it != Point(0, 0) }
                     .map(transform)
-                    .min()
+                    .minOrNull()
 
     private class WireInProgress(val current: Point, val all: List<Point> = listOf(current)) {
         operator fun plus(segment: Segment): WireInProgress {

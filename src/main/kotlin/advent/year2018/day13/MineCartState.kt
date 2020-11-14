@@ -162,7 +162,7 @@ enum class TrackType(val picture: Char,
 
 data class Tracks(val tracksByPosition: Map<Coordinates, TrackType>)
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day13/input.txt")
             .readText()
 

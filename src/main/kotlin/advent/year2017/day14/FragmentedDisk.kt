@@ -53,7 +53,7 @@ class FragmentedDisk(val key: String, val width: Int = 128, val height: Int = 12
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val disk = FragmentedDisk(key = "xlqgujun")
     println(disk.usedSquares())
     println(disk.regions())

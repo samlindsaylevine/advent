@@ -99,7 +99,7 @@ class TuringProgramParser {
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day25/input.txt")
             .readText()
             .trim()

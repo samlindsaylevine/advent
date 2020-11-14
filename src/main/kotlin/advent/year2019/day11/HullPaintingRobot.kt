@@ -58,10 +58,10 @@ class HullPaintingRobot(val program: List<Long>) {
     data class PaintResult(val whitePoints: Set<Point>,
                            val pointsEverPainted: Set<Point>) {
         override fun toString(): String {
-            val maxY = whitePoints.map { it.y }.max() ?: 0
-            val minY = whitePoints.map { it.y }.min() ?: 0
-            val minX = whitePoints.map { it.x }.min() ?: 0
-            val maxX = whitePoints.map { it.x }.max() ?: 0
+            val maxY = whitePoints.map { it.y }.maxOrNull() ?: 0
+            val minY = whitePoints.map { it.y }.minOrNull() ?: 0
+            val minX = whitePoints.map { it.x }.minOrNull() ?: 0
+            val maxX = whitePoints.map { it.x }.maxOrNull() ?: 0
 
             return (maxY downTo minY).joinToString("\n") { y ->
                 (minX..maxX).joinToString("") { x ->

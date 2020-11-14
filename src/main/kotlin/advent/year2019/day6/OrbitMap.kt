@@ -45,7 +45,7 @@ class OrbitMap(private val orbits: Map<String, Set<String>>) {
         val finder = ShortestPathFinder()
 
         val shortestPaths = finder.find(startChild, EndState(targetChild), Steps(::adjacent))
-        return shortestPaths.map { it.steps.size }.min()
+        return shortestPaths.map { it.steps.size }.minOrNull()
     }
 
     private fun adjacent(obj: String): Set<String> {

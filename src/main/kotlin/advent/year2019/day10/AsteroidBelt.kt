@@ -18,9 +18,9 @@ class AsteroidBelt(private val asteroids: Set<Point>) {
 
     fun mostObservable() = asteroids
             .map { MostObservable(it, numObservableFrom(it)) }
-            .maxBy { it.count }
+            .maxByOrNull { it.count }
 
-    data class MostObservable(val asteroid: Point, val count: Int)
+  data class MostObservable(val asteroid: Point, val count: Int)
 
     private fun numObservableFrom(asteroid: Point) = asteroids.count { asteroid canObserve it }
 
@@ -45,7 +45,7 @@ class AsteroidBelt(private val asteroids: Set<Point>) {
         val origin = mostObservable()?.asteroid ?: return emptyList()
 
         val first = asteroids.allMinBy { (it - origin).theta }
-                .minBy { it.distanceFrom(origin) }
+                .minByOrNull { it.distanceFrom(origin) }
                 ?: return emptyList()
 
         return vaporizedAsteroids(listOf(first), origin, asteroids - first - origin)
@@ -71,7 +71,7 @@ class AsteroidBelt(private val asteroids: Set<Point>) {
         } else {
             asteroids.allMinBy { (it - origin).theta }
         }
-        return candidates.minBy { it.distanceFrom(origin) }
+        return candidates.minByOrNull { it.distanceFrom(origin) }
     }
 
 }

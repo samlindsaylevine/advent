@@ -72,10 +72,10 @@ private class FlowResult constructor(clay: Set<Point>, spring: Point) {
 
     private val points: MutableMap<Point, PointState> = clay.associate { it to PointState.CLAY }.toMutableMap()
 
-    private val minY = clay.map { it.y }.min() ?: 0
-    private val maxY = clay.map { it.y }.max() ?: 0
-    private val minX = clay.map { it.x }.min() ?: 0
-    private val maxX = clay.map { it.x }.max() ?: 0
+    private val minY = clay.map { it.y }.minOrNull() ?: 0
+    private val maxY = clay.map { it.y }.maxOrNull() ?: 0
+    private val minX = clay.map { it.x }.minOrNull() ?: 0
+    private val maxX = clay.map { it.x }.maxOrNull() ?: 0
 
     init {
         this[spring] = PointState.FLOWING_WATER

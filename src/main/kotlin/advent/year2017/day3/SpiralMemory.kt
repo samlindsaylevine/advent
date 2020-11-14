@@ -75,7 +75,7 @@ class SpiralMemory {
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = 277678
     println(SpiralMemory().distanceFromOrigin(input))
     println(SpiralMemory().stressTestValues().find { it > input })

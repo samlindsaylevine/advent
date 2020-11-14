@@ -35,11 +35,11 @@ data class ReactivePolymer(val formula: String) {
     fun bestImprovement() = unitTypes()
             .map { unit -> this.without(unit) }
             .map { it.reduced() }
-            .minBy { it.formula.length }
+            .minByOrNull { it.formula.length }
             ?: ReactivePolymer("")
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day5/input.txt")
             .readText()
             .trim()

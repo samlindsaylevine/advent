@@ -12,7 +12,7 @@ class FrequencyDrift(deltas: List<Int>) {
         }
     }
 
-    constructor(input: String) : this(input.trim().lines().map { FrequencyDrift.parseDelta(it) })
+    constructor(input: String) : this(input.trim().lines().map { parseDelta(it) })
 
     val result = deltas.sum()
 
@@ -31,7 +31,7 @@ class FrequencyDrift(deltas: List<Int>) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day1/input.txt")
             .readText()
             .trim()

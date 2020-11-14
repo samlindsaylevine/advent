@@ -17,7 +17,7 @@ class GoblinCombat private constructor(val height: Int,
         fun parse(input: String, elfAttackPower: Int = 3): GoblinCombat {
             val lines = input.split("\n")
             val height = lines.size
-            val width = lines.map { it.length }.max() ?: 0
+            val width = lines.map { it.length }.maxOrNull() ?: 0
             val charsByPosition = lines.withIndex()
                     .flatMap { it.value.toCharArray().mapIndexed { x, c -> Position(x, it.index) to c } }
                     .toMap()
@@ -40,7 +40,7 @@ class GoblinCombat private constructor(val height: Int,
         fun outcomeAtMinElfAttackPowerToWin(input: String): Outcome = generateSequence(4, { it + 1 })
                 .map {
                     println("Attempting attack power $it")
-                    GoblinCombat.parse(input, it).battle()
+                    parse(input, it).battle()
                 }
                 .filter { it.numberOfDeadElves == 0 }
                 .first()
@@ -71,9 +71,9 @@ class GoblinCombat private constructor(val height: Int,
 
             val targetToAttack = targets.filter { it.position.adjacent().contains(combatant.position) }
                     .allMinBy { it.hitPoints }
-                    .minBy { it.position }
+                    .minByOrNull { it.position }
 
-            if (targetToAttack != null) {
+          if (targetToAttack != null) {
                 targetToAttack.hitPoints -= combatant.attackPower
             }
         }
@@ -122,7 +122,7 @@ class GoblinCombat private constructor(val height: Int,
         val shortestPaths = paths.allMinBy { it.steps.size }
         val pathsToFirstTarget = shortestPaths.allMinBy { it.steps.last() }
 
-        return pathsToFirstTarget.map { it.steps.first() }.min()
+        return pathsToFirstTarget.map { it.steps.first() }.minOrNull()
                 ?: throw IllegalStateException("Shouldn't have 0 paths")
 
     }

@@ -20,7 +20,7 @@ class PipeGraph(lines: Sequence<String>) : Graph<Int>(lines.map { parseNode(it) 
             .asSequence())
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val graph = File("src/main/kotlin/advent/year2017/day12/input.txt")
             .useLines { PipeGraph(it) }
 

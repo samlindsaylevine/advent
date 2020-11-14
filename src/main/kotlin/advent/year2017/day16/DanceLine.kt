@@ -88,7 +88,7 @@ data class DanceLine(val order: String) {
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val line = DanceLine(16)
 
     val input = File("src/main/kotlin/advent/year2017/day16/input.txt")

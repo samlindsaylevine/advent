@@ -86,7 +86,7 @@ data class Memory(private val state: MutableMap<Long, Long> = mutableMapOf()) {
     }
 
     fun asList(): List<Long> {
-        val max = state.keys.max() ?: 0
+        val max = state.keys.maxOrNull() ?: 0
         if (max + 1 > Int.MAX_VALUE) throw IllegalStateException("Can't represent as list - too large! $max")
         val output = MutableList<Long>(max.toInt() + 1) { 0 }
 

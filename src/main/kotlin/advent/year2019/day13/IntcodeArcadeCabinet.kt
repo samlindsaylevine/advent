@@ -89,10 +89,10 @@ private class IntcodeArcadeDisplay {
     @Volatile
     private var awaitingKeyStroke: CompletableFuture<JoystickState>? = null
 
-    fun ballX() = tiles.filter { it.value == Tile.BALL }.map { it.key.x }.min()
+    fun ballX() = tiles.filter { it.value == Tile.BALL }.map { it.key.x }.minOrNull()
             ?: throw IllegalStateException("No ball")
 
-    fun paddleX() = tiles.filter { it.value == Tile.PADDLE }.map { it.key.x }.min()
+    fun paddleX() = tiles.filter { it.value == Tile.PADDLE }.map { it.key.x }.minOrNull()
             ?: throw IllegalStateException("No paddle")
 
     init {

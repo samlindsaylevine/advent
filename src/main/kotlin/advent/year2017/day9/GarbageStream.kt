@@ -43,7 +43,7 @@ class GarbageStream(input: String) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day9/input.txt").readText().trim()
     val stream = GarbageStream(input)
 

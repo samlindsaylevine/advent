@@ -139,7 +139,7 @@ class DuetPairComputer private constructor(programId: Long) {
     private data class InstructionResult(val stepsToAdvance: Long = 1)
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2017/day18/input.txt")
             .readLines()
             .map { it.trim() }

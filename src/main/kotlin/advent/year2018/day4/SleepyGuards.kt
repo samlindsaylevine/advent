@@ -32,15 +32,15 @@ class SleepyGuards(val events: List<GuardEvent>) {
                 .toSet()
     }
 
-    val sleepiestGuard = guards.maxBy { it.minutesAsleep }
-    val mostFrequentlyAsleepOnSameMinute = guards.maxBy { it.timesAsleepOnSleepiestMinute }
+    val sleepiestGuard = guards.maxByOrNull { it.minutesAsleep }
+    val mostFrequentlyAsleepOnSameMinute = guards.maxByOrNull { it.timesAsleepOnSleepiestMinute }
 }
 
 class SleepyGuard(val number: Int,
                   private val sleepRanges: Collection<IntRange>) {
     val minutesAsleep = sleepRanges.sumBy { it.count() }
     private fun timesAsleepOn(minute: Int) = sleepRanges.count { it.contains(minute) }
-    val sleepiestMinute = (0..59).maxBy(this::timesAsleepOn)!!
+    val sleepiestMinute = (0..59).maxByOrNull(this::timesAsleepOn)!!
     val timesAsleepOnSleepiestMinute = timesAsleepOn(sleepiestMinute)
 }
 
@@ -75,7 +75,7 @@ class NewGuard(timestamp: LocalDateTime,
 class FallsAsleep(timestamp: LocalDateTime) : GuardEvent(timestamp)
 class WakesUp(timestamp: LocalDateTime) : GuardEvent(timestamp)
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day4/input.txt")
             .readText()
             .trim()

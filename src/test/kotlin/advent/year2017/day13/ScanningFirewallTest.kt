@@ -1,6 +1,5 @@
 package advent.year2017.day13
 
-import advent.year2017.day13.ScanningFirewall
 import advent.year2017.day13.ScanningFirewall.SecurityScanner
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

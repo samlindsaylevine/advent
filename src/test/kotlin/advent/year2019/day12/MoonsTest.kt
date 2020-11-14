@@ -1,7 +1,6 @@
 package advent.year2019.day12
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class MoonsTest {

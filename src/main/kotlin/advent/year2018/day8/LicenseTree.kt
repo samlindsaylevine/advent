@@ -61,7 +61,7 @@ data class LicenseTree(val root: Node) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day8/input.txt")
             .readText()
             .trim()

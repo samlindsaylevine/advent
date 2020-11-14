@@ -42,8 +42,8 @@ class PottedPlants(private val potsWithPlants: Set<Int>,
     private fun hasPlant(index: Int) = potsWithPlants.contains(index)
 
     private fun nextGeneration(): PottedPlants {
-        val min = (potsWithPlants.min() ?: 0) - 2
-        val max = (potsWithPlants.max() ?: 0) + 2
+        val min = (potsWithPlants.minOrNull() ?: 0) - 2
+        val max = (potsWithPlants.maxOrNull() ?: 0) + 2
 
         return PottedPlants((min..max).filter(this::hasPlantInNextGeneration).toSet(),
                 generationsElapsed + 1,
@@ -72,7 +72,7 @@ data class PlantRuleCondition(val twoLeft: Boolean,
                               val right: Boolean,
                               val twoRight: Boolean)
 
-fun main(args: Array<String>) {
+fun main() {
     val input = File("src/main/kotlin/advent/year2018/day12/input.txt")
             .readText()
             .trim()
