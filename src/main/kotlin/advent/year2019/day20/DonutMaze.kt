@@ -97,14 +97,33 @@ class DonutMaze private constructor(private val openSpaces: Set<MazePoint>,
   private val teleporterLabelsBySpace: Map<MazePoint, String> = teleporterSpaces.associate { it.point to it.label }
   private val teleporterSpacesByLabel: Map<String, List<MazePoint>> = teleporterSpaces.groupBy({ it.label }, { it.point })
 
-  fun stepsToComplete(): Int {
-    val start = teleporterSpacesByLabel["AA"]?.firstOrNull() ?: throw IllegalStateException("No AA space")
-    val end = teleporterSpacesByLabel["ZZ"]?.firstOrNull() ?: throw java.lang.IllegalStateException("No ZZ space")
+  private val start = teleporterSpacesByLabel["AA"]?.firstOrNull() ?: throw IllegalStateException("No AA space")
+  private val end = teleporterSpacesByLabel["ZZ"]?.firstOrNull() ?: throw java.lang.IllegalStateException("No ZZ space")
 
+  private val lowerRightCorner = MazePoint(
+          openSpaces.maxOf { it.x },
+          openSpaces.maxOf { it.y }
+  )
+
+  /**
+   * From part 1, with teleportation.
+   */
+  fun stepsToComplete(): Int {
     val paths = ShortestPathFinder().find(
             start = start,
             end = EndState(end),
             nextSteps = Steps(this::adjacent)
+    )
+
+    return paths.first().totalCost
+  }
+
+  fun recursiveStepsToComplete(): Int {
+    val paths = ShortestPathFinder().find(
+            start = RecursiveTraversal(point = start, depth = 0),
+            end = EndState(RecursiveTraversal(point = end, depth = 0)),
+            nextSteps = Steps(this::adjacentWithRecursion),
+            reportEvery = 100
     )
 
     return paths.first().totalCost
@@ -119,6 +138,29 @@ class DonutMaze private constructor(private val openSpaces: Set<MazePoint>,
 
     return (normalSteps + teleportSteps).toSet()
   }
+
+  private fun adjacentWithRecursion(traversal: RecursiveTraversal): Set<RecursiveTraversal> {
+    val normalSteps = traversal.point.adjacent()
+            .filter(openSpaces::contains)
+            .map { RecursiveTraversal(it, traversal.depth) }
+
+    val teleportLabel = teleporterLabelsBySpace[traversal.point]
+    val depthDelta = if (isOnOuterBorder(traversal.point)) -1 else 1
+
+    val recurseSteps: List<RecursiveTraversal> = when {
+      traversal.depth == 0 && depthDelta == -1 -> emptyList()
+      teleportLabel == null -> emptyList()
+      teleportLabel == "AA" -> emptyList()
+      teleportLabel == "ZZ" -> emptyList()
+      else -> (teleporterSpacesByLabel[teleportLabel]?.filter { it != traversal.point } ?: emptyList())
+              .map { RecursiveTraversal(it, traversal.depth + depthDelta) }
+    }
+
+    return (normalSteps + recurseSteps).toSet()
+  }
+
+  private fun isOnOuterBorder(point: MazePoint): Boolean =
+          point.x == 0 || point.y == 0 || point.x == lowerRightCorner.x || point.y == lowerRightCorner.y
 
   /**
    * 2D point that is [Comparable] to find the bounds of the maze - the ordering is in English page reading order
@@ -180,6 +222,8 @@ class DonutMaze private constructor(private val openSpaces: Set<MazePoint>,
   }
 
   private data class TeleporterSpace(val point: MazePoint, val label: String)
+
+  private data class RecursiveTraversal(val point: MazePoint, val depth: Int)
 }
 
 fun main() {
@@ -189,4 +233,9 @@ fun main() {
   val maze = DonutMaze.parse(input)
 
   println(maze.stepsToComplete())
+
+  // This takes a long time. Obviously we should do a similar thing to what we did in day 18, and transform from actual
+  // steps into distances between nodes, and have edges with weights, so we can blast through this faster.
+  // But, I just let it run for 20 minutes while I was cooking black pepper eggplant and tofu, and got the answer.
+  println(maze.recursiveStepsToComplete())
 }
