@@ -15,9 +15,9 @@ class ErisTest {
       #....
     """.trimIndent()
 
-    val next = ErisState.parse(state).next()
+    val next = SimpleErisState.parse(state).next()
 
-    assertThat(next).isEqualTo(ErisState.parse("""
+    assertThat(next).isEqualTo(SimpleErisState.parse("""
       #..#.
       ####.
       ###.#
@@ -36,9 +36,9 @@ class ErisTest {
       .##..
     """.trimIndent()
 
-    val next = ErisState.parse(state).next()
+    val next = SimpleErisState.parse(state).next()
 
-    assertThat(next).isEqualTo(ErisState.parse("""
+    assertThat(next).isEqualTo(SimpleErisState.parse("""
       #####
       ....#
       ....#
@@ -57,9 +57,9 @@ class ErisTest {
       #.###
     """.trimIndent()
 
-    val next = ErisState.parse(state).next()
+    val next = SimpleErisState.parse(state).next()
 
-    assertThat(next).isEqualTo(ErisState.parse("""
+    assertThat(next).isEqualTo(SimpleErisState.parse("""
       #....
       ####.
       ...##
@@ -78,9 +78,9 @@ class ErisTest {
       .##.#
     """.trimIndent()
 
-    val next = ErisState.parse(state).next()
+    val next = SimpleErisState.parse(state).next()
 
-    assertThat(next).isEqualTo(ErisState.parse("""
+    assertThat(next).isEqualTo(SimpleErisState.parse("""
       ####.
       ....#
       ##..#
@@ -99,9 +99,9 @@ class ErisTest {
       #....
     """.trimIndent()
 
-    val firstToAppearTwice = Eris(ErisState.parse(state)).firstToAppearTwice()
+    val firstToAppearTwice = SimpleEris(SimpleErisState.parse(state)).firstToAppearTwice()
 
-    assertThat(firstToAppearTwice).isEqualTo(ErisState.parse("""
+    assertThat(firstToAppearTwice).isEqualTo(SimpleErisState.parse("""
       .....
       .....
       .....
@@ -120,8 +120,102 @@ class ErisTest {
       .#...
     """.trimIndent()
 
-    val biodiversity = ErisState.parse(state).biodiversity()
+    val biodiversity = SimpleErisState.parse(state).biodiversity()
 
     assertThat(biodiversity).isEqualTo(2129920L)
+  }
+
+  @Test
+  fun `recursive eris -- reference example, advanced 10 times -- has reference state`() {
+    val initialFloor = RecursiveErisState(SimpleErisState.parse("""
+      ....#
+      #..#.
+      #.?##
+      ..#..
+      #....
+    """.trimIndent()))
+
+    val advanced = initialFloor.advanced(10)
+
+    val expected = RecursiveErisState(mapOf(-5 to SimpleErisState.parse("""
+      ..#..
+      .#.#.
+      ..?.#
+      .#.#.
+      ..#..
+    """.trimIndent()),
+            -4 to SimpleErisState.parse("""
+      ...#.
+      ...##
+      ..?..
+      ...##
+      ...#.
+    """.trimIndent()),
+            -3 to SimpleErisState.parse("""
+      #.#..
+      .#...
+      ..?..
+      .#...
+      #.#..
+    """.trimIndent()),
+            -2 to SimpleErisState.parse("""
+      .#.##
+      ....#
+      ..?.#
+      ...##
+      .###.
+    """.trimIndent()),
+            -1 to SimpleErisState.parse("""
+      #..##
+      ...##
+      ..?..
+      ...#.
+      .####
+    """.trimIndent()),
+            0 to SimpleErisState.parse("""
+      .#...
+      .#.##
+      .#?..
+      .....
+      .....
+    """.trimIndent()),
+            1 to SimpleErisState.parse("""
+      .##..
+      #..##
+      ..?.#
+      ##.##
+      #####
+    """.trimIndent()),
+            2 to SimpleErisState.parse("""
+      ###..
+      ##.#.
+      #.?..
+      .#.##
+      #.#..
+    """.trimIndent()),
+            3 to SimpleErisState.parse("""
+      ..###
+      .....
+      #.?..
+      #....
+      #...#
+    """.trimIndent()),
+            4 to SimpleErisState.parse("""
+      .###.
+      #..#.
+      #.?..
+      ##.#.
+      .....
+    """.trimIndent()),
+            5 to SimpleErisState.parse("""
+      ####.
+      #..#.
+      #.?#.
+      ####.
+      .....
+    """.trimIndent())))
+
+    assertThat(advanced).isEqualTo(expected)
+    assertThat(advanced.bugCount()).isEqualTo(99)
   }
 }
