@@ -4,6 +4,7 @@ import advent.year2019.day13.parseIntcodeFromFile
 import advent.year2019.day5.IntcodeComputer
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.reflect.KClass
 
 class StarshipTextAdventure(val program: List<Long>) {
 
@@ -43,5 +44,5 @@ fun main() {
   // - weather machine
   //
   // Just did it via trial and error. (Drop something whenever I was too heavy; pick up something
-  // when I was too late.)
+  // when I was too light.)
 }
