@@ -2,7 +2,10 @@ package advent.year2020.day1
 
 import java.io.File
 
-class ExpenseReport(val entries: List<Int>) {
+class ExpenseReport(entriesList: List<Int>) {
+
+  private val entries = entriesList.asSequence()
+
   fun product() = entries.flatMap { first -> entries.map { first to it } }
           .first { it.first + it.second == 2020 }
           .let { it.first * it.second }
