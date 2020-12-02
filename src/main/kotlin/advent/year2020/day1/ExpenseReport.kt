@@ -17,7 +17,7 @@ class ExpenseReport(entriesList: List<Int>) {
 }
 
 fun main() {
-  val input = File("src/main/kotlin/advent/year2020/day1/input.txt")
+  val input = File("src/main/kotlin/advent/advent.year2020/day1/input.txt")
           .readText()
           .trim()
           .lines()
