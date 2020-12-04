@@ -1,6 +1,5 @@
-package advent.year2020
+package advent.year2020.day3
 
-import advent.year2020.day3.TobogganForest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
