@@ -13,7 +13,7 @@ class TobogganForestUnitTest {
           "5, 1, 3",
           "7, 1, 4",
           "1, 2, 2")
-  fun `treesEncountered -- reference inputs -- reference counts`(right: Int, down: Int, trees: Int) {
+  fun `treesEncountered -- reference inputs -- reference counts`(right: Int, down: Int, trees: Long) {
     val forest = TobogganForest.parse("""
       ..##.......
       #...#...#..

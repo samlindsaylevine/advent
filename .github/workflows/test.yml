@@ -1,0 +1,16 @@
+name: Tests
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-in: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run tests
+        run: mvn test
