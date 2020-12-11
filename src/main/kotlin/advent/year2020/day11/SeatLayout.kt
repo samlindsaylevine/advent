@@ -1,6 +1,7 @@
 package advent.year2020.day11
 
 import advent.utils.Point
+import advent.utils.times
 import java.io.File
 
 data class SeatLayout(
@@ -32,22 +33,45 @@ data class SeatLayout(
     }
   }
 
-  fun next(): SeatLayout {
-    val empty = seats - occupied
-    val nextOccupied = empty.filter { it.adjacentOccupiedCount() == 0 }.toSet() +
-            occupied.filter { it.adjacentOccupiedCount() < 4 }.toSet()
+  private val xRange = 0..seats.maxOf { it.x }
+  private val yRange = 0..seats.maxOf { it.y }
+  private val empty = seats - occupied
+
+  fun next(): SeatLayout = nextBy(::adjacentOccupiedCount, 4)
+  fun nextBySightLines(): SeatLayout = nextBy(::visibleOccupiedCount, 5)
+
+  private fun nextBy(countNeighbors: (Point) -> Int, tooFull: Int): SeatLayout {
+    val nextOccupied = empty.filter { countNeighbors(it) == 0 }.toSet() +
+            occupied.filter { countNeighbors(it) < tooFull }.toSet()
 
     return SeatLayout(seats, nextOccupied)
   }
 
-  private fun Point.adjacentOccupiedCount() = this.eightNeighbors.count(occupied::contains)
+  private fun adjacentOccupiedCount(point: Point) = point.eightNeighbors.count(occupied::contains)
 
-  fun stableState() = stableState(this)
+  fun visibleOccupiedCount(point: Point) = point.visibleSeats().count(occupied::contains)
 
-  private tailrec fun stableState(current: SeatLayout): SeatLayout {
-    val next = current.next()
+  private fun Point.visibleSeats() = eightDirections()
+          .mapNotNull { this.firstVisibleSeat(it) }
 
-    return if (next == current) next else stableState(next)
+  private fun eightDirections() = (-1..1).flatMap { x ->
+    (-1..1).map { y -> Point(x, y) }
+  }.minus(Point(0, 0))
+
+  private fun path(origin: Point, direction: Point) = generateSequence(1) { it + 1 }
+          .map { origin + it * direction }
+
+  private fun Point.firstVisibleSeat(direction: Point): Point? = path(this, direction)
+          .takeWhile { it.x in xRange && it.y in yRange }
+          .firstOrNull { seats.contains(it) }
+
+  fun stableState() = stableState(this, SeatLayout::next)
+  fun stableBySightLines() = stableState(this, SeatLayout::nextBySightLines)
+
+  private tailrec fun stableState(current: SeatLayout, transform: (SeatLayout) -> SeatLayout): SeatLayout {
+    val next = transform(current)
+
+    return if (next == current) next else stableState(next, transform)
   }
 }
 
@@ -58,4 +82,7 @@ fun main() {
   val layout = SeatLayout.parse(input)
 
   println(layout.stableState().occupied.size)
+  // This takes a couple seconds - we could speed it up by not recalculating sightlines for every state, and only once
+  // for the whole layout... but CPU time is cheap and developer time is expensive :)
+  println(layout.stableBySightLines().occupied.size)
 }
