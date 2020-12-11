@@ -1,15 +1,13 @@
 package advent.year2020.day7
 
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.CacheLoader
+import advent.utils.loadingCache
 import java.io.File
 
 class BagRules(val rules: List<BagRule>) {
   constructor(input: String) : this(input.trim().lines().map(BagRule::parse))
 
   // Cache the contained-inside counts so we don't have to recalculate for any particular type of bag.
-  private val containedInsideCache = CacheBuilder.newBuilder()
-          .build(CacheLoader.from { bag: String? -> calculateContainedInside(bag!!) })
+  private val containedInsideCache = loadingCache(::calculateContainedInside)
 
   fun validOutmost(inner: String): Set<String> = validOutmost(setOf(inner), emptySet())
 
