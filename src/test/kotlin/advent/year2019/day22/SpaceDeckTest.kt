@@ -1,5 +1,7 @@
 package advent.year2019.day22
 
+import advent.utils.expMod
+import advent.utils.multiplicativeInverse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -163,28 +165,6 @@ class SpaceDeckTest {
     val result = DealWithIncrement(3).originalPosition(finalPosition, numCards = 10)
 
     assertThat(result).isEqualTo(expected)
-  }
-
-  @Test
-  fun `multiplicative inverse -- sample input -- really is the inverse`() {
-    val actual = multiplicativeInverse(53, 10007)
-
-    println(actual)
-
-    assertThat((actual * 53) % 10007).isEqualTo(1)
-  }
-
-  @ParameterizedTest(name = "exp mod -- {0}^{1} mod {2} -- {3}")
-  @CsvSource("2, 4, 100, 16",
-          "2, 4, 10, 6",
-          "2, 3, 100, 8",
-          "2, 3, 5, 3",
-          "3, 6, 1000, 729",
-          "3, 6, 10, 9")
-  fun `exp mod -- sample input -- gives expected output`(x: Long, n: Long, m: Long, expected: Long) {
-    val actual = expMod(x, n, m)
-
-    assertThat(actual).isEqualTo(expected)
   }
 
   private fun List<String>.shuffle(startingDeck: SpaceDeck) = this.toInstructions().shuffle(startingDeck)
