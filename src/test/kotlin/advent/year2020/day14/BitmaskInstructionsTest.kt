@@ -32,4 +32,36 @@ class BitmaskInstructionsTest {
 
     assertThat(result).isEqualTo(165)
   }
+
+  @Test
+  fun `possibleValues -- reference bitmask -- 26, 27, 58, 59`() {
+    val bitmask = Bitmask("000000000000000000000000000000X1101X")
+
+    val result = bitmask.possibleValues()
+
+    assertThat(result).containsExactlyInAnyOrder(26L, 27L, 58L, 59L)
+  }
+
+  @Test
+  fun `possibleValues -- reference bitmask on 42 -- reference value`() {
+    val bitmask = Bitmask("000000000000000000000000000000X1001X")
+
+    val result = bitmask.applyQuantum(42)
+
+    assertThat(result.mask).isEqualTo("000000000000000000000000000000X1101X")
+  }
+
+  @Test
+  fun `instructions execute quantum -- reference example -- sum 208`() {
+    val instructions = BitmaskInstructions("""
+      mask = 000000000000000000000000000000X1001X
+      mem[42] = 100
+      mask = 00000000000000000000000000000000X0XX
+      mem[26] = 1
+    """.trimIndent())
+
+    val result = instructions.executeQuantum().sum()
+
+    assertThat(result).isEqualTo(208)
+  }
 }

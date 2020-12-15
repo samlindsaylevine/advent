@@ -13,8 +13,24 @@ class BitmaskInstructions(input: String) {
 
     instructions.forEach {
       when (it) {
-        is SetMask -> mask = Bitmask((it.mask))
+        is SetMask -> mask = Bitmask(it.mask)
         is SetMemory -> memory.values[it.address] = mask.apply(it.value)
+      }
+    }
+
+    return memory
+  }
+
+  fun executeQuantum(): BitmaskMemory {
+    val memory = BitmaskMemory()
+    var mask = Bitmask("X".repeat(36))
+
+    instructions.forEach { instruction ->
+      when (instruction) {
+        is SetMask -> mask = Bitmask(instruction.mask)
+        is SetMemory -> mask.applyQuantum(instruction.address).possibleValues().forEach { address ->
+          memory.values[address] = instruction.value
+        }
       }
     }
 
@@ -22,7 +38,7 @@ class BitmaskInstructions(input: String) {
   }
 }
 
-class Bitmask(val mask: String) {
+data class Bitmask(val mask: String) {
   fun apply(number: Long): Long = number.let(::applyOnes).let(::applyZeroes)
 
   private fun applyOnes(number: Long) = mask.replace('X', '0')
@@ -32,6 +48,27 @@ class Bitmask(val mask: String) {
   private fun applyZeroes(number: Long) = mask.replace('X', '1')
           .toLong(radix = 2)
           .and(number)
+
+  fun applyQuantum(number: Long): Bitmask {
+    val otherAsString = number.toString(radix = 2)
+            .padStart(length = this.mask.length, padChar = '0')
+
+    return mask.toCharArray().zip(otherAsString.toCharArray())
+            .map {
+              when (it.first) {
+                '1' -> '1'
+                'X' -> 'X'
+                else -> it.second
+              }
+            }
+            .joinToString(separator = "")
+            .let(::Bitmask)
+  }
+
+  fun possibleValues(): List<Long> = when {
+    mask.count { it == 'X' } == 0 -> listOf(mask.dropWhile { it == '0' }.toLong(radix = 2))
+    else -> listOf('0', '1').flatMap { Bitmask(mask.replaceFirst('X', it)).possibleValues() }
+  }
 }
 
 sealed class BitmaskInstruction {
@@ -62,4 +99,5 @@ fun main() {
   val instructions = BitmaskInstructions(input)
 
   println(instructions.execute().sum())
+  println(instructions.executeQuantum().sum())
 }
