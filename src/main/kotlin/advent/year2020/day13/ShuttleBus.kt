@@ -2,7 +2,6 @@ package advent.year2020.day13
 
 import advent.utils.ModularConstraint
 import advent.utils.chineseRemainderSolution
-import advent.utils.multiplicativeInverse
 
 class ShuttleBus(val id: Int) {
   fun earliestArrivalAfter(timestamp: Int) = ((timestamp / id) + 1) * id
@@ -38,11 +37,7 @@ class DepartureTimes(val busToOffset: Map<Long, Long>) {
    * single equation in the modulo that is the product of the individual ones.
    */
   fun earliest() = chineseRemainderSolution(busToOffset.entries
-          .map {
-            val output = ModularConstraint(Math.floorMod(-it.value, it.key), it.key)
-            println(output)
-            output
-          })
+          .map { ModularConstraint(Math.floorMod(-it.value, it.key), it.key) })
 }
 
 fun main() {
