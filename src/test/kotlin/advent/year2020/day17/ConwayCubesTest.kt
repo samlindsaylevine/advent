@@ -19,4 +19,18 @@ class ConwayCubesTest {
 
     assertThat(count).isEqualTo(112)
   }
+
+  @Test
+  fun `hypercubes advanced six times -- count -- 848`() {
+    val cubes = ConwayHypercubes("""
+      .#.
+      ..#
+      ###
+    """.trimIndent())
+
+    val finalState = advance(6, cubes, ConwayHypercubes::next)
+    val count = finalState.active.size
+
+    assertThat(count).isEqualTo(848)
+  }
 }
