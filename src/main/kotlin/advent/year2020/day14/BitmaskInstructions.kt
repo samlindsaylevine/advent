@@ -82,7 +82,7 @@ sealed class BitmaskInstruction {
   }
 }
 
-private fun String.substringBetween(openingDelimiter: String, closingDelimiter: String) =
+fun String.substringBetween(openingDelimiter: String, closingDelimiter: String) =
         this.substringAfter(openingDelimiter).substringBefore(closingDelimiter)
 
 private class SetMask(val mask: String) : BitmaskInstruction()
