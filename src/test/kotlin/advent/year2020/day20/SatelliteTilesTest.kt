@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test
 
 class SatelliteTilesTest {
 
-  @Test
-  fun `solve -- reference input -- reference corner product`() {
-    val tiles = SatelliteTiles("""
+  val input = """
       Tile 2311:
       ..##.#..#.
       ##..#.....
@@ -115,11 +113,25 @@ class SatelliteTilesTest {
       ..#.###...
       ..#.......
       ..#.###...
-    """.trimIndent())
+    """.trimIndent()
+
+  @Test
+  fun `solve -- reference input -- reference corner product`() {
+    val tiles = SatelliteTiles(input)
 
     val solution = tiles.solve()
     val product = solution.cornerProduct()
 
     assertThat(product).isEqualTo(20899048083289L)
+  }
+
+  @Test
+  fun `water roughness -- reference input -- 273`() {
+    val tiles = SatelliteTiles(input)
+
+    val solution = tiles.solve()
+    val roughness = solution.toImage().waterRoughness
+
+    assertThat(roughness).isEqualTo(273)
   }
 }
