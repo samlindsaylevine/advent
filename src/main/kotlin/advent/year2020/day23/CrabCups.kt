@@ -19,19 +19,22 @@ class CrabCups(cupsList: List<Int>,
   private val numCups = cupsList.size
 
   // A random-access list for looking up our linked list nodes by value.
+  // These linked list nodes will be hooked up in the init method, in the proper (circular) order.
+  // We originally used a built-in LinkedList, but that was too slow, particularly since we had to do O(N) lookups
+  // for a particular cup. This lets us do inserts, removes, and lookups by value all as O(1) operations.
   private val cups = (1..numCups).map(::Cup)
 
   /**
    * Get the node for the Cup with the provided number.
    */
-  private operator fun get(cupNumber: Int) = cups[cupNumber - 1]
+  private fun getCup(cupNumber: Int) = cups[cupNumber - 1]
 
-  private var currentCup = this[cupsList.first()]
+  private var currentCup = getCup(cupsList.first())
 
   init {
     // Hook up our linked list.
-    cupsList.zipWithNext().forEach { (first, second) -> this[first].next = this[second] }
-    this[cupsList.last()].next = this[cupsList.first()]
+    cupsList.zipWithNext().forEach { (first, second) -> getCup(first).next = getCup(second) }
+    getCup(cupsList.last()).next = getCup(cupsList.first())
   }
 
   private var movesExecuted = 0
@@ -49,7 +52,7 @@ class CrabCups(cupsList: List<Int>,
 
     val destinationNumber = destinationCupLabel(pickedUp.values())
     debug("destination: $destinationNumber")
-    val destination = this[destinationNumber]
+    val destination = getCup(destinationNumber)
 
     place(destination, pickedUp)
 
@@ -60,16 +63,14 @@ class CrabCups(cupsList: List<Int>,
 
   fun next(moves: Int) = repeat(moves) { next() }
 
-  fun labels(): String = generateSequence(this[1]) { it.next }
+  fun labels(): String = generateSequence(getCup(1)) { it.next }
           .drop(1)
           .map { it.value }
-          .takeWhile {
-            it != 1
-          }
+          .takeWhile { it != 1 }
           .joinToString(separator = "") { it.toString() }
 
   fun labelProduct(): Long {
-    val cupOne = this[1]
+    val cupOne = getCup(1)
 
     return cupOne.next.value.toLong() * cupOne.next.next.value.toLong()
   }
