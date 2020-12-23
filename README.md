@@ -26,4 +26,4 @@ The problem statements are all saved here, for your reference, under the doc fol
 
 Note that 2015 and 2016 are under src/[main|test]/java and later years are under src/[main|test]/kotlin.
 
-Continuous integration through Github Actions: ![Tests](https://github.com/samlindsaylevine/advent/workflows/Tests/badge.svg)
+Continuous integration through Github Actions: [![Tests](https://github.com/samlindsaylevine/advent/workflows/Tests/badge.svg)](https://github.com/samlindsaylevine/advent/actions)
