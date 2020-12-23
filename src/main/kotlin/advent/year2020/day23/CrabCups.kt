@@ -1,7 +1,6 @@
 package advent.year2020.day23
 
-class CrabCups(cupsList: List<Int>,
-               private val debug: Boolean = false) {
+class CrabCups(cupsList: List<Int>) {
   constructor(input: String) : this(parseToList(input))
 
   companion object {
@@ -37,26 +36,13 @@ class CrabCups(cupsList: List<Int>,
     getCup(cupsList.last()).next = getCup(cupsList.first())
   }
 
-  private var movesExecuted = 0
-
-  private fun debug(statement: String = "") = if (debug) println(statement) else Unit
-
   fun next() {
-    movesExecuted++
-
-    debug("-- move $movesExecuted --")
-
     val pickedUp = Triple(pickUp(), pickUp(), pickUp())
 
-    debug("pick up: ${pickedUp.first.value}, ${pickedUp.second.value}, ${pickedUp.third.value}")
-
     val destinationNumber = destinationCupLabel(pickedUp.values())
-    debug("destination: $destinationNumber")
     val destination = getCup(destinationNumber)
 
     place(destination, pickedUp)
-
-    debug()
 
     currentCup = currentCup.next
   }
