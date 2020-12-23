@@ -1,57 +1,89 @@
 package advent.year2020.day23
 
-import java.util.*
+class CrabCups(cupsList: List<Int>,
+               private val debug: Boolean = false) {
+  constructor(input: String) : this(parseToList(input))
 
-class CrabCups(val cups: LinkedList<Int>,
-               var currentIndex: Int = 0) {
-  constructor(input: String) : this(input.split("")
-          .filter { it.isNotEmpty() }
-          .map { it.toInt() }
-          .let(::LinkedList))
+  companion object {
+    private fun parseToList(input: String) = input.split("")
+            .filter { it.isNotEmpty() }
+            .map { it.toInt() }
 
-  private val minCup = cups.minOrNull() ?: throw IllegalStateException("Can't play cups with no cups")
-  private val maxCup = cups.maxOrNull() ?: throw IllegalStateException("Can't play cups with no cups")
+    fun extended(input: String): CrabCups {
+      val original = parseToList(input)
+      val additional = (original.size + 1)..1_000_000
+      return CrabCups(original + additional)
+    }
+  }
 
-  override fun toString() = cups.mapIndexed { i, cup -> if (i == currentIndex) "($cup)" else "$cup" }
-          .joinToString(" ")
+  private val numCups = cupsList.size
+
+  // A random-access list for looking up our linked list nodes by value.
+  private val cups = (1..numCups).map(::Cup)
+
+  /**
+   * Get the node for the Cup with the provided number.
+   */
+  private operator fun get(cupNumber: Int) = cups[cupNumber - 1]
+
+  private var currentCup = this[cupsList.first()]
+
+  init {
+    // Hook up our linked list.
+    cupsList.zipWithNext().forEach { (first, second) -> this[first].next = this[second] }
+    this[cupsList.last()].next = this[cupsList.first()]
+  }
+
+  private var movesExecuted = 0
+
+  private fun debug(statement: String = "") = if (debug) println(statement) else Unit
 
   fun next() {
+    movesExecuted++
+
+    debug("-- move $movesExecuted --")
+
     val pickedUp = Triple(pickUp(), pickUp(), pickUp())
 
-    place(pickedUp, destinationIndex(pickedUp))
+    debug("pick up: ${pickedUp.first.value}, ${pickedUp.second.value}, ${pickedUp.third.value}")
 
-    currentIndex = (currentIndex + 1) % cups.size
+    val destinationNumber = destinationCupLabel(pickedUp.values())
+    debug("destination: $destinationNumber")
+    val destination = this[destinationNumber]
+
+    place(destination, pickedUp)
+
+    debug()
+
+    currentCup = currentCup.next
   }
 
   fun next(moves: Int) = repeat(moves) { next() }
 
-  fun labels(): String {
-    val oneIndex = cups.indexOf(1)
+  fun labels(): String = generateSequence(this[1]) { it.next }
+          .drop(1)
+          .map { it.value }
+          .takeWhile {
+            it != 1
+          }
+          .joinToString(separator = "") { it.toString() }
 
-    val startingFromOne = cups.drop(oneIndex + 1) + cups.take(oneIndex)
+  fun labelProduct(): Long {
+    val cupOne = this[1]
 
-    return startingFromOne.joinToString("")
+    return cupOne.next.value.toLong() * cupOne.next.next.value.toLong()
   }
 
-  private fun pickUp(): Int = if (currentIndex == cups.size - 1) {
-    currentIndex--
-    cups.removeFirst()
-  } else {
-    cups.removeAt(currentIndex + 1)
+  private fun pickUp() = currentCup.takeNext()
+
+  private fun place(destination: Cup, pickedUp: Triple<Cup, Cup, Cup>) {
+    destination.addNext(pickedUp.third)
+    destination.addNext(pickedUp.second)
+    destination.addNext(pickedUp.first)
   }
-
-  private fun place(pickedUp: Triple<Int, Int, Int>, index: Int) {
-    if (index <= currentIndex) currentIndex = (currentIndex + 3)
-
-    cups.add(index, pickedUp.third)
-    cups.add(index, pickedUp.second)
-    cups.add(index, pickedUp.first)
-  }
-
-  private fun destinationIndex(pickedUp: Triple<Int, Int, Int>) = cups.indexOf(destinationCupLabel(pickedUp.toSet())) + 1
 
   private fun destinationCupLabel(pickedUp: Set<Int>): Int {
-    val target = cups[currentIndex] - 1
+    val target = currentCup.value - 1
     val possibilities = sequenceOf(
             wrap(target),
             wrap(target - 1),
@@ -62,18 +94,44 @@ class CrabCups(val cups: LinkedList<Int>,
     return possibilities.first { !pickedUp.contains(it) }
   }
 
-  private fun wrap(number: Int) = if (number < minCup) {
-    maxCup - (minCup - number - 1)
+  private fun wrap(number: Int) = if (number < 1) {
+    numCups + number
   } else {
     number
   }
 }
 
-private fun Triple<Int, Int, Int>.toSet() = setOf(this.first, this.second, this.third)
+/**
+ * Linked list nodes.
+ */
+private class Cup(val value: Int) {
+  var next: Cup = this
+
+  fun takeNext(): Cup {
+    val twoDown = this.next.next
+    val output = this.next
+    this.next = twoDown
+
+    return output
+  }
+
+  fun addNext(cup: Cup) {
+    val previousNext = this.next
+    this.next = cup
+    cup.next = previousNext
+  }
+}
+
+private fun Triple<Cup, Cup, Cup>.values() = setOf(this.first.value, this.second.value, this.third.value)
 
 fun main() {
-  val cups = CrabCups("389547612")
+  val input = "389547612"
+  val cups = CrabCups(input)
 
   cups.next(100)
   println(cups.labels())
+
+  val extended = CrabCups.extended(input)
+  extended.next(10_000_000)
+  println(extended.labelProduct())
 }

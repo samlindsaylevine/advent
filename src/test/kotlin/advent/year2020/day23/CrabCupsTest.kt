@@ -25,4 +25,14 @@ class CrabCupsTest {
 
     assertThat(labels).isEqualTo("67384529")
   }
+
+  @Test
+  fun `10_000_000 moves -- extended input -- reference label product`() {
+    val cups = CrabCups.extended("389125467")
+
+    cups.next(10_000_000)
+    val product = cups.labelProduct()
+
+    assertThat(product).isEqualTo(149245887792L)
+  }
 }
