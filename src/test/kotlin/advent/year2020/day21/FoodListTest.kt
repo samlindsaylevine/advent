@@ -30,4 +30,26 @@ class FoodListTest {
 
     assertThat(nonAllergenic).containsExactlyInAnyOrder("kfcds", "nhms", "sbzzf", "trh")
   }
+
+  @Test
+  fun `dangerous ingredients -- reference input -- mxmxvkd = dairy, sqjhc = fish, fvjkl = soy`() {
+    val foods = FoodList(input)
+
+    val dangerous = foods.dangerousIngredients()
+
+    assertThat(dangerous).isEqualTo(mapOf(
+            "mxmxvkd" to "dairy",
+            "sqjhc" to "fish",
+            "fvjkl" to "soy"
+    ))
+  }
+
+  @Test
+  fun `canonical dangerous ingredient list -- reference input -- mxmxvkd,sqjhc,fvjkl`() {
+    val foods = FoodList(input)
+
+    val canonicalList = foods.canonicalDangerousIngredientList()
+
+    assertThat(canonicalList).isEqualTo("mxmxvkd,sqjhc,fvjkl")
+  }
 }
