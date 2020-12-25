@@ -25,15 +25,13 @@ class HexTileFloor(val tiles: Set<HexLocation>) {
 
     return boundingBox
             .filter {
-              val neighborCount = countNeighbors(it)
+              val neighborCount = it.neighbors.count(tiles::contains)
               (it in tiles && (neighborCount == 1 || neighborCount == 2))
                       || (it !in tiles && neighborCount == 2)
             }
             .toSet()
             .let(::HexTileFloor)
   }
-
-  private fun countNeighbors(location: HexLocation) = location.neighbors.count { tiles.contains(it) }
 
   fun next(steps: Int) = nextRecursive(this, steps)
 
