@@ -183,7 +183,7 @@ class TileOrientation(val onPixels: Set<Point>,
           .toSet()
 }
 
-class SatelliteImage(val onPixels: Set<Point>) {
+class SatelliteImage(private val onPixels: Set<Point>) {
   companion object {
     private val seaMonsterString = """
                         # 
@@ -219,6 +219,25 @@ class SatelliteImage(val onPixels: Set<Point>) {
 
     water.size
   }
+
+  private val seaMonsterPixels: Set<Point> by lazy {
+    seaMonsterPositions.flatMap { tail -> seaMonsterOffsets.map { it + tail} }.toSet()
+  }
+
+  override fun toString(): String {
+    val maxY = onPixels.maxOf { it.y }
+    val maxX = onPixels.maxOf { it.y }
+
+    return (0..maxY).joinToString(separator = "\n") { y ->
+      (0..maxX).joinToString(separator = "") { x ->
+        when (Point(x, y)) {
+          in seaMonsterPixels -> "\u001b[31m#\u001b[0m"
+          in onPixels -> "#"
+          else -> "."
+        }
+      }
+    }
+  }
 }
 
 fun main() {
@@ -230,5 +249,7 @@ fun main() {
   val solution = tiles.solve()
 
   println(solution.cornerProduct())
-  println(solution.toImage().waterRoughness)
+  val image = solution.toImage()
+  println(image.waterRoughness)
+  println(image)
 }
