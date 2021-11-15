@@ -1,7 +1,7 @@
 package advent.year2020.day7
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class BagRulesTest {
 

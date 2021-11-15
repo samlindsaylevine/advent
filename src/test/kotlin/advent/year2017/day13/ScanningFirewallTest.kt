@@ -65,5 +65,4 @@ class ScanningFirewallTest {
 
         assertThat(startTime).isEqualTo(10)
     }
-
 }

@@ -1,14 +1,14 @@
 package advent.year2016.day14;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import advent.year2016.day14.OneTimePadKeyStream.Key;
 
@@ -57,7 +57,7 @@ public class OneTimePadKeyStreamTest {
 		this.assertStretchedIndex(1, 10);
 	}
 
-	@Ignore("This test does pass, but it is too slow to run every test run.")
+	@Disabled("This test does pass, but it is too slow to run every test run.")
 	@Test
 	public void stretchedReference() {
 		this.assertStretchedIndex(64, 22551);

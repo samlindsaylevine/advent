@@ -1,7 +1,7 @@
 package advent.year2018.day5
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class ReactivePolymerTest {
 

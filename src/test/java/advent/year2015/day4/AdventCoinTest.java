@@ -1,10 +1,10 @@
 package advent.year2015.day4;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.security.NoSuchAlgorithmException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import advent.year2015.day4.AdventCoin;
 
@@ -21,5 +21,4 @@ public class AdventCoinTest {
 		AdventCoin coin = new AdventCoin("pqrstuv");
 		assertEquals(1048970L, coin.getNumber());
 	}
-
 }

@@ -1,4 +1,6 @@
 /target/
+build/
+.gradle/
 .settings
 .DS_Store
 .idea

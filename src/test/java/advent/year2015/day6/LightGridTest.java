@@ -1,8 +1,8 @@
 package advent.year2015.day6;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import advent.year2015.day6.LightGrid.DigitalLight;
 import advent.year2015.day6.LightGrid.Instruction;
