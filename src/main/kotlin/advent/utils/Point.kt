@@ -1,7 +1,8 @@
 package advent.utils
 
+import java.lang.Integer.max
 import kotlin.math.abs
-import kotlin.math.sign
+import kotlin.math.absoluteValue
 
 data class Point(val x: Int, val y: Int) : Comparable<Point> {
   operator fun plus(other: Point) = Point(this.x + other.x, this.y + other.y)
@@ -15,8 +16,8 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 
   val adjacentNeighbors by lazy {
     sequenceOf(Point(-1, 0), Point(0, 1), Point(1, 0), Point(0, -1))
-            .map { it + this }
-            .toSet()
+      .map { it + this }
+      .toSet()
   }
 
   val eightNeighbors by lazy {
@@ -26,7 +27,7 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
   }
 
   override fun compareTo(other: Point) = this.distanceFrom(Point(0, 0))
-          .compareTo(other.distanceFrom(Point(0, 0)))
+    .compareTo(other.distanceFrom(Point(0, 0)))
 
   infix operator fun rangeTo(other: Point) = PointRange(this, other)
 }
@@ -34,13 +35,16 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 operator fun Int.times(point: Point) = Point(this * point.x, this * point.y)
 
 /**
- * Defines a range of points along a horizontal or vertical line.
+ * Defines a range of points along a horizontal, vertical, or diagonal line.
  */
-class PointRange(private val start: Point,
-                 private val endInclusive: Point) : Iterable<Point> {
+class PointRange(
+  val start: Point,
+  val endInclusive: Point
+) : Iterable<Point> {
   init {
-    require(start.x == endInclusive.x || start.y == endInclusive.y) {
-      "Start $start and end $endInclusive must be horizontally or vertically aligned"
+    val delta = (endInclusive - start)
+    require(delta.x == 0 || delta.y == 0 || delta.x.absoluteValue == delta.y.absoluteValue) {
+      "Start $start and end $endInclusive must be horizontally, vertically, or diagonally aligned"
     }
   }
 
@@ -50,7 +54,11 @@ class PointRange(private val start: Point,
 /**
  * The brains of the [PointRange].
  */
-class PointRangeIterator(private val start: Point, private val end: Point) : Iterator<Point> {
+class PointRangeIterator(start: Point, private val end: Point) : Iterator<Point> {
+  private val step = (end - start).let { delta ->
+    val length = max(delta.x.absoluteValue, delta.y.absoluteValue)
+    delta / length
+  }
   private var next: Point? = start
 
   override fun hasNext() = next != null
@@ -58,11 +66,9 @@ class PointRangeIterator(private val start: Point, private val end: Point) : Ite
   override fun next(): Point {
     val output = next ?: throw NoSuchElementException("Walked past end of iterator")
 
-    next = when {
-      output == end -> null
-      output.x == end.x -> Point(output.x, output.y + (end.y - output.y).sign)
-      output.y == end.y -> Point(output.x + (end.x - output.x).sign, output.y)
-      else -> throw IllegalStateException("Start $start and end $end aren't in a straight line")
+    next = when (output) {
+      end -> null
+      else -> output + step
     }
 
     return output
