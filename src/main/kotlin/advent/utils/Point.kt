@@ -35,7 +35,12 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 operator fun Int.times(point: Point) = Point(this * point.x, this * point.y)
 
 /**
- * Defines a range of points along a horizontal, vertical, or diagonal line.
+ * Defines a range of points along a line segment. The line segment may be horizontal, vertical, or (any degree of)
+ * diagonal; if diagonal, only integer-coordinate-value points along that line segment are part of the range.
+ *
+ * For example, the range from (0,0) to (6,4) contains (0,0), (3,2), and (6,4).
+ *
+ * If start and end are the same point, the range contains only one point, not two (i.e., points are never repeated).
  */
 class PointRange(
   val start: Point,
