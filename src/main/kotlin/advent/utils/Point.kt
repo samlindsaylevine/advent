@@ -1,6 +1,6 @@
 package advent.utils
 
-import java.lang.Integer.max
+import advent.year2019.day10.gcd
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 
@@ -41,13 +41,6 @@ class PointRange(
   val start: Point,
   val endInclusive: Point
 ) : Iterable<Point> {
-  init {
-    val delta = (endInclusive - start)
-    require(delta.x == 0 || delta.y == 0 || delta.x.absoluteValue == delta.y.absoluteValue) {
-      "Start $start and end $endInclusive must be horizontally, vertically, or diagonally aligned"
-    }
-  }
-
   override fun iterator() = PointRangeIterator(start, endInclusive)
 }
 
@@ -56,8 +49,8 @@ class PointRange(
  */
 class PointRangeIterator(start: Point, private val end: Point) : Iterator<Point> {
   private val step = (end - start).let { delta ->
-    val length = max(delta.x.absoluteValue, delta.y.absoluteValue)
-    if (length == 0) Point(0, 0) else delta / length
+    val gcd = gcd(delta.x.absoluteValue, delta.y.absoluteValue)
+    if (gcd == 0) Point(0, 0) else delta / gcd
   }
   private var next: Point? = start
 
@@ -65,12 +58,7 @@ class PointRangeIterator(start: Point, private val end: Point) : Iterator<Point>
 
   override fun next(): Point {
     val output = next ?: throw NoSuchElementException("Walked past end of iterator")
-
-    next = when (output) {
-      end -> null
-      else -> output + step
-    }
-
+    next = if (output == end) null else output + step
     return output
   }
 }

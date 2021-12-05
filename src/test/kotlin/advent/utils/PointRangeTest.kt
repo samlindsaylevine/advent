@@ -50,4 +50,27 @@ class PointRangeTest {
       Point(4, 5)
     )
   }
+
+  @Test
+  fun `included points -- non 45 degree diagonal -- has expected points`() {
+    val range = Point(0, 0)..Point(12, 4)
+    assertThat(range).containsExactly(
+      Point(0, 0),
+      Point(3, 1),
+      Point(6, 2),
+      Point(9, 3),
+      Point(12, 4)
+    )
+  }
+
+  @Test
+  fun `included points -- diagonal with non-even ratio -- has expected points`() {
+    val range = Point(0, 0)..Point(9, 6)
+    assertThat(range).containsExactly(
+      Point(0, 0),
+      Point(3, 2),
+      Point(6, 4),
+      Point(9, 6)
+    )
+  }
 }
