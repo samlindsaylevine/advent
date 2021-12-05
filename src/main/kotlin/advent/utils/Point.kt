@@ -57,7 +57,7 @@ class PointRange(
 class PointRangeIterator(start: Point, private val end: Point) : Iterator<Point> {
   private val step = (end - start).let { delta ->
     val length = max(delta.x.absoluteValue, delta.y.absoluteValue)
-    delta / length
+    if (length == 0) Point(0, 0) else delta / length
   }
   private var next: Point? = start
 

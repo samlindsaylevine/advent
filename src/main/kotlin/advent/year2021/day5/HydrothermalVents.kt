@@ -71,36 +71,22 @@ Consider all of the lines. At how many points do at least two lines overlap?
 
 Your puzzle answer was 17717.
  */
-class HydrothermalVent(val range: PointRange) {
-  constructor(input: String) : this(input.let {
-    val (first, second) = it.split(" -> ")
+class HydrothermalVents(private val vents: List<PointRange>) {
+  constructor(input: String) : this(input.trim().lines().map { line ->
+    val (first, second) = line.split(" -> ")
     val (firstX, firstY) = first.split(",").map(String::toInt)
     val (secondX, secondY) = second.split(",").map(String::toInt)
     Point(firstX, firstY)..Point(secondX, secondY)
   })
-}
-
-class HydrothermalVents(private val vents: List<HydrothermalVent>) {
-  constructor(input: String) : this(input.trim().lines().mapNotNull {
-    try {
-      HydrothermalVent(it)
-    } catch (e: IllegalArgumentException) {
-      // Not orthogonal!
-      null
-    }
-  })
 
   fun orthogonalOnly() = HydrothermalVents(this.vents.filter {
-    it.range.start.x == it.range.endInclusive.x || it.range.start.y == it.range.endInclusive.y
+    it.start.x == it.endInclusive.x || it.start.y == it.endInclusive.y
   })
 
-  private fun numberOfVentsAt(point: Point) = vents.count { it.range.contains(point) }
-
-  fun overlappingPoints(): Int = vents.flatMap { it.range }
+  fun overlappingPoints(): Int = vents.flatten()
     .groupingBy { it }
     .eachCount()
-    .filter { it.value >= 2 }
-    .count()
+    .count { it.value >= 2 }
 }
 
 fun main() {

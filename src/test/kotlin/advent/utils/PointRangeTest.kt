@@ -41,4 +41,13 @@ class PointRangeTest {
       Point(0, 4)
     )
   }
+
+  @Test
+  fun `included points -- start same as end -- has expected point`() {
+    val range = Point(4, 5)..Point(4, 5)
+
+    assertThat(range).containsExactly(
+      Point(4, 5)
+    )
+  }
 }

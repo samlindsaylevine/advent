@@ -3,7 +3,7 @@ package advent.year2021.day5
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class HydrothermalVentTest {
+class HydrothermalVentsTest {
 
   private val input = """
     0,9 -> 5,9
