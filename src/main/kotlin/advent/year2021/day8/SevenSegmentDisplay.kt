@@ -1,9 +1,11 @@
 package advent.year2021.day8
 
-import com.google.common.collect.Collections2
+import advent.utils.permutations
 import java.io.File
 
 enum class DisplayDigit(val segments: Set<Char>) {
+
+
   ZERO('a', 'b', 'c', 'e', 'f', 'g'),
   ONE('c', 'f'),
   TWO('a', 'c', 'd', 'e', 'g'),
@@ -16,6 +18,12 @@ enum class DisplayDigit(val segments: Set<Char>) {
   NINE('a', 'b', 'c', 'd', 'f', 'g');
 
   constructor (vararg segments: Char) : this(segments.toSet())
+
+  companion object {
+    val allSegments = values().map { it.segments }
+      .reduce(Set<Char>::union)
+      .sorted()
+  }
 }
 
 class SignalPattern(val wires: Set<Char>) {
@@ -47,21 +55,12 @@ class DisplayEntry(
   /**
    * Returns a calculated mapping of the wire codes in this entry (in the patterns and outputs) to
    * the segment codes (as defined in [DisplayDigit]).
+   *
+   * We're going to flagrantly ignore the hint in part 1 and just brute force test all the permutations.
    */
-  fun wiresToSegmentsMapping(): Map<Char, Char> {
-    // Let's ignore the hint of part 1 and just brute force this sucker -- we'll try every possible
-    // mapping and see which is consistent.
-    val segments = DisplayDigit.values().map { it.segments }
-      .reduce(Set<Char>::union)
-      .toList()
-
-    @Suppress("UnstableApiUsage")
-    val permutations = Collections2.permutations(segments)
-
-    val possibleMappings = permutations.map { it.zip(segments).toMap() }
-
-    return possibleMappings.first(this::isConsistent)
-  }
+  fun wiresToSegmentsMapping(): Map<Char, Char> = DisplayDigit.allSegments.permutations()
+    .map { it.zip(DisplayDigit.allSegments).toMap() }
+    .first(this::isConsistent)
 
   private fun isConsistent(mapping: Map<Char, Char>): Boolean {
     val allValues: List<Set<Char>> = signalPatterns.map { it.wires } + outputValue.digits
