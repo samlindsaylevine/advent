@@ -14,3 +14,12 @@ fun <T> List<T>.permutations(): Sequence<List<T>> = when {
     (this - first).permutations().map { rest: List<T> -> listOf(first) + rest }
   }
 }
+
+/**
+ * Find the "median" of a sortable collection of any type. Since we don't guarantee the ability to do arithmetic, only
+ * to sort, this only works with an odd number of elements.
+ */
+fun <T : Comparable<T>> Collection<T>.median() = when {
+  this.size % 2 == 0 -> throw IllegalArgumentException("Median of arbitrary type only works for odd number of elements")
+  else -> this.sorted()[(this.size - 1) / 2]
+}
