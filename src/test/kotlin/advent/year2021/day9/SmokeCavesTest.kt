@@ -1,6 +1,5 @@
-package advent.year2021
+package advent.year2021.day9
 
-import advent.year2021.day9.SmokeCaves
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

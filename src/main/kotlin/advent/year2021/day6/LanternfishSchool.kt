@@ -79,8 +79,8 @@ class LanternfishSchool(
 
   fun next(): LanternfishSchool {
     val countedDown = countByTimer.map { (timer, count) -> timer - 1 to count }
-    val (stillCounting, spawning) = countedDown.partition { it.first >= 0 }
-    val numSpawning = spawning.sumOf { it.second }
+    val (stillCounting, spawning) = countedDown.partition { (timer, _) -> timer >= 0 }
+    val numSpawning = spawning.sumOf { (_, count) -> count }
     val newFish = if (numSpawning > 0) {
       mapOf(generationLength - 1 to numSpawning, generationLength + 1 to numSpawning)
     } else {

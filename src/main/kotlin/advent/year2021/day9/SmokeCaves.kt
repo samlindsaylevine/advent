@@ -83,9 +83,8 @@ class SmokeCaves(private val heights: Map<Point, Int>) {
     .toMap())
 
   private val lowPoints by lazy {
-    heights.filter {
-      val height = it.value
-      it.key.adjacentNeighbors.all { neighbor ->
+    heights.filter { (point, height) ->
+      point.adjacentNeighbors.all { neighbor ->
         val neighborHeight = heights[neighbor]
         neighborHeight == null || neighborHeight > height
       }
@@ -111,8 +110,8 @@ class SmokeCaves(private val heights: Map<Point, Int>) {
     .groupingBy { basinLowPoint(it) }
     .eachCount()
     .entries
-    .filter { it.key != null }
-    .map { it.value }
+    .filter { (lowPoint, _) -> lowPoint != null }
+    .map { (_, basinSize) -> basinSize }
     .sorted()
     .takeLast(3)
     .reduce(Int::times)
