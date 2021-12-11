@@ -103,7 +103,7 @@ class NavigationSubsystem(val lines: List<String>) {
   companion object {
     fun validate(line: String) = validate(emptyList(), line)
 
-    private fun validate(chunkOpeners: List<Char>, remainingLine: String): LineValidation = when {
+    private tailrec fun validate(chunkOpeners: List<Char>, remainingLine: String): LineValidation = when {
       remainingLine.isEmpty() && chunkOpeners.isEmpty() -> ValidLine
       remainingLine.isEmpty() && chunkOpeners.isNotEmpty() ->
         IncompleteLine(chunkOpeners.reversed().map { it.matchingCloser() })

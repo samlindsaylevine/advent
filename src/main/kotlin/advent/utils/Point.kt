@@ -34,6 +34,19 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 
 operator fun Int.times(point: Point) = Point(this * point.x, this * point.y)
 
+// Helper for converting geographic maps (from Point to T) into a string.
+// We put (minX, minY) at the upper left, and Y increases down, and X increases to the right.
+fun <T> Map<Point, T>.visualized(transform: (T) -> String): String {
+  val minX = keys.minOf { it.x }
+  val maxX = keys.maxOf { it.x }
+  val minY = keys.minOf { it.y }
+  val maxY = keys.maxOf { it.y }
+
+  return (minY..maxY).joinToString("\n") { y ->
+    (minX..maxX).joinToString("") { x -> this[Point(x, y)]?.let(transform) ?: " " }
+  }
+}
+
 /**
  * Defines a range of points along a line segment. The line segment may be horizontal, vertical, or (any degree of)
  * diagonal; if diagonal, only integer-coordinate-value points along that line segment are part of the range.
