@@ -47,6 +47,11 @@ fun <T> Map<Point, T>.visualized(transform: (T) -> String): String {
   }
 }
 
+fun Set<Point>.visualized(pointCharacter: Char): String {
+  val map = this.groupBy { it }
+  return map.visualized { pointCharacter.toString() }
+}
+
 /**
  * Defines a range of points along a line segment. The line segment may be horizontal, vertical, or (any degree of)
  * diagonal; if diagonal, only integer-coordinate-value points along that line segment are part of the range.
