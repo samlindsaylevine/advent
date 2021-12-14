@@ -38,7 +38,7 @@ class SubmarinePolymerTest {
   fun `next -- formulas -- as per reference`(steps: Int, expected: String) {
     val polymer = example.next(steps)
 
-    assertThat(polymer.currentFormula).isEqualTo(expected)
+    assertThat(polymer.currentFormula).isEqualTo(expected.pairCount())
   }
 
   @Test
