@@ -4,6 +4,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 
@@ -13,7 +14,9 @@ object InputFile {
       .uri(URI.create("https://adventofcode.com/${date.year}/day/${date.dayOfMonth}/input"))
       .build()
 
-    val target = Paths.get("src", "main", "kotlin", "advent", "year${date.year}", "day${date.dayOfMonth}", "input.txt")
+    val directory = Paths.get("src", "main", "kotlin", "advent", "year${date.year}", "day${date.dayOfMonth}")
+    Files.createDirectories(directory)
+    val target = directory.resolve("input.txt")
 
     client.send(request, HttpResponse.BodyHandlers.ofFile(target))
   }
