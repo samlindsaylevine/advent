@@ -114,7 +114,7 @@ class SubmarinePolymer(
   private fun characterCounts(): Map<Char, Long> {
     // We'll count just the first character of each pair, so that we don't double count.
     val firstCharacterCounts = currentFormula.map { (pair, count) -> pair.first to count }
-      .groupingBy { (char, count) -> char }
+      .groupingBy { (char, _) -> char }
       .fold(0L) { acc, pair -> acc + pair.second }
 
     // Since we only counted the first character, that means we haven't yet counted the last character of the string.
@@ -128,7 +128,7 @@ class SubmarinePolymer(
     val counts = characterCounts()
       .map { (_, count) -> count }
 
-    return (counts.maxOrThrow() - counts.minOrThrow()).toLong()
+    return (counts.maxOrThrow() - counts.minOrThrow())
   }
 }
 
