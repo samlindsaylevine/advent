@@ -17,34 +17,41 @@ class ShortestPathFinder {
    * @param filter A speed up optimization: [FilterOptions] can control the discarding of paths that we know are
    *               irrelevant.
    * @param collapse A speed up optimization choice: [CollapseOptions] can optionally collapse some paths and only
-   * consider the first one, if our problem statement allows it.
+   * consider the first one, if our problem statement allows it. For example, if we only care about finding *one* path,
+   * we will often want to collapse based on the last() element of the path.
    * @param reportEvery If non-null, prints a debug statement every this number of steps.
    *
    * @return All the shortest paths (i.e., of equal length) from start to end, or empty set if there are none.
    */
-  fun <T> find(start: T,
-               end: EndOptions<T>,
-               nextSteps: StepOptions<T>,
-               filter: FilterOptions<T> = NoFilter(),
-               collapse: CollapseOptions<T, *> = NoCollapse(),
-               reportEvery: Int? = null): Set<Path<T>> =
-          find(end::matches,
-                  PathsInProgress(start),
-                  setOf(start),
-                  nextSteps::next,
-                  filter::discard,
-                  collapse::collapseKey,
-                  reportEvery,
-                  0)
+  fun <T> find(
+    start: T,
+    end: EndOptions<T>,
+    nextSteps: StepOptions<T>,
+    filter: FilterOptions<T> = NoFilter(),
+    collapse: CollapseOptions<T, *> = NoCollapse(),
+    reportEvery: Int? = null
+  ): Set<Path<T>> =
+    find(
+      end::matches,
+      PathsInProgress(start),
+      setOf(start),
+      nextSteps::next,
+      filter::discard,
+      collapse::collapseKey,
+      reportEvery,
+      0
+    )
 
-  private tailrec fun <T, K> find(endCondition: (T) -> Boolean,
-                                  inProgress: PathsInProgress<T>,
-                                  visited: Set<T>,
-                                  nextSteps: (T) -> Set<Step<T>>,
-                                  filterOut: (List<T>) -> Boolean,
-                                  collapseKey: (List<T>) -> K,
-                                  reportEvery: Int?,
-                                  costIncurred: Int): Set<Path<T>> {
+  private tailrec fun <T, K> find(
+    endCondition: (T) -> Boolean,
+    inProgress: PathsInProgress<T>,
+    visited: Set<T>,
+    nextSteps: (T) -> Set<Step<T>>,
+    filterOut: (List<T>) -> Boolean,
+    collapseKey: (List<T>) -> K,
+    reportEvery: Int?,
+    costIncurred: Int
+  ): Set<Path<T>> {
 
     val currentPaths = inProgress.current()
     val successfulPaths = currentPaths.filter { it.steps.isNotEmpty() && endCondition(it.steps.last()) }
@@ -54,8 +61,8 @@ class ShortestPathFinder {
       inProgress.isEmpty() -> emptySet()
       else -> {
         val nextPaths: Set<PathAndCost<T>> = currentPaths.flatMap { it.next(nextSteps, visited) }
-                .filter { !filterOut(it.path.steps) }
-                .toSet()
+          .filter { !filterOut(it.path.steps) }
+          .toSet()
 
         if (reportEvery != null && (costIncurred % reportEvery == 0)) {
           println("At step $costIncurred, considering ${nextPaths.size} options")
@@ -65,13 +72,15 @@ class ShortestPathFinder {
 
         val nextVisited: Set<T> = visited + nextInProgress.current().map { it.currentPoint }
 
-        find(endCondition,
-                nextInProgress,
-                nextVisited,
-                nextSteps, filterOut,
-                collapseKey,
-                reportEvery,
-                costIncurred + 1)
+        find(
+          endCondition,
+          nextInProgress,
+          nextVisited,
+          nextSteps, filterOut,
+          collapseKey,
+          reportEvery,
+          costIncurred + 1
+        )
       }
     }
   }
@@ -174,14 +183,18 @@ data class Step<T>(val next: T, val cost: Int) {
  */
 data class Path<T>(val steps: List<T>, val totalCost: Int)
 
-private data class PathInProgress<T>(val steps: List<T>,
-                                     val currentPoint: T) {
-  fun next(nextSteps: (T) -> Set<Step<T>>,
-           visited: Set<T>): Set<PathAndCost<T>> = nextSteps(currentPoint)
-          .asSequence()
-          .filter { !visited.contains(it.next) }
-          .map { PathAndCost(this.withStep(it.next), it.cost) }
-          .toSet()
+private data class PathInProgress<T>(
+  val steps: List<T>,
+  val currentPoint: T
+) {
+  fun next(
+    nextSteps: (T) -> Set<Step<T>>,
+    visited: Set<T>
+  ): Set<PathAndCost<T>> = nextSteps(currentPoint)
+    .asSequence()
+    .filter { !visited.contains(it.next) }
+    .map { PathAndCost(this.withStep(it.next), it.cost) }
+    .toSet()
 
   private fun withStep(nextPoint: T) = PathInProgress(this.steps + nextPoint, nextPoint)
 }
@@ -198,21 +211,23 @@ private class PathsInProgress<T>(private val nextPathsByCost: Set<PathAndCost<T>
   fun current() = nextPathsByCost.filter { it.cost == 0 }.map { it.path }
 
   fun advanced(): PathsInProgress<T> = PathsInProgress(nextPathsByCost.filter { it.cost > 0 }
-          .map { PathAndCost(it.path, it.cost - 1) }
-          .toSet())
+    .map { PathAndCost(it.path, it.cost - 1) }
+    .toSet())
 
   fun isEmpty() = nextPathsByCost.isEmpty()
 
   fun size() = nextPathsByCost.size
 
-  fun <K> plus(newPaths: Set<PathAndCost<T>>,
-               collapseKey: (List<T>) -> K): PathsInProgress<T> {
+  fun <K> plus(
+    newPaths: Set<PathAndCost<T>>,
+    collapseKey: (List<T>) -> K
+  ): PathsInProgress<T> {
 
     val allNext = nextPathsByCost + newPaths
 
     val collapsed = allNext.groupBy { if (it.path.steps.isEmpty()) null else collapseKey(it.path.steps) }
-            .values
-            .mapNotNull { paths -> paths.minByOrNull { it.cost } }
+      .values
+      .mapNotNull { paths -> paths.minByOrNull { it.cost } }
 
     return PathsInProgress(collapsed.toSet())
   }
