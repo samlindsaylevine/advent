@@ -90,7 +90,7 @@ private fun String.copyToClipboard() {
 fun main() {
   val statement = ProblemStatement.retrieve(
     AdventOfCodeCookies.clientWithCookies(),
-    LocalDate.of(2018, Month.DECEMBER, 21)
+    LocalDate.of(2019, Month.DECEMBER, 9)
   )
 
   val javadoc = statement.toJavadoc()
