@@ -156,11 +156,13 @@ import java.io.File
 object BuoyancyInterchangeTransmission {
   fun parse(hexString: String): BitPacket {
     // Can't just use the built-in toInt(radix) and toString(radix) for two reasons:
-    // 1, number is too big; 2, need to ensure that we have the correct number of leading 0s.
+    // 1, number is too big (could use BigInteger, though);
+    // 2, need to ensure that we have the correct number of leading 0s.
+    // So, we'll translate each character individually.
     val binary = hexString.toCharArray()
       .joinToString("") {
-        it.digitToInt(16)
-          .toString(2)
+        it.digitToInt(radix = 16)
+          .toString(radix = 2)
           .padStart(4, '0')
       }
 
@@ -221,11 +223,7 @@ object BuoyancyInterchangeTransmission {
 }
 
 sealed class BitPacket(open val version: Int) {
-  fun versionSum(): Int = when (this) {
-    is LiteralPacket -> this.version
-    is OperatorPacket -> this.version + this.subpackets.sumOf { it.versionSum() }
-  }
-
+  abstract fun versionSum(): Int
   abstract fun evaluate(): Long
 }
 
@@ -233,6 +231,7 @@ data class LiteralPacket(
   override val version: Int,
   val value: Long
 ) : BitPacket(version) {
+  override fun versionSum() = version
   override fun evaluate() = value
 }
 
@@ -241,6 +240,7 @@ data class OperatorPacket(
   val packetTypeId: Int,
   val subpackets: List<BitPacket>
 ) : BitPacket(version) {
+  override fun versionSum() = version + subpackets.sumOf { it.versionSum() }
   override fun evaluate(): Long = when (packetTypeId) {
     0 -> subpackets.sumOf { it.evaluate() }
     1 -> subpackets.fold(1) { acc, packet -> acc * packet.evaluate() }
