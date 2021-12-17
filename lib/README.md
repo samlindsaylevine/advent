@@ -1,4 +1,5 @@
-[CookieMonster](https://github.com/benjholla/CookieMonster) from Ben Holland included under the MIT License:
+[CookieMonster](https://github.com/benjholla/CookieMonster) from Ben Holland included (for purposes of "meta" actions,
+extracting Chrome cookies to make requests to Advent of Code) under the MIT License:
 
 The MIT License (MIT)
 

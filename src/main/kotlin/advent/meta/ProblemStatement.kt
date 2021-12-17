@@ -8,7 +8,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.LocalDate
-import java.time.Month
 
 class ProblemStatement(val original: String) {
 
@@ -88,10 +87,7 @@ private fun String.copyToClipboard() {
  * Best run after solving the day's problem so that both parts are visible.
  */
 fun main() {
-  val statement = ProblemStatement.retrieve(
-    AdventOfCodeCookies.clientWithCookies(),
-    LocalDate.of(2019, Month.DECEMBER, 9)
-  )
+  val statement = ProblemStatement.retrieve(AdventOfCodeCookies.clientWithCookies())
 
   val javadoc = statement.toJavadoc()
   javadoc.copyToClipboard()
