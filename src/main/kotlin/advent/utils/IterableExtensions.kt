@@ -1,5 +1,11 @@
 package advent.utils
 
+import kotlin.Comparable
+import kotlin.IllegalArgumentException
+import kotlin.IllegalStateException
+import kotlin.Pair
+import kotlin.to
+
 fun <T : Comparable<T>> Iterable<T>.maxOrThrow(): T = this.maxOrNull()
   ?: throw IllegalStateException("Max of an empty Iterable is undefined")
 
@@ -16,6 +22,13 @@ fun <T> List<T>.permutations(): Sequence<List<T>> = when {
   else -> this.asSequence().flatMap { first ->
     (this - first).permutations().map { rest: List<T> -> listOf(first) + rest }
   }
+}
+
+/**
+ * Returns all ordered pairs between elements in this list and each other, including between elements and themselves.
+ */
+fun <T> List<T>.pairs(): Sequence<Pair<T, T>> = this.asSequence().flatMap { element ->
+  this.asSequence().map { element to it }
 }
 
 /**
