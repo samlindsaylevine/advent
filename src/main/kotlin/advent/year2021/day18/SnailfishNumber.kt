@@ -262,18 +262,16 @@ sealed class SnailfishNumber {
 
     this.sequence().forEach {
       val current = it.last()
+      val existingPair = pair
       when {
-        pair == null && current is RegularNumber -> previousNumber = current
-        pair == null && current is SnailfishPair && it.size >= 5 -> pair = current
-        pair != null && current is RegularNumber && !it.contains(pair!!) -> return ExplodingPair(
-          pair!!,
-          previousNumber,
-          current
-        )
+        existingPair == null && current is RegularNumber -> previousNumber = current
+        existingPair == null && current is SnailfishPair && it.size >= 5 -> pair = current
+        existingPair != null && current is RegularNumber && !it.contains(existingPair) ->
+          return ExplodingPair(existingPair, previousNumber, current)
       }
     }
 
-    return pair?.let { ExplodingPair(pair!!, previousNumber, null) }
+    return pair?.let { ExplodingPair(it, previousNumber, null) }
   }
 
   private data class ExplodingPair(
@@ -282,6 +280,10 @@ sealed class SnailfishNumber {
     val nextNumber: RegularNumber?
   )
 
+  /**
+   * If numberToIncrement is non-null, replace it in our tree with a number incremented by amount. If it is null,
+   * do nothing.
+   */
   private fun incremented(numberToIncrement: RegularNumber?, amount: Int) = if (numberToIncrement == null) {
     this
   } else {

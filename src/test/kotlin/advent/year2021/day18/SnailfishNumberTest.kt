@@ -41,7 +41,6 @@ class SnailfishNumberTest {
   )
   fun `split -- simple -- as per examples`(input: String, expected: String) {
     val number = SnailfishNumber.parse(input)
-    println(number.sequence().toList())
     val split = number.reduced()
 
     assertThat(split.toString()).isEqualTo(expected)

@@ -4,8 +4,8 @@ import kotlin.math.abs
 
 data class Point3D(val x: Int, val y: Int, val z: Int) {
   fun distanceTo(other: Point3D) = abs(this.x - other.x) +
-          abs(this.y - other.y) +
-          abs(this.z - other.z)
+      abs(this.y - other.y) +
+      abs(this.z - other.z)
 
   /**
    * Including neighbors that are "diagonal".
@@ -17,4 +17,12 @@ data class Point3D(val x: Int, val y: Int, val z: Int) {
       }
     }.filter { it != this }
   }
+
+  operator fun plus(other: Point3D) = Point3D(this.x + other.x, this.y + other.y, this.z + other.z)
+  operator fun minus(other: Point3D) = Point3D(this.x - other.x, this.y - other.y, this.z - other.z)
+
+  /**
+   * Manhattan distance.
+   */
+  fun distanceFrom(other: Point3D) = abs(this.x - other.x) + abs(this.y - other.y) + abs(this.z - other.z)
 }
