@@ -65,11 +65,11 @@ import kotlin.math.max
  */
 data class DiracDice(
   val players: Pair<Player, Player>,
-  val turnsElapsed: Long = 0,
-  val goal: Long = 1000
+  val turnsElapsed: Int = 0,
+  val goal: Int = 1000
 ) {
   constructor(input: String) : this(players = input.trim().lines()
-    .map { it.substringAfterLast(" ").toLong() }
+    .map { it.substringAfterLast(" ").toInt() }
     .let { positions ->
       val (firstPosition, secondPosition) = positions
       Player(firstPosition) to Player(secondPosition)
@@ -77,24 +77,19 @@ data class DiracDice(
 
   fun nextDeterministic() = next(deterministicDiceRoll())
 
-  fun next(diceRoll: Long): DiracDice = if (turnsElapsed % 2 == 0L) {
-    DiracDice(
-      players = players.first.advanced(diceRoll) to players.second,
-      turnsElapsed + 1,
-      goal
-    )
-  } else {
-    DiracDice(
-      players = players.first to players.second.advanced(diceRoll),
-      turnsElapsed + 1,
-      goal
-    )
+  fun next(diceRoll: Int): DiracDice {
+    val nextPlayers = if (turnsElapsed % 2 == 0) {
+      players.first.advanced(diceRoll) to players.second
+    } else {
+      players.first to players.second.advanced(diceRoll)
+    }
+    return DiracDice(nextPlayers, turnsElapsed + 1, goal)
   }
 
   fun product(): Long {
     val losingPlayer = if (players.first.score >= goal) players.second else players.first
 
-    return losingPlayer.score * (3 * turnsElapsed)
+    return losingPlayer.score.toLong() * (3 * turnsElapsed)
   }
 
   fun isCompleted() = players.first.score >= goal || players.second.score >= goal
@@ -102,14 +97,14 @@ data class DiracDice(
   fun deterministicGame() = generateSequence(this) { it.nextDeterministic() }
     .first { it.isCompleted() }
 
-  private fun deterministicDiceRoll(): Long {
+  private fun deterministicDiceRoll(): Int {
     return (1 + 3 * turnsElapsed).modToOne(100) +
         (2 + 3 * turnsElapsed).modToOne(100) +
         (3 + 3 * turnsElapsed).modToOne(100)
   }
 
-  data class Player(val position: Long, val score: Long = 0) {
-    fun advanced(spaces: Long): Player {
+  data class Player(val position: Int, val score: Int = 0) {
+    fun advanced(spaces: Int): Player {
       val newPosition = ((position + spaces) % 10).modToOne(10)
       val newScore = score + newPosition
       return Player(newPosition, newScore)
@@ -121,13 +116,13 @@ data class DiracDice(
 /**
  * As per normal reduce mod, except it only reduces once you go _over_ the modulus, and thus never returns 0.
  */
-private fun Long.modToOne(modulus: Long) = (this % modulus).let { if (it == 0L) modulus else it }
+private fun Int.modToOne(modulus: Int) = (this % modulus).let { if (it == 0) modulus else it }
 
 class DiracMultiverse(
   /**
    * A map of games not yet completed to the count of how many copies of that game there are.
    */
-  val gamesInProgress: Map<DiracDice, Long>,
+  private val gamesInProgress: Map<DiracDice, Long>,
   val playerOneWins: Long = 0,
   val playerTwoWins: Long = 0
 ) {
@@ -167,13 +162,12 @@ class DiracMultiverse(
    * When we roll 3 dice, we get a total. This is the map from dice total to number of times that can appear when we
    * roll the quantum die 3 times.
    */
-  private val diceRolls: Map<Long, Long> = (1L..3L).flatMap { a ->
-    (1L..3L).flatMap { b ->
-      (1L..3L).map { c -> a + b + c }
+  private val diceRolls: Map<Int, Int> = (1..3).flatMap { a ->
+    (1..3).flatMap { b ->
+      (1..3).map { c -> a + b + c }
     }
   }.groupingBy { it }
     .eachCount()
-    .mapValues { (_, count) -> count.toLong() }
 
   fun resolve(): DiracMultiverse = generateSequence(this) { it.next() }
     .first { it.gamesInProgress.isEmpty() }
