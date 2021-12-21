@@ -1,6 +1,7 @@
 package advent.year2021.day21
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class DiracDiceTest {
@@ -27,5 +28,14 @@ class DiracDiceTest {
     val product = example.deterministicGame().product()
 
     assertThat(product).isEqualTo(739785)
+  }
+
+  @Test
+  @Disabled("This is probably too slow to run regularly, but does pass!")
+  fun `multiverse -- as per example -- reference number of wins`() {
+    val result = DiracMultiverse(example).resolve()
+
+    assertThat(result.playerOneWins).isEqualTo(444356092776315)
+    assertThat(result.playerTwoWins).isEqualTo(341960390180808)
   }
 }

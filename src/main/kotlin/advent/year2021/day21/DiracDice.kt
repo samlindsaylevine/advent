@@ -1,6 +1,8 @@
 package advent.year2021.day21
 
+import advent.utils.merge
 import java.io.File
+import kotlin.math.max
 
 /**
  * --- Day 21: Dirac Dice ---
@@ -63,7 +65,8 @@ import java.io.File
  */
 data class DiracDice(
   val players: Pair<Player, Player>,
-  val turnsElapsed: Long = 0
+  val turnsElapsed: Long = 0,
+  val goal: Long = 1000
 ) {
   constructor(input: String) : this(players = input.trim().lines()
     .map { it.substringAfterLast(" ").toLong() }
@@ -72,29 +75,32 @@ data class DiracDice(
       Player(firstPosition) to Player(secondPosition)
     })
 
-  fun nextDeterministic(): DiracDice {
-    val diceRoll = deterministicDiceRoll()
-    return if (turnsElapsed % 2 == 0L) {
-      DiracDice(
-        players = players.first.advanced(diceRoll) to players.second,
-        turnsElapsed + 1
-      )
-    } else {
-      DiracDice(
-        players = players.first to players.second.advanced(diceRoll),
-        turnsElapsed + 1
-      )
-    }
+  fun nextDeterministic() = next(deterministicDiceRoll())
+
+  fun next(diceRoll: Long): DiracDice = if (turnsElapsed % 2 == 0L) {
+    DiracDice(
+      players = players.first.advanced(diceRoll) to players.second,
+      turnsElapsed + 1,
+      goal
+    )
+  } else {
+    DiracDice(
+      players = players.first to players.second.advanced(diceRoll),
+      turnsElapsed + 1,
+      goal
+    )
   }
 
   fun product(): Long {
-    val losingPlayer = if (players.first.score >= 1000L) players.second else players.first
+    val losingPlayer = if (players.first.score >= goal) players.second else players.first
 
     return losingPlayer.score * (3 * turnsElapsed)
   }
 
+  fun isCompleted() = players.first.score >= goal || players.second.score >= goal
+
   fun deterministicGame() = generateSequence(this) { it.nextDeterministic() }
-    .first { it.players.first.score >= 1000L || it.players.second.score >= 1000L }
+    .first { it.isCompleted() }
 
   private fun deterministicDiceRoll(): Long {
     return (1 + 3 * turnsElapsed).modToOne(100) +
@@ -117,10 +123,68 @@ data class DiracDice(
  */
 private fun Long.modToOne(modulus: Long) = (this % modulus).let { if (it == 0L) modulus else it }
 
+class DiracMultiverse(
+  /**
+   * A map of games not yet completed to the count of how many copies of that game there are.
+   */
+  val gamesInProgress: Map<DiracDice, Long>,
+  val playerOneWins: Long = 0,
+  val playerTwoWins: Long = 0
+) {
+  constructor(first: DiracDice) : this(mapOf(first.copy(goal = 21) to 1L))
+
+  fun next(): DiracMultiverse {
+    println("Turns: ${gamesInProgress.keys.first().turnsElapsed}")
+    println("In progress: ${gamesInProgress.size}")
+
+    val nextStates = gamesInProgress.entries.map { (state, count) ->
+      next(state, count)
+    }.reduce(Map<DiracDice, Long>::merge)
+
+    val (done, stillGoing) = nextStates.entries.partition { (state, _) -> state.isCompleted() }
+    val (playerOneVictories, playerTwoVictories) = done.partition { (state, _) -> state.players.first.score >= state.goal }
+    val playerOneVictoryCount = playerOneVictories.sumOf { (_, count) -> count }
+    val playerTwoVictoryCount = playerTwoVictories.sumOf { (_, count) -> count }
+
+    return DiracMultiverse(
+      gamesInProgress = stillGoing.associateBy({ it.key }, { it.value }),
+      playerOneWins = this.playerOneWins + playerOneVictoryCount,
+      playerTwoWins = this.playerTwoWins + playerTwoVictoryCount
+    )
+  }
+
+  /**
+   * Given a single state, and the number of that state that exist, returns the next steps that the state could advance
+   * to, and how many times each of those states appears.
+   */
+  private fun next(dice: DiracDice, existingCount: Long): Map<DiracDice, Long> {
+    return diceRolls.entries.associate { (diceRoll, count) ->
+      dice.next(diceRoll) to existingCount * count
+    }
+  }
+
+  /**
+   * When we roll 3 dice, we get a total. This is the map from dice total to number of times that can appear when we
+   * roll the quantum die 3 times.
+   */
+  private val diceRolls: Map<Long, Long> = (1L..3L).flatMap { a ->
+    (1L..3L).flatMap { b ->
+      (1L..3L).map { c -> a + b + c }
+    }
+  }.groupingBy { it }
+    .eachCount()
+    .mapValues { (_, count) -> count.toLong() }
+
+  fun resolve(): DiracMultiverse = generateSequence(this) { it.next() }
+    .first { it.gamesInProgress.isEmpty() }
+}
+
 fun main() {
   val dice = File("src/main/kotlin/advent/year2021/day21/input.txt")
     .readText()
     .let(::DiracDice)
 
   println(dice.deterministicGame().product())
+  val multiverse = DiracMultiverse(dice).resolve()
+  println(max(multiverse.playerOneWins, multiverse.playerTwoWins))
 }
