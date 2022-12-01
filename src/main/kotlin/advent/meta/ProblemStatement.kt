@@ -15,6 +15,7 @@ class ProblemStatement(val original: String) {
     fun retrieve(client: HttpClient, date: LocalDate = LocalDate.now()): ProblemStatement {
       val request = HttpRequest.newBuilder()
         .uri(URI.create("https://adventofcode.com/${date.year}/day/${date.dayOfMonth}"))
+        .header("User-Agent", AdventOfCodeUserAgent.HEADER)
         .build()
 
       val response = client.send(request, HttpResponse.BodyHandlers.ofString())
