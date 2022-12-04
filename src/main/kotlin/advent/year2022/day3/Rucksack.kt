@@ -96,9 +96,9 @@ private fun String.secondHalf() = this.slice(this.length / 2 until this.length)
 
 fun String.asRuckSacks(): List<Rucksack> = this.lines().map(::Rucksack)
 fun List<Rucksack>.totalPriority() = this.sumOf { it.priority }
-fun List<Rucksack>.badgePriority() = this.chunked(3) { group ->
-  group.map { it.items.toSet() }.reduce(Set<Char>::intersect).first()
-}.sumOf { commonItem -> priority(commonItem) }
+
+fun List<Rucksack>.commonItem() = this.map { it.items.toSet() }.reduce(Set<Char>::intersect).first()
+fun List<Rucksack>.badgePriority() = this.chunked(3) { group -> group.commonItem() }.sumOf { priority(it) }
 
 fun main() {
   val input = File("src/main/kotlin/advent/year2022/day3/input.txt").readText().trim()
