@@ -23,7 +23,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
   implementation("commons-io:commons-io:2.7")
-  implementation("com.google.guava:guava:30.0-jre")
+  implementation("com.google.guava:guava:31.1-jre")
   implementation("commons-codec:commons-codec:1.10")
   implementation("org.apache.commons:commons-lang3:3.4")
   implementation("com.google.code.gson:gson:2.10")
