@@ -31,7 +31,7 @@ dependencies {
 
   // For "meta" actions - downloading input file & problem statement.
   implementation(files("lib/CookieMonster.jar"))
-  implementation("org.jsoup:jsoup:1.14.3")
+  implementation("org.jsoup:jsoup:1.15.3")
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.1.0")
   testImplementation("org.junit.jupiter:junit-jupiter-engine:5.1.0")
