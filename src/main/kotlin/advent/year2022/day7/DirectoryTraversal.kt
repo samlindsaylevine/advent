@@ -130,11 +130,9 @@ data class DirectoryTraversal(val lines: List<String>) {
         // We're presuming that we never cd into a directory before ls'ing it.
         line.startsWith("$ cd ") -> currentPath = currentPath.subdirectories[line.substringAfter("cd ")]
           ?: throw IllegalArgumentException("No subdirectory $line")
-        line.startsWith("dir") -> currentPath.subdirectories.put(
-          line.substringAfter("dir "),
+        line.startsWith("dir") -> currentPath.subdirectories[line.substringAfter("dir ")] =
           Directory(parent = currentPath)
-        )
-        line.take(1).isNumber() -> currentPath.files.put(line.substringAfter(" "), line.substringBefore(" ").toLong())
+        line.take(1).isNumber() -> currentPath.files[line.substringAfter(" ")] = line.substringBefore(" ").toLong()
         line == "$ ls" -> Unit
         else -> throw IllegalArgumentException("Unrecognized command $line")
       }
