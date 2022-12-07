@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 
 class PipeGraphTest {
 
-    private val REFERENCE_INPUT = """0 <-> 2
+  private val REFERENCE_INPUT = """0 <-> 2
 1 <-> 1
 2 <-> 0, 3, 4
 3 <-> 2, 4
@@ -13,23 +13,24 @@ class PipeGraphTest {
 5 <-> 6
 6 <-> 4, 5"""
 
-    @Test
-    fun `connectedSubgraph -- reference input -- reference output`() {
-        val graph = PipeGraph(REFERENCE_INPUT)
+  @Test
+  fun `connectedSubgraph -- reference input -- reference output`() {
+    val graph = PipeGraph(REFERENCE_INPUT)
 
-        val subgraph = graph.connectedSubgraph(0)
+    val subgraph = graph.connectedSubgraph(0)
 
-        assertThat(subgraph).hasSize(6)
-                .containsExactlyInAnyOrder(0, 2, 3, 4, 5, 6)
-    }
+    assertThat(subgraph).containsExactlyInAnyOrder(0, 2, 3, 4, 5, 6)
+  }
 
-    @Test
-    fun `connectedSubgraphs -- reference input -- reference output`() {
-        val graph = PipeGraph(REFERENCE_INPUT)
+  @Test
+  fun `connectedSubgraphs -- reference input -- reference output`() {
+    val graph = PipeGraph(REFERENCE_INPUT)
 
-        val subgraphs = graph.connectedSubgraphs()
+    val subgraphs = graph.connectedSubgraphs()
 
-        assertThat(subgraphs).containsExactlyInAnyOrder(setOf(0, 2, 3, 4, 5, 6),
-                setOf(1))
-    }
+    assertThat(subgraphs).containsExactlyInAnyOrder(
+      setOf(0, 2, 3, 4, 5, 6),
+      setOf(1)
+    )
+  }
 }
