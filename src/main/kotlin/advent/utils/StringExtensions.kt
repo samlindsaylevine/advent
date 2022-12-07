@@ -14,3 +14,5 @@ fun String.findAllNumbers(): List<Int> {
  * If there aren't that many numbers throws IndexOutOfBoundsException.
  */
 fun String.findNumber(position: Int): Int = this.findAllNumbers()[position]
+
+fun String.isNumber() = Regex("\\d+").matches(this)

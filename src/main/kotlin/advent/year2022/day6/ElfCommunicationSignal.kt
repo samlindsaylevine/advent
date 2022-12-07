@@ -54,7 +54,7 @@ import java.io.File
  *
  */
 class ElfCommunicationSignal(val characters: String) {
-  fun firstMarker(markerLength: Int = 4): Int = characters.toCharArray().toList()
+  fun firstMarker(markerLength: Int = 4): Int = characters.toList()
     .windowed(markerLength)
     // The marker count includes the characters themselves.
     .indexOfFirst { it.toSet().size == markerLength } + markerLength
