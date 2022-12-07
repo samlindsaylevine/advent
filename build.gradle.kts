@@ -33,7 +33,7 @@ dependencies {
   implementation(files("lib/CookieMonster.jar"))
   implementation("org.jsoup:jsoup:1.15.3")
 
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.1.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-engine:5.1.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.1.0")
   testImplementation("org.assertj:assertj-core:3.8.0")
