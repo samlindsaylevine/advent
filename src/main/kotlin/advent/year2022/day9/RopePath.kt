@@ -719,8 +719,6 @@ class RopePath(
     val delta = target - follower
     val move = when {
       delta.x.absoluteValue <= 1 && delta.y.absoluteValue <= 1 -> Point(0, 0)
-      delta.y == 0 -> Point(delta.x.sign, 0)
-      delta.x == 0 -> Point(0, delta.y.sign)
       else -> Point(delta.x.sign, delta.y.sign)
     }
     return follower + move
