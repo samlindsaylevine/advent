@@ -389,5 +389,10 @@ fun main() {
   val circuit = ClockCircuit(input)
 
   println(circuit.interestingSignalStrength())
-  println(circuit.draw())
+  // Make some modifications to the official representation for readability.
+  println(
+    circuit.draw()
+      .replace('.', ' ')
+      .replace('#', '█')
+  )
 }
