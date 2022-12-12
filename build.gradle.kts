@@ -24,7 +24,7 @@ dependencies {
 
   implementation("commons-io:commons-io:2.11.0")
   implementation("com.google.guava:guava:31.1-jre")
-  implementation("commons-codec:commons-codec:1.10")
+  implementation("commons-codec:commons-codec:1.15")
   implementation("org.apache.commons:commons-lang3:3.12.0")
   implementation("com.google.code.gson:gson:2.10")
   implementation("org.reflections:reflections:0.9.8")
