@@ -150,6 +150,10 @@ data class Collapse<T, K>(val collapse: (List<T>) -> K) : CollapseOptions<T, K> 
   override fun collapseKey(states: List<T>) = collapse(states)
 }
 
+class CollapseOnCurrentState<T> : CollapseOptions<T, T> {
+  override fun collapseKey(states: List<T>) = states.last()
+}
+
 /**
  * A definition of what paths in progress should be filtered out and discarded, as a speed-up optimization.
  */
