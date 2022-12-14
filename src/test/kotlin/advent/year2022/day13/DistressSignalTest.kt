@@ -117,6 +117,4 @@ class DistressSignalTest {
 
     assertThat(signal.decoderKey()).isEqualTo(140)
   }
-
-
 }
