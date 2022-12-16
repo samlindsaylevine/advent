@@ -24,4 +24,11 @@ class VolcanoValvesTest {
 
     assertThat(valves.maxPressureReleased()).isEqualTo(1651)
   }
+
+  @Test
+  fun `maxPressureReleased -- reference input, with elephant -- 1707`() {
+    val valves = VolcanoValves(input)
+
+    assertThat(valves.maxPressureReleased(withElephant = true)).isEqualTo(1707)
+  }
 }
