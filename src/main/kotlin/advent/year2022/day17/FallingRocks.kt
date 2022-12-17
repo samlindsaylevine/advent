@@ -2,6 +2,7 @@ package advent.year2022.day17
 
 import advent.utils.Direction
 import advent.utils.Point
+import advent.utils.findLinearRecurrence
 import java.io.File
 
 class FallingRocks(private val jetDirections: List<Direction>) {
@@ -13,7 +14,7 @@ class FallingRocks(private val jetDirections: List<Direction>) {
     }
   })
 
-  fun chambers(): Sequence<FallingRockChamber> =
+  private fun chambers(): Sequence<FallingRockChamber> =
     jetDirections.asSequence()
       .repeatForever()
       .runningFold(FallingRockChamber()) { chamber, direction ->
@@ -21,6 +22,17 @@ class FallingRocks(private val jetDirections: List<Direction>) {
       }
 
   fun result(rocksLanded: Int) = chambers().first { it.rocksLanded == rocksLanded }
+
+  // Returns a sequence of pairs (number of rocks dropped, height after rock dropped).
+  private fun heightsByRock(): Sequence<Int> = sequenceOf(0) +
+      chambers()
+        .zipWithNext()
+        .filter { it.second.rocksLanded > it.first.rocksLanded }
+        .map { it.second.height() }
+
+  fun calculateHeight(rocksLanded: Long) = heightsByRock()
+    .findLinearRecurrence(minPeriod = 10)
+    ?.get(rocksLanded)
 }
 
 private fun <T> Sequence<T>.repeatForever() = sequence { while (true) yieldAll(this@repeatForever) }
@@ -87,4 +99,8 @@ fun main() {
 
   val result = rocks.result(2022)
   println(result.height())
+
+  // This takes a couple minutes to find the linear recurrence
+  // LinearRecurrence(firstIndex=390, period=1725, deltaPerCycle=2685)
+  println(rocks.calculateHeight(1000000000000))
 }
