@@ -13,13 +13,14 @@ class FallingRocks(private val jetDirections: List<Direction>) {
     }
   })
 
-  fun result(rocksLanded: Int): FallingRockChamber =
+  fun chambers(): Sequence<FallingRockChamber> =
     jetDirections.asSequence()
       .repeatForever()
       .runningFold(FallingRockChamber()) { chamber, direction ->
         chamber.next(direction)
       }
-      .first { it.rocksLanded == rocksLanded }
+
+  fun result(rocksLanded: Int) = chambers().first { it.rocksLanded == rocksLanded }
 }
 
 private fun <T> Sequence<T>.repeatForever() = sequence { while (true) yieldAll(this@repeatForever) }

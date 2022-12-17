@@ -1,6 +1,5 @@
 package advent.year2022.day17
 
-import advent.year2022.FallingRocks
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
