@@ -35,7 +35,7 @@ dependencies {
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.1.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.1")
   testImplementation("org.assertj:assertj-core:3.23.1")
 
   api("org.apache.commons:commons-math3:3.6.1")
