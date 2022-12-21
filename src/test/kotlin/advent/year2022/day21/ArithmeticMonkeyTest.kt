@@ -27,6 +27,14 @@ class ArithmeticMonkeyTest {
   fun `root -- reference input -- 152`() {
     val monkeys = ArithmeticMonkeys(input)
 
-    assertThat(monkeys.getValue("root")).isEqualTo(152)
+    assertThat(monkeys.getValue("root").toLong()).isEqualTo(152)
+  }
+
+  @Test
+  fun `to shout -- reference input -- 301`() {
+    val monkeys = ArithmeticMonkeys(input)
+    val withMe = monkeys.withMe()
+
+    assertThat(withMe.getValue("root").toLong()).isEqualTo(301)
   }
 }
