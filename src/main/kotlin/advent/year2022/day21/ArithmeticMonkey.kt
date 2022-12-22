@@ -135,15 +135,15 @@ data class LinearExpression(val variableCoefficient: Rational, val constant: Rat
     )
   }
 
-  operator fun div(other: LinearExpression) = when (other.variableCoefficient) {
-    Rational.of(0, 1) -> LinearExpression(this.variableCoefficient / other.constant, this.constant / other.constant)
-    else -> throw IllegalStateException("Uh-oh: trying to divide by a non-constant expression! $this * $other")
+  operator fun div(other: LinearExpression) = when {
+    other.variableCoefficient.isNonZero() -> throw IllegalStateException("Uh-oh: trying to divide by a non-constant expression! $this * $other")
+    else -> LinearExpression(this.variableCoefficient / other.constant, this.constant / other.constant)
   }
 
   private fun Rational.isNonZero() = this != Rational.of(0, 1)
 
   fun toLong() = when {
-    variableCoefficient != Rational.of(0, 1) -> throw IllegalStateException("Non-constant expression $this")
+    variableCoefficient.isNonZero() -> throw IllegalStateException("Non-constant expression $this")
     constant.denominator != 1L -> throw IllegalStateException("Non-integer expression $this")
     else -> constant.numerator
   }
