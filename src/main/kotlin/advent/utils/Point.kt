@@ -65,6 +65,8 @@ class PointRange(
   val endInclusive: Point
 ) : Iterable<Point> {
   override fun iterator() = PointRangeIterator(start, endInclusive)
+
+  override fun toString() = "$start .. $endInclusive"
 }
 
 /**
