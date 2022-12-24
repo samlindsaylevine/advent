@@ -21,4 +21,11 @@ class BlizzardBasinTest {
 
     assertThat(basin.timeToEscape()).isEqualTo(18)
   }
+
+  @Test
+  fun `time to round trip for snacks -- example -- 54`() {
+    val basin = BlizzardBasin(input)
+
+    assertThat(basin.timeToRoundTripForSnacks()).isEqualTo(54)
+  }
 }
