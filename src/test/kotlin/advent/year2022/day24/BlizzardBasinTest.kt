@@ -1,6 +1,5 @@
-package advent.year2022
+package advent.year2022.day24
 
-import advent.year2022.day24.BlizzardBasin
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
