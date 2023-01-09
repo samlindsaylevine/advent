@@ -4,3 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Disable version updates; allow only security updates. (Hard to imagine any way a security vulnerability in a
+    # library could impact me running code on my own machine with no input from anywhere else...)
+    open-pull-requests-limit: 0
