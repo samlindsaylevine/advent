@@ -26,7 +26,7 @@ dependencies {
   implementation("com.google.guava:guava:31.1-jre")
   implementation("commons-codec:commons-codec:1.15")
   implementation("org.apache.commons:commons-lang3:3.12.0")
-  implementation("com.google.code.gson:gson:2.10")
+  implementation("com.google.code.gson:gson:2.10.1")
   implementation("org.reflections:reflections:0.10.2")
 
   // For "meta" actions - downloading input file & problem statement.
