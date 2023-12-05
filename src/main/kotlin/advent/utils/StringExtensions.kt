@@ -2,10 +2,13 @@ package advent.utils
 
 fun String.digits() = this.split("").filter { it.isNotEmpty() }.map { it.toInt() }
 
-fun String.findAllNumbers(): List<Int> {
-  val regex = Regex("\\d+")
-  val allMatches = regex.findAll(this)
-  return allMatches.map { it.value.toInt() }.toList()
+fun String.findAllNumbers(): List<Int> = findAllNumbers(String::toInt)
+fun String.findAllLongs(): List<Long> = findAllNumbers(String::toLong)
+
+private fun <T> String.findAllNumbers(transform: (String) -> T): List<T> {
+    val regex = Regex("\\d+")
+    val allMatches = regex.findAll(this)
+    return allMatches.map { transform(it.value) }.toList()
 }
 
 /**
