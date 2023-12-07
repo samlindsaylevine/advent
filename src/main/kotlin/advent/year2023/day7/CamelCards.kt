@@ -20,19 +20,19 @@ class CamelCards(private val handsAndBids: List<HandAndBid>) {
 data class HandAndBid(val hand: CamelCardHand, val bid: Int)
 
 enum class CamelCard(val char: Char) {
-    A('A'),
-    K('K'),
-    Q('Q'),
-    J('J'),
-    T('T'),
-    NINE('9'),
-    EIGHT('8'),
-    SEVEN('7'),
-    SIX('6'),
-    FIVE('5'),
-    FOUR('4'),
+    TWO('2'),
     THREE('3'),
-    TWO('2');
+    FOUR('4'),
+    FIVE('5'),
+    SIX('6'),
+    SEVEN('7'),
+    EIGHT('8'),
+    NINE('9'),
+    T('T'),
+    J('J'),
+    Q('Q'),
+    K('K'),
+    A('A');
 
     companion object {
         private val byChar = values().associateBy { it.char }
@@ -42,8 +42,8 @@ enum class CamelCard(val char: Char) {
         val jokersLowComparator: Comparator<CamelCard> = Comparator { left, right ->
             when {
                 left == right -> 0
-                left == J -> 1
-                right == J -> -1
+                left == J -> -1
+                right == J -> 1
                 else -> left.compareTo(right)
             }
         }
@@ -51,13 +51,13 @@ enum class CamelCard(val char: Char) {
 }
 
 enum class CamelCardHandType(val distinctCounts: List<Int>) {
-    FIVE_OF_A_KIND(5),
-    FOUR_OF_A_KIND(4, 1),
-    FULL_HOUSE(3, 2),
-    THREE_OF_A_KIND(3, 1, 1),
-    TWO_PAIR(2, 2, 1),
+    HIGH_CARD(1, 1, 1, 1, 1),
     ONE_PAIR(2, 1, 1, 1),
-    HIGH_CARD(1, 1, 1, 1, 1);
+    TWO_PAIR(2, 2, 1),
+    THREE_OF_A_KIND(3, 1, 1),
+    FULL_HOUSE(3, 2),
+    FOUR_OF_A_KIND(4, 1),
+    FIVE_OF_A_KIND(5);
 
     companion object {
         private val byCounts = values().associateBy { it.distinctCounts }
@@ -78,7 +78,6 @@ data class CamelCardHand(val cards: List<CamelCard>) : Comparable<CamelCardHand>
                 .thenComparing<CamelCard> { it.cards[2] }
                 .thenComparing<CamelCard> { it.cards[3] }
                 .thenComparing<CamelCard> { it.cards[4] }
-                .reversed()
 
         val jokersWildComparator: Comparator<CamelCardHand> = Comparator.comparing(CamelCardHand::typeWithJokers)
                 .thenComparing({ it.cards[0] }, CamelCard.jokersLowComparator)
@@ -86,7 +85,6 @@ data class CamelCardHand(val cards: List<CamelCard>) : Comparable<CamelCardHand>
                 .thenComparing({ it.cards[2] }, CamelCard.jokersLowComparator)
                 .thenComparing({ it.cards[3] }, CamelCard.jokersLowComparator)
                 .thenComparing({ it.cards[4] }, CamelCard.jokersLowComparator)
-                .reversed()
     }
 
     private fun List<CamelCard>.distinctCounts(): List<Int> = this.groupingBy { it }.eachCount().values.sortedDescending()

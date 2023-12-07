@@ -58,18 +58,20 @@ class CamelCardsTest {
     fun `card orders -- sorted jokers low -- AKQ1098765432J`() {
         val cards = CamelCard.values().sortedWith(CamelCard.jokersLowComparator)
 
-        assertThat(cards).containsExactly(CamelCard.A,
-                CamelCard.K,
-                CamelCard.Q,
-                CamelCard.T,
-                CamelCard.NINE,
-                CamelCard.EIGHT,
-                CamelCard.SEVEN,
-                CamelCard.SIX,
-                CamelCard.FIVE,
-                CamelCard.FOUR,
-                CamelCard.THREE,
+        assertThat(cards).containsExactly(
+                CamelCard.J,
                 CamelCard.TWO,
-                CamelCard.J)
+                CamelCard.THREE,
+                CamelCard.FOUR,
+                CamelCard.FIVE,
+                CamelCard.SIX,
+                CamelCard.SEVEN,
+                CamelCard.EIGHT,
+                CamelCard.NINE,
+                CamelCard.T,
+                CamelCard.Q,
+                CamelCard.K,
+                CamelCard.A
+        )
     }
 }
