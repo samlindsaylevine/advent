@@ -14,6 +14,11 @@ fun <T> Sequence<T>.takeWhileInclusive(predicate: (T) -> Boolean): Sequence<T> =
 }
 
 /**
+ * Will never return if your sequence is infinite!
+ */
+fun <T> Sequence<T>.size() = this.fold(0) { acc, _ -> acc + 1 }
+
+/**
  * Attempts to find a "linear recurrence" in the sequence - a repeating set of numbers that are all offset by some delta
  * for each full cycle.
  *
@@ -23,9 +28,9 @@ fun <T> Sequence<T>.takeWhileInclusive(predicate: (T) -> Boolean): Sequence<T> =
  * A min period can be specified to reduce these false positives.
  */
 fun Sequence<Int>.findLinearRecurrence(
-  minPeriod: Int = 3,
-  maxPeriod: Int = 10_000,
-  printEvery: Int? = null
+        minPeriod: Int = 3,
+        maxPeriod: Int = 10_000,
+        printEvery: Int? = null
 ): LinearRecurrence? {
   val encountered = mutableListOf<Int>()
 
@@ -49,10 +54,10 @@ fun Sequence<Int>.findLinearRecurrence(
 
 
 data class LinearRecurrence(
-  val firstIndex: Int,
-  val period: Int,
-  val deltaPerCycle: Int,
-  val individualValues: List<Int>
+        val firstIndex: Int,
+        val period: Int,
+        val deltaPerCycle: Int,
+        val individualValues: List<Int>
 ) {
   /**
    * Extrapolate forward to predict what the value at the given index will be (by counting cycles).

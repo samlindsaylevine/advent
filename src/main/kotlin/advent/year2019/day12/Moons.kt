@@ -28,77 +28,77 @@ import advent.year2019.day10.gcd
  * <x=2, y=-10, z=-7>
  * <x=4, y=-8, z=8>
  * <x=3, y=5, z=-1>
- * 
+ *
  * Simulating the motion of these moons would produce the following:
  * After 0 steps:
  * pos=<x=-1, y=  0, z= 2>, vel=<x= 0, y= 0, z= 0>
  * pos=<x= 2, y=-10, z=-7>, vel=<x= 0, y= 0, z= 0>
  * pos=<x= 4, y= -8, z= 8>, vel=<x= 0, y= 0, z= 0>
  * pos=<x= 3, y=  5, z=-1>, vel=<x= 0, y= 0, z= 0>
- * 
+ *
  * After 1 step:
  * pos=<x= 2, y=-1, z= 1>, vel=<x= 3, y=-1, z=-1>
  * pos=<x= 3, y=-7, z=-4>, vel=<x= 1, y= 3, z= 3>
  * pos=<x= 1, y=-7, z= 5>, vel=<x=-3, y= 1, z=-3>
  * pos=<x= 2, y= 2, z= 0>, vel=<x=-1, y=-3, z= 1>
- * 
+ *
  * After 2 steps:
  * pos=<x= 5, y=-3, z=-1>, vel=<x= 3, y=-2, z=-2>
  * pos=<x= 1, y=-2, z= 2>, vel=<x=-2, y= 5, z= 6>
  * pos=<x= 1, y=-4, z=-1>, vel=<x= 0, y= 3, z=-6>
  * pos=<x= 1, y=-4, z= 2>, vel=<x=-1, y=-6, z= 2>
- * 
+ *
  * After 3 steps:
  * pos=<x= 5, y=-6, z=-1>, vel=<x= 0, y=-3, z= 0>
  * pos=<x= 0, y= 0, z= 6>, vel=<x=-1, y= 2, z= 4>
  * pos=<x= 2, y= 1, z=-5>, vel=<x= 1, y= 5, z=-4>
  * pos=<x= 1, y=-8, z= 2>, vel=<x= 0, y=-4, z= 0>
- * 
+ *
  * After 4 steps:
  * pos=<x= 2, y=-8, z= 0>, vel=<x=-3, y=-2, z= 1>
  * pos=<x= 2, y= 1, z= 7>, vel=<x= 2, y= 1, z= 1>
  * pos=<x= 2, y= 3, z=-6>, vel=<x= 0, y= 2, z=-1>
  * pos=<x= 2, y=-9, z= 1>, vel=<x= 1, y=-1, z=-1>
- * 
+ *
  * After 5 steps:
  * pos=<x=-1, y=-9, z= 2>, vel=<x=-3, y=-1, z= 2>
  * pos=<x= 4, y= 1, z= 5>, vel=<x= 2, y= 0, z=-2>
  * pos=<x= 2, y= 2, z=-4>, vel=<x= 0, y=-1, z= 2>
  * pos=<x= 3, y=-7, z=-1>, vel=<x= 1, y= 2, z=-2>
- * 
+ *
  * After 6 steps:
  * pos=<x=-1, y=-7, z= 3>, vel=<x= 0, y= 2, z= 1>
  * pos=<x= 3, y= 0, z= 0>, vel=<x=-1, y=-1, z=-5>
  * pos=<x= 3, y=-2, z= 1>, vel=<x= 1, y=-4, z= 5>
  * pos=<x= 3, y=-4, z=-2>, vel=<x= 0, y= 3, z=-1>
- * 
+ *
  * After 7 steps:
  * pos=<x= 2, y=-2, z= 1>, vel=<x= 3, y= 5, z=-2>
  * pos=<x= 1, y=-4, z=-4>, vel=<x=-2, y=-4, z=-4>
  * pos=<x= 3, y=-7, z= 5>, vel=<x= 0, y=-5, z= 4>
  * pos=<x= 2, y= 0, z= 0>, vel=<x=-1, y= 4, z= 2>
- * 
+ *
  * After 8 steps:
  * pos=<x= 5, y= 2, z=-2>, vel=<x= 3, y= 4, z=-3>
  * pos=<x= 2, y=-7, z=-5>, vel=<x= 1, y=-3, z=-1>
  * pos=<x= 0, y=-9, z= 6>, vel=<x=-3, y=-2, z= 1>
  * pos=<x= 1, y= 1, z= 3>, vel=<x=-1, y= 1, z= 3>
- * 
+ *
  * After 9 steps:
  * pos=<x= 5, y= 3, z=-4>, vel=<x= 0, y= 1, z=-2>
  * pos=<x= 2, y=-9, z=-3>, vel=<x= 0, y=-2, z= 2>
  * pos=<x= 0, y=-8, z= 4>, vel=<x= 0, y= 1, z=-2>
  * pos=<x= 1, y= 1, z= 5>, vel=<x= 0, y= 0, z= 2>
- * 
+ *
  * After 10 steps:
  * pos=<x= 2, y= 1, z=-3>, vel=<x=-3, y=-2, z= 1>
  * pos=<x= 1, y=-8, z= 0>, vel=<x=-1, y= 1, z= 3>
  * pos=<x= 3, y=-6, z= 1>, vel=<x= 3, y= 2, z=-3>
  * pos=<x= 2, y= 0, z= 4>, vel=<x= 1, y=-1, z=-1>
- * 
+ *
  * Then, it might help to calculate the total energy in the system. The total energy for a single moon is its potential
  * energy multiplied by its kinetic energy. A moon's potential energy is the sum of the absolute values of its x, y,
- * and z position coordinates. A moon's kinetic energy is the sum of the absolute values of its velocity coordinates. 
+ * and z position coordinates. A moon's kinetic energy is the sum of the absolute values of its velocity coordinates.
  * Below, each line shows the calculations for a moon's potential energy (pot), kinetic energy (kin), and total energy:
  * Energy after 10 steps:
  * pot: 2 + 1 + 3 =  6;   kin: 3 + 2 + 1 = 6;   total:  6 * 6 = 36
@@ -106,7 +106,7 @@ import advent.year2019.day10.gcd
  * pot: 3 + 6 + 1 = 10;   kin: 3 + 2 + 3 = 8;   total: 10 * 8 = 80
  * pot: 2 + 0 + 4 =  6;   kin: 1 + 1 + 1 = 3;   total:  6 * 3 = 18
  * Sum of total energy: 36 + 45 + 80 + 18 = 179
- * 
+ *
  * In the above example, adding together the total energy for all moons after 10 steps produces the total energy in the
  * system, 179.
  * Here's a second example:
@@ -114,83 +114,83 @@ import advent.year2019.day10.gcd
  * <x=5, y=5, z=10>
  * <x=2, y=-7, z=3>
  * <x=9, y=-8, z=-3>
- * 
+ *
  * Every ten steps of simulation for 100 steps produces:
  * After 0 steps:
  * pos=<x= -8, y=-10, z=  0>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  5, y=  5, z= 10>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  2, y= -7, z=  3>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  9, y= -8, z= -3>, vel=<x=  0, y=  0, z=  0>
- * 
+ *
  * After 10 steps:
  * pos=<x= -9, y=-10, z=  1>, vel=<x= -2, y= -2, z= -1>
  * pos=<x=  4, y= 10, z=  9>, vel=<x= -3, y=  7, z= -2>
  * pos=<x=  8, y=-10, z= -3>, vel=<x=  5, y= -1, z= -2>
  * pos=<x=  5, y=-10, z=  3>, vel=<x=  0, y= -4, z=  5>
- * 
+ *
  * After 20 steps:
  * pos=<x=-10, y=  3, z= -4>, vel=<x= -5, y=  2, z=  0>
  * pos=<x=  5, y=-25, z=  6>, vel=<x=  1, y=  1, z= -4>
  * pos=<x= 13, y=  1, z=  1>, vel=<x=  5, y= -2, z=  2>
  * pos=<x=  0, y=  1, z=  7>, vel=<x= -1, y= -1, z=  2>
- * 
+ *
  * After 30 steps:
  * pos=<x= 15, y= -6, z= -9>, vel=<x= -5, y=  4, z=  0>
  * pos=<x= -4, y=-11, z=  3>, vel=<x= -3, y=-10, z=  0>
  * pos=<x=  0, y= -1, z= 11>, vel=<x=  7, y=  4, z=  3>
  * pos=<x= -3, y= -2, z=  5>, vel=<x=  1, y=  2, z= -3>
- * 
+ *
  * After 40 steps:
  * pos=<x= 14, y=-12, z= -4>, vel=<x= 11, y=  3, z=  0>
  * pos=<x= -1, y= 18, z=  8>, vel=<x= -5, y=  2, z=  3>
  * pos=<x= -5, y=-14, z=  8>, vel=<x=  1, y= -2, z=  0>
  * pos=<x=  0, y=-12, z= -2>, vel=<x= -7, y= -3, z= -3>
- * 
+ *
  * After 50 steps:
  * pos=<x=-23, y=  4, z=  1>, vel=<x= -7, y= -1, z=  2>
  * pos=<x= 20, y=-31, z= 13>, vel=<x=  5, y=  3, z=  4>
  * pos=<x= -4, y=  6, z=  1>, vel=<x= -1, y=  1, z= -3>
  * pos=<x= 15, y=  1, z= -5>, vel=<x=  3, y= -3, z= -3>
- * 
+ *
  * After 60 steps:
  * pos=<x= 36, y=-10, z=  6>, vel=<x=  5, y=  0, z=  3>
  * pos=<x=-18, y= 10, z=  9>, vel=<x= -3, y= -7, z=  5>
  * pos=<x=  8, y=-12, z= -3>, vel=<x= -2, y=  1, z= -7>
  * pos=<x=-18, y= -8, z= -2>, vel=<x=  0, y=  6, z= -1>
- * 
+ *
  * After 70 steps:
  * pos=<x=-33, y= -6, z=  5>, vel=<x= -5, y= -4, z=  7>
  * pos=<x= 13, y= -9, z=  2>, vel=<x= -2, y= 11, z=  3>
  * pos=<x= 11, y= -8, z=  2>, vel=<x=  8, y= -6, z= -7>
  * pos=<x= 17, y=  3, z=  1>, vel=<x= -1, y= -1, z= -3>
- * 
+ *
  * After 80 steps:
  * pos=<x= 30, y= -8, z=  3>, vel=<x=  3, y=  3, z=  0>
  * pos=<x= -2, y= -4, z=  0>, vel=<x=  4, y=-13, z=  2>
  * pos=<x=-18, y= -7, z= 15>, vel=<x= -8, y=  2, z= -2>
  * pos=<x= -2, y= -1, z= -8>, vel=<x=  1, y=  8, z=  0>
- * 
+ *
  * After 90 steps:
  * pos=<x=-25, y= -1, z=  4>, vel=<x=  1, y= -3, z=  4>
  * pos=<x=  2, y= -9, z=  0>, vel=<x= -3, y= 13, z= -1>
  * pos=<x= 32, y= -8, z= 14>, vel=<x=  5, y= -4, z=  6>
  * pos=<x= -1, y= -2, z= -8>, vel=<x= -3, y= -6, z= -9>
- * 
+ *
  * After 100 steps:
  * pos=<x=  8, y=-12, z= -9>, vel=<x= -7, y=  3, z=  0>
  * pos=<x= 13, y= 16, z= -3>, vel=<x=  3, y=-11, z= -5>
  * pos=<x=-29, y=-11, z= -1>, vel=<x= -3, y=  7, z=  4>
  * pos=<x= 16, y=-13, z= 23>, vel=<x=  7, y=  1, z=  1>
- * 
+ *
  * Energy after 100 steps:
  * pot:  8 + 12 +  9 = 29;   kin: 7 +  3 + 0 = 10;   total: 29 * 10 = 290
  * pot: 13 + 16 +  3 = 32;   kin: 3 + 11 + 5 = 19;   total: 32 * 19 = 608
  * pot: 29 + 11 +  1 = 41;   kin: 3 +  7 + 4 = 14;   total: 41 * 14 = 574
  * pot: 16 + 13 + 23 = 52;   kin: 7 +  1 + 1 =  9;   total: 52 *  9 = 468
  * Sum of total energy: 290 + 608 + 574 + 468 = 1940
- * 
+ *
  * What is the total energy in the system after simulating the moons given in your scan for 1000 steps?
- * 
+ *
  * --- Part Two ---
  * All this drifting around in space makes you wonder about the nature of the universe.  Does history really repeat
  * itself?  You're curious whether the moons will ever return to a previous state.
@@ -203,138 +203,138 @@ import advent.year2019.day10.gcd
  * pos=<x=  2, y=-10, z= -7>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  4, y= -8, z=  8>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  3, y=  5, z= -1>, vel=<x=  0, y=  0, z=  0>
- * 
+ *
  * After 2770 steps:
  * pos=<x=  2, y= -1, z=  1>, vel=<x= -3, y=  2, z=  2>
  * pos=<x=  3, y= -7, z= -4>, vel=<x=  2, y= -5, z= -6>
  * pos=<x=  1, y= -7, z=  5>, vel=<x=  0, y= -3, z=  6>
  * pos=<x=  2, y=  2, z=  0>, vel=<x=  1, y=  6, z= -2>
- * 
+ *
  * After 2771 steps:
  * pos=<x= -1, y=  0, z=  2>, vel=<x= -3, y=  1, z=  1>
  * pos=<x=  2, y=-10, z= -7>, vel=<x= -1, y= -3, z= -3>
  * pos=<x=  4, y= -8, z=  8>, vel=<x=  3, y= -1, z=  3>
  * pos=<x=  3, y=  5, z= -1>, vel=<x=  1, y=  3, z= -1>
- * 
+ *
  * After 2772 steps:
  * pos=<x= -1, y=  0, z=  2>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  2, y=-10, z= -7>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  4, y= -8, z=  8>, vel=<x=  0, y=  0, z=  0>
  * pos=<x=  3, y=  5, z= -1>, vel=<x=  0, y=  0, z=  0>
- * 
+ *
  * Of course, the universe might last for a very long time before repeating.  Here's a copy of the second example from
  * above:
  * <x=-8, y=-10, z=0>
  * <x=5, y=5, z=10>
  * <x=2, y=-7, z=3>
  * <x=9, y=-8, z=-3>
- * 
+ *
  * This set of initial positions takes 4686774924 steps before it repeats a previous state! Clearly, you might need to
  * find a more efficient way to simulate the universe.
  * How many steps does it take to reach the first state that exactly matches a previous state?
- * 
+ *
  */
 class Moons(private val moons: List<Moon>) {
 
-    fun get() = moons
+  fun get() = moons
 
-    fun advance() {
-        moons.allPairs().forEach { it.first.attract(it.second) }
-        moons.forEach { it.move() }
-    }
+  fun advance() {
+    moons.allPairs().forEach { it.first.attract(it.second) }
+    moons.forEach { it.move() }
+  }
 
-    fun totalEnergy() = moons.sumBy { it.totalEnergy() }
+  fun totalEnergy() = moons.sumBy { it.totalEnergy() }
 
-    private fun copyMoons() = moons.map {
-        Moon(position = it.position.copy(),
-                velocity = it.velocity.copy())
-    }
+  private fun copyMoons() = moons.map {
+    Moon(position = it.position.copy(),
+            velocity = it.velocity.copy())
+  }
 
-    fun stepsToRepeat() = listOf(periodOfAxis { it.x }, periodOfAxis { it.y }, periodOfAxis { it.z }).reduce(::lcm)
+  fun stepsToRepeat() = listOf(periodOfAxis { it.x }, periodOfAxis { it.y }, periodOfAxis { it.z }).reduce(::lcm)
 
-    // Left over from some previous experimentation.
-    @Suppress("unused")
-    fun stepsToPermute() = stepsUntil { initial, current -> initial.toSet() == current.toSet() }
+  // Left over from some previous experimentation.
+  @Suppress("unused")
+  fun stepsToPermute() = stepsUntil { initial, current -> initial.toSet() == current.toSet() }
 
-    // Left over from some previous experimentation.
-    @Suppress("unused")
-    fun periodOfMoon(index: Int) = stepsUntil { initial, current -> initial[index] == current[index] }
+  // Left over from some previous experimentation.
+  @Suppress("unused")
+  fun periodOfMoon(index: Int) = stepsUntil { initial, current -> initial[index] == current[index] }
 
-    private fun periodOfAxis(selector: (ThreeDVector) -> Int) =
-            stepsUntil { initial, current -> axisMatches(initial, current, selector) }
+  private fun periodOfAxis(selector: (ThreeDVector) -> Int) =
+          stepsUntil { initial, current -> axisMatches(initial, current, selector) }
 
-    private fun axisMatches(initial: List<Moon>,
-                            current: List<Moon>,
-                            selector: (ThreeDVector) -> Int): Boolean {
-        val positionsMatch = (initial.map { selector(it.position) } == current.map { selector(it.position) })
-        val velocitiesMatch = (initial.map { selector(it.velocity) } == current.map { selector(it.velocity) })
-        return positionsMatch && velocitiesMatch
-    }
+  private fun axisMatches(initial: List<Moon>,
+                          current: List<Moon>,
+                          selector: (ThreeDVector) -> Int): Boolean {
+    val positionsMatch = (initial.map { selector(it.position) } == current.map { selector(it.position) })
+    val velocitiesMatch = (initial.map { selector(it.velocity) } == current.map { selector(it.velocity) })
+    return positionsMatch && velocitiesMatch
+  }
 
-    private fun stepsUntil(condition: (List<Moon>, List<Moon>) -> Boolean): Long {
-        val initial = copyMoons()
-        val current = Moons(copyMoons())
-        val ticker = Ticker(10_000_000)
-        var stepsTaken = 0L
+  private fun stepsUntil(condition: (List<Moon>, List<Moon>) -> Boolean): Long {
+    val initial = copyMoons()
+    val current = Moons(copyMoons())
+    val ticker = Ticker(10_000_000)
+    var stepsTaken = 0L
 
-        do {
-            current.advance()
-            stepsTaken++
-            ticker.tick()
-        } while (!condition(initial, current.moons))
+    do {
+      current.advance()
+      stepsTaken++
+      ticker.tick()
+    } while (!condition(initial, current.moons))
 
-        return stepsTaken
-    }
+    return stepsTaken
+  }
 }
 
 data class Moon(val position: ThreeDVector,
                 val velocity: ThreeDVector = ThreeDVector(0, 0, 0)) {
-    constructor(x: Int, y: Int, z: Int) : this(ThreeDVector(x, y, z))
+  constructor(x: Int, y: Int, z: Int) : this(ThreeDVector(x, y, z))
 
-    private fun potentialEnergy() = Math.abs(position.x) + Math.abs(position.y) + Math.abs(position.z)
-    private fun kineticEnergy() = Math.abs(velocity.x) + Math.abs(velocity.y) + Math.abs(velocity.z)
-    fun totalEnergy() = potentialEnergy() * kineticEnergy()
+  private fun potentialEnergy() = Math.abs(position.x) + Math.abs(position.y) + Math.abs(position.z)
+  private fun kineticEnergy() = Math.abs(velocity.x) + Math.abs(velocity.y) + Math.abs(velocity.z)
+  fun totalEnergy() = potentialEnergy() * kineticEnergy()
 
-    fun attract(other: Moon) {
-        attractAxis(other, { it.x }, { v, i -> v.x += i })
-        attractAxis(other, { it.y }, { v, i -> v.y += i })
-        attractAxis(other, { it.z }, { v, i -> v.z += i })
+  fun attract(other: Moon) {
+    attractAxis(other, { it.x }, { v, i -> v.x += i })
+    attractAxis(other, { it.y }, { v, i -> v.y += i })
+    attractAxis(other, { it.z }, { v, i -> v.z += i })
+  }
+
+  private fun attractAxis(other: Moon,
+                          positionGetter: (ThreeDVector) -> Int,
+                          velocityIncrementor: (ThreeDVector, Int) -> Unit) {
+    val positionDelta = positionGetter(other.position) - positionGetter(this.position)
+
+    val velocityDelta = when {
+      positionDelta < 0 -> -1
+      positionDelta == 0 -> 0
+      else -> 1
     }
 
-    private fun attractAxis(other: Moon,
-                            positionGetter: (ThreeDVector) -> Int,
-                            velocityIncrementor: (ThreeDVector, Int) -> Unit) {
-        val positionDelta = positionGetter(other.position) - positionGetter(this.position)
+    velocityIncrementor(this.velocity, velocityDelta)
+    velocityIncrementor(other.velocity, -velocityDelta)
+  }
 
-        val velocityDelta = when {
-            positionDelta < 0 -> -1
-            positionDelta == 0 -> 0
-            else -> 1
-        }
-
-        velocityIncrementor(this.velocity, velocityDelta)
-        velocityIncrementor(other.velocity, -velocityDelta)
-    }
-
-    fun move() {
-        this.position += this.velocity
-    }
+  fun move() {
+    this.position += this.velocity
+  }
 }
 
 data class ThreeDVector(var x: Int, var y: Int, var z: Int) {
-    operator fun plusAssign(other: ThreeDVector) {
-        this.x += other.x
-        this.y += other.y
-        this.z += other.z
-    }
+  operator fun plusAssign(other: ThreeDVector) {
+    this.x += other.x
+    this.y += other.y
+    this.z += other.z
+  }
 }
 
 fun <T> List<T>.allPairs(): List<Pair<T, T>> =
         (0 until this.size).flatMap { i ->
-            (0 until i).map { j -> this[j] to this[i] }
+          (0 until i).map { j -> this[j] to this[i] }
         }
 
-private fun lcm(x: Long, y: Long) = x * y / gcd(x, y)
+fun lcm(x: Long, y: Long) = x * y / gcd(x, y)
 
 private fun input() = Moons(listOf(
         Moon(-17, 9, -5),
@@ -344,11 +344,11 @@ private fun input() = Moons(listOf(
 ))
 
 private fun partOne(): Int {
-    val moons = input()
+  val moons = input()
 
-    repeat(1000) { moons.advance() }
+  repeat(1000) { moons.advance() }
 
-    return (moons.totalEnergy())
+  return (moons.totalEnergy())
 }
 
 // This is a little tricky. I tried the brute force, "CPU time is cheaper than developer time" approach, and could
@@ -366,12 +366,12 @@ private fun partOne(): Int {
 // Since the axes do not actually interact with each other at all, if they cycle on independent periods, then the entire
 // state should repeat when the axes' cycles line up!
 private fun partTwo(): Long {
-    val moons = input()
+  val moons = input()
 
-    return moons.stepsToRepeat()
+  return moons.stepsToRepeat()
 }
 
 fun main() {
-    println(partOne())
-    println(partTwo())
+  println(partOne())
+  println(partTwo())
 }

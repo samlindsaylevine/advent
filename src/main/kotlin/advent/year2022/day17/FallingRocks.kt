@@ -355,101 +355,101 @@ import java.io.File
  *
  */
 class FallingRocks(private val jetDirections: List<Direction>) {
-  constructor(input: String) : this(input.toList().map {
-    when (it) {
-      '<' -> Direction.W
-      '>' -> Direction.E
-      else -> throw IllegalArgumentException("Unrecognized jet direction $it")
-    }
-  })
+    constructor(input: String) : this(input.toList().map {
+        when (it) {
+            '<' -> Direction.W
+            '>' -> Direction.E
+            else -> throw IllegalArgumentException("Unrecognized jet direction $it")
+        }
+    })
 
-  private fun chambers(): Sequence<FallingRockChamber> =
-    jetDirections.asSequence()
-      .repeatForever()
-      .runningFold(FallingRockChamber()) { chamber, direction ->
-        chamber.next(direction)
-      }
+    private fun chambers(): Sequence<FallingRockChamber> =
+            jetDirections.asSequence()
+                    .repeatForever()
+                    .runningFold(FallingRockChamber()) { chamber, direction ->
+                        chamber.next(direction)
+                    }
 
-  fun result(rocksLanded: Int) = chambers().first { it.rocksLanded == rocksLanded }
+    fun result(rocksLanded: Int) = chambers().first { it.rocksLanded == rocksLanded }
 
-  // Returns a sequence of pairs (number of rocks dropped, height after rock dropped).
-  private fun heightsByRock(): Sequence<Int> = sequenceOf(0) +
-      chambers()
-        .zipWithNext()
-        .filter { it.second.rocksLanded > it.first.rocksLanded }
-        .map { it.second.height() }
+    // Returns a sequence of pairs (number of rocks dropped, height after rock dropped).
+    private fun heightsByRock(): Sequence<Int> = sequenceOf(0) +
+            chambers()
+                    .zipWithNext()
+                    .filter { it.second.rocksLanded > it.first.rocksLanded }
+                    .map { it.second.height() }
 
-  fun calculateHeight(rocksLanded: Long) = heightsByRock()
-    .findLinearRecurrence(minPeriod = 10)
-    ?.get(rocksLanded)
+    fun calculateHeight(rocksLanded: Long) = heightsByRock()
+            .findLinearRecurrence(minPeriod = 10)
+            ?.get(rocksLanded)
 }
 
-private fun <T> Sequence<T>.repeatForever() = sequence { while (true) yieldAll(this@repeatForever) }
+fun <T> Sequence<T>.repeatForever() = sequence { while (true) yieldAll(this@repeatForever) }
 
 class FallingRockChamber(
-  private val rockPoints: Set<Point> = emptySet(),
-  private val currentRockShapeIndex: Int = 0,
-  // The bottom left of the rock.
-  // 0,0 is the bottom left empty space of the chamber, up against the left wall
-  // and the floor.
-  private val currentRockLocation: Point = Point(2, 3),
-  val rocksLanded: Int = 0
+        private val rockPoints: Set<Point> = emptySet(),
+        private val currentRockShapeIndex: Int = 0,
+        // The bottom left of the rock.
+        // 0,0 is the bottom left empty space of the chamber, up against the left wall
+        // and the floor.
+        private val currentRockLocation: Point = Point(2, 3),
+        val rocksLanded: Int = 0
 ) {
-  private fun isAvailable(point: Point) = point.x in 0 until 7 &&
-      point.y >= 0 &&
-      point !in rockPoints
+    private fun isAvailable(point: Point) = point.x in 0 until 7 &&
+            point.y >= 0 &&
+            point !in rockPoints
 
-  fun height() = rockPoints.height()
+    fun height() = rockPoints.height()
 
-  private fun Set<Point>.height() = (this.maxOfOrNull { it.y } ?: -1) + 1
+    private fun Set<Point>.height() = (this.maxOfOrNull { it.y } ?: -1) + 1
 
-  fun next(jetDirection: Direction): FallingRockChamber {
-    val currentRockShape = FallingRockShape.values()[currentRockShapeIndex]
-    val sidewaysPoints = currentRockShape.points.map { it + currentRockLocation + jetDirection.toPoint() }
+    fun next(jetDirection: Direction): FallingRockChamber {
+        val currentRockShape = FallingRockShape.values()[currentRockShapeIndex]
+        val sidewaysPoints = currentRockShape.points.map { it + currentRockLocation + jetDirection.toPoint() }
 
-    val rockLocationAfterSideways = if (sidewaysPoints.all(this::isAvailable)) {
-      currentRockLocation + jetDirection.toPoint()
-    } else {
-      currentRockLocation
+        val rockLocationAfterSideways = if (sidewaysPoints.all(this::isAvailable)) {
+            currentRockLocation + jetDirection.toPoint()
+        } else {
+            currentRockLocation
+        }
+
+        val downwardsPoints = currentRockShape.points.map { it + rockLocationAfterSideways + Point(0, -1) }
+        return if (downwardsPoints.all(this::isAvailable)) {
+            FallingRockChamber(rockPoints, currentRockShapeIndex, rockLocationAfterSideways + Point(0, -1), rocksLanded)
+        } else {
+            val currentRockRestingPoints = currentRockShape.points.map { it + rockLocationAfterSideways }.toSet()
+            val newRockPoints = rockPoints + currentRockRestingPoints
+            FallingRockChamber(
+                    rockPoints + newRockPoints,
+                    (currentRockShapeIndex + 1) % FallingRockShape.values().size,
+                    Point(2, newRockPoints.height() + 3),
+                    rocksLanded + 1
+            )
+        }
     }
-
-    val downwardsPoints = currentRockShape.points.map { it + rockLocationAfterSideways + Point(0, -1) }
-    return if (downwardsPoints.all(this::isAvailable)) {
-      FallingRockChamber(rockPoints, currentRockShapeIndex, rockLocationAfterSideways + Point(0, -1), rocksLanded)
-    } else {
-      val currentRockRestingPoints = currentRockShape.points.map { it + rockLocationAfterSideways }.toSet()
-      val newRockPoints = rockPoints + currentRockRestingPoints
-      FallingRockChamber(
-        rockPoints + newRockPoints,
-        (currentRockShapeIndex + 1) % FallingRockShape.values().size,
-        Point(2, newRockPoints.height() + 3),
-        rocksLanded + 1
-      )
-    }
-  }
 }
 
 // In order of falling.
 enum class FallingRockShape(
-  // Defined such that the bottom left is (0,0).
-  val points: Set<Point>
+        // Defined such that the bottom left is (0,0).
+        val points: Set<Point>
 ) {
-  MINUS(setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(3, 0))),
-  PLUS(setOf(Point(1, 0), Point(0, 1), Point(1, 1), Point(2, 1), Point(1, 2))),
-  ANGLE(setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(2, 2))),
-  I(setOf(Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3))),
-  SQUARE(setOf(Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)))
+    MINUS(setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(3, 0))),
+    PLUS(setOf(Point(1, 0), Point(0, 1), Point(1, 1), Point(2, 1), Point(1, 2))),
+    ANGLE(setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(2, 2))),
+    I(setOf(Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3))),
+    SQUARE(setOf(Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)))
 }
 
 fun main() {
-  val input = File("src/main/kotlin/advent/year2022/day17/input.txt").readText().trim()
+    val input = File("src/main/kotlin/advent/year2022/day17/input.txt").readText().trim()
 
-  val rocks = FallingRocks(input)
+    val rocks = FallingRocks(input)
 
-  val result = rocks.result(2022)
-  println(result.height())
+    val result = rocks.result(2022)
+    println(result.height())
 
-  // This takes a couple minutes to find the linear recurrence
-  // LinearRecurrence(firstIndex=390, period=1725, deltaPerCycle=2685)
-  println(rocks.calculateHeight(1000000000000))
+    // This takes a couple minutes to find the linear recurrence
+    // LinearRecurrence(firstIndex=390, period=1725, deltaPerCycle=2685)
+    println(rocks.calculateHeight(1000000000000))
 }
