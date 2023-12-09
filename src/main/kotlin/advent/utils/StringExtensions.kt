@@ -6,9 +6,9 @@ fun String.findAllNumbers(): List<Int> = findAllNumbers(String::toInt)
 fun String.findAllLongs(): List<Long> = findAllNumbers(String::toLong)
 
 private fun <T> String.findAllNumbers(transform: (String) -> T): List<T> {
-    val regex = Regex("\\d+")
-    val allMatches = regex.findAll(this)
-    return allMatches.map { transform(it.value) }.toList()
+  val regex = Regex("-?\\d+")
+  val allMatches = regex.findAll(this)
+  return allMatches.map { transform(it.value) }.toList()
 }
 
 /**
