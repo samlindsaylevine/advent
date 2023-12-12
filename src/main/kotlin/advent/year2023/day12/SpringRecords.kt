@@ -146,6 +146,17 @@ data class SpringRecord(val conditions: List<SpringCondition>, val groupSizes: L
 
   private val cache = loadingCache(::arrangementCount)
 
+  /**
+   * We're going to advance through the conditions and recursively calculate the counts. We're using a cache of
+   * already calculated values, originally because I had some correctness problems in part 1 and wanted to see the
+   * sub-calculations to find and fix a bug. This was super helpful because it meant that part 2 ran basically just
+   * the same way!
+   *
+   * While we are contemplating a record, we also consider whether we are "in a group", i.e., whether the previous
+   * spring was damaged. If the current state is impossible, the count must be 0; if the current state has completed
+   * successfully the count is 1. If the leading value is unknown we sum together the counts for if it is damaged
+   * vs. operational.
+   */
   private fun arrangementCount(lookup: ArrangementLookup): Long {
     val (record, inGroup) = lookup
     val (conditions, groupSizes) = record
