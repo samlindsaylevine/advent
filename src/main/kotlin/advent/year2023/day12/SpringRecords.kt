@@ -172,17 +172,25 @@ data class SpringRecord(val conditions: List<SpringCondition>, val groupSizes: L
 
     return when (conditions.first()) {
       SpringCondition.OPERATIONAL -> when {
+        // We successfully completed a group! We can drop that group and this spring and move on.
         inGroup && groupSizes.first() == 0 -> cache[ArrangementLookup(record.dropCondition().dropGroup(), false)]
+        // Not currently in a group, can just skip this spring.
         !inGroup -> cache[ArrangementLookup(record.dropCondition(), false)]
+        // We were in a group, and completed it... but it was the wrong size. Impossible, thus 0 valid choices.
         else -> 0
       }
 
       SpringCondition.DAMAGED -> when {
+        // There aren't supposed to be any springs left! Impossible, 0 valid choices.
         groupSizes.isEmpty() -> 0
+        // We're in a group, but we have already found all the damaged springs and this is one too many. 0 valid choices.
         inGroup && groupSizes.first() == 0 -> 0
+        // We're either already in, or now starting, a group - decrease the size of the group (the first in the list)
+        // and continue.
         else -> cache[ArrangementLookup(record.dropCondition().decrementFirstGroup(), true)]
       }
 
+      // Sum the valid options from both possibilities.
       SpringCondition.UNKNOWN -> cache[ArrangementLookup(record.replaceFirst(SpringCondition.OPERATIONAL), inGroup)] +
               cache[ArrangementLookup(record.replaceFirst(SpringCondition.DAMAGED), inGroup)]
     }
