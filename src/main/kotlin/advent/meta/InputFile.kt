@@ -11,9 +11,9 @@ import java.time.LocalDate
 object InputFile {
   fun save(client: HttpClient, date: LocalDate = LocalDate.now()) {
     val request = HttpRequest.newBuilder()
-      .uri(URI.create("https://adventofcode.com/${date.year}/day/${date.dayOfMonth}/input"))
-      .header("User-Agent", AdventOfCodeUserAgent.HEADER)
-      .build()
+            .uri(URI.create("https://adventofcode.com/${date.year}/day/${date.dayOfMonth}/input"))
+            .header("User-Agent", AdventOfCodeUserAgent.HEADER)
+            .build()
 
     val directory = Paths.get("src", "main", "kotlin", "advent", "year${date.year}", "day${date.dayOfMonth}")
     Files.createDirectories(directory)
