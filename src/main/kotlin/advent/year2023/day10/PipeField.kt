@@ -290,19 +290,19 @@ class PipeField(val tiles: Map<Point, Char>) {
     val enclosed = points.filter { it.x % 2 == 0 && it.y % 2 == 0 && it !in findableFromOutside && it !in expandedLoop }
     return enclosed.size
   }
+}
 
-  private fun floodFill(initial: Point, allowed: (Point) -> Boolean): Set<Point> =
-          floodFill(emptySet(), setOf(initial), allowed)
+fun floodFill(initial: Point, allowed: (Point) -> Boolean): Set<Point> =
+        floodFill(emptySet(), setOf(initial), allowed)
 
-  private tailrec fun floodFill(visited: Set<Point>, frontier: Set<Point>, allowed: (Point) -> Boolean): Set<Point> {
-    if (frontier.isEmpty()) return visited
+tailrec fun floodFill(visited: Set<Point>, frontier: Set<Point>, allowed: (Point) -> Boolean): Set<Point> {
+  if (frontier.isEmpty()) return visited
 
-    val next = frontier.flatMap { it.adjacentNeighbors }
-            .filter { it !in visited && allowed(it) }
-            .toSet()
+  val next = frontier.flatMap { it.adjacentNeighbors }
+          .filter { it !in visited && allowed(it) }
+          .toSet()
 
-    return floodFill(visited + frontier, next, allowed)
-  }
+  return floodFill(visited + frontier, next, allowed)
 }
 
 fun main() {
