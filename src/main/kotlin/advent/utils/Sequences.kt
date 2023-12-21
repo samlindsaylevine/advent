@@ -37,6 +37,7 @@ fun Sequence<Int>.findLinearRecurrence(
   this.forEachIndexed { index, value ->
     if (printEvery != null && index % printEvery == 0) println("Looking for recurrence at $index")
     if (index / 3 > maxPeriod) return null
+    println("${index}: $value")
     encountered.add(value)
     for (attemptedPeriod in minPeriod..index / 3) {
       val currentWindow = encountered.slice(index - attemptedPeriod + 1..index)
