@@ -55,4 +55,11 @@ class RationalsTest {
 
     assertThat(reduced).isEqualTo(unreduced)
   }
+
+  @Test
+  fun `sum -- same denominator -- result has same denominator`() {
+    val sum = Rational.of(1, 17161) + Rational.of(2, 17161)
+
+    assertThat(sum).isEqualTo(Rational.of(3, 17161))
+  }
 }

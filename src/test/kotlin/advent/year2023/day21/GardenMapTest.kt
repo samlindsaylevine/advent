@@ -1,5 +1,6 @@
 package advent.year2023.day21
 
+import advent.utils.Point
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -25,12 +26,16 @@ class GardenMapTest {
     """.trimIndent()
     val map = GardenMap.of(input)
 
+
+    map.reachable().take(10).forEach { println("${it.size()}: $it") }
+
     val count = map.countAfter(6)
 
     assertThat(count).isEqualTo(16)
   }
 
-  @Disabled("Part 2 not yet working!")
+  @Disabled("The test data doesn't seem to have the same recurrence as the real data? Or something fishy is going " +
+          "on. This is gross, sorry!")
   @ParameterizedTest
   @CsvSource(
           "6, 16",
@@ -60,5 +65,27 @@ class GardenMapTest {
     val count = map.countByRecurrence(numSteps)
 
     assertThat(count).isEqualTo(expectedCount)
+  }
+
+  @Test
+  fun `find quadratic recurrence -- quadratic exists -- found`() {
+    val quadratic = Quadratic.fit(
+            Point(0, 1),
+            Point(1, 3),
+            Point(2, 7)
+    )
+
+    assertThat(quadratic).isEqualTo(Quadratic(1, 1, 1))
+  }
+
+  @Test
+  fun `find quadratic recurrence -- simplest quadratic -- found`() {
+    val quadratic = Quadratic.fit(
+            Point(0, 0),
+            Point(1, 1),
+            Point(2, 4)
+    )
+
+    assertThat(quadratic).isEqualTo(Quadratic(1, 0, 0))
   }
 }

@@ -9,15 +9,15 @@ import javax.annotation.processing.Generated
 class Rational private constructor(val numerator: Long, val denominator: Long) {
   companion object {
     fun of(numerator: Long, denominator: Long): Rational {
+      if (denominator < 0) return of(-numerator, -denominator)
       val gcd = gcd(numerator, denominator)
-      val divisor = if (numerator < 0 && denominator < 0) -gcd else gcd
-      return Rational(numerator / divisor, denominator / divisor)
+      return Rational(numerator / gcd, denominator / gcd)
     }
   }
 
   operator fun plus(other: Rational) = of(
-    this.numerator * other.denominator + this.denominator * other.numerator,
-    this.denominator * other.denominator
+          this.numerator * other.denominator + this.denominator * other.numerator,
+          this.denominator * other.denominator
   )
 
   operator fun minus(other: Rational) = this + (-1) * other
@@ -25,6 +25,8 @@ class Rational private constructor(val numerator: Long, val denominator: Long) {
   operator fun div(other: Rational) = of(this.numerator * other.denominator, this.denominator * other.numerator)
 
   override fun toString() = "$numerator/$denominator"
+
+  fun toLong() = if (denominator == 1L) numerator else throw IllegalStateException("$this is not an integer")
 
   @Generated
   override fun equals(other: Any?): Boolean {
@@ -48,3 +50,4 @@ class Rational private constructor(val numerator: Long, val denominator: Long) {
 }
 
 operator fun Int.times(rational: Rational) = Rational.of(rational.numerator * this, rational.denominator)
+operator fun Long.times(rational: Rational) = Rational.of(rational.numerator * this, rational.denominator)
