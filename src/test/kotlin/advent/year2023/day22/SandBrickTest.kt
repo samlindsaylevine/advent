@@ -44,4 +44,23 @@ class SandBrickTest {
 
     assertThat(droppedDistances).containsExactly(0, 0, 1, 1, 2, 2, 3)
   }
+
+  @Test
+  fun `cascade count -- reference input -- 7`() {
+    val input = """
+      1,0,1~1,2,1
+      0,0,2~2,0,2
+      0,2,3~2,2,3
+      0,0,4~0,2,4
+      2,0,5~2,2,5
+      0,1,6~2,1,6
+      1,1,8~1,1,9
+    """.trimIndent()
+    val bricks = SandBricks(input)
+
+    bricks.settle()
+    val count = bricks.cascadeCount()
+
+    assertThat(count).isEqualTo(7)
+  }
 }

@@ -19,6 +19,7 @@ class SandBricks(val bricks: List<SandBrick>) {
       brick.droppedBy = brick.droppedBy + amountToDrop
       occupied.addAll(brick.points())
     }
+    pointsToBricks = calculatePointsToBricks()
   }
 
   private fun dropDistance(brick: SandBrick, minZ: Int, occupied: Set<Point3D>): Int =
@@ -26,20 +27,53 @@ class SandBricks(val bricks: List<SandBrick>) {
             brick.points().droppedBy(z).all { it !in occupied }
           }.lastOrNull() ?: 0
 
-  fun removable(): Collection<SandBrick> {
-    val pointsToBricks = bricks.flatMap { brick -> brick.points().map { it to brick } }
-            .toMap()
+  private var pointsToBricks = calculatePointsToBricks()
+  private fun calculatePointsToBricks() = bricks.flatMap { brick -> brick.points().map { it to brick } }
+          .toMap()
 
-    fun adjacent(brick: SandBrick, amountBelow: Int): Set<SandBrick> =
-            brick.points().droppedBy(amountBelow)
-                    .mapNotNull { pointsToBricks[it] }
-                    .filter { it != brick }
-                    .toSet()
+  private fun adjacent(brick: SandBrick, amountBelow: Int): Set<SandBrick> =
+          brick.points().droppedBy(amountBelow)
+                  .mapNotNull { pointsToBricks[it] }
+                  .filter { it != brick }
+                  .toSet()
 
-    fun above(brick: SandBrick) = adjacent(brick, -1)
-    fun below(brick: SandBrick) = adjacent(brick, 1)
+  private fun above(brick: SandBrick) = adjacent(brick, -1)
+  private fun below(brick: SandBrick) = adjacent(brick, 1)
 
-    return bricks.filter { brick -> above(brick).all { below(it).size > 1 } }
+  fun removable(): Collection<SandBrick> = bricks.filter { brick -> above(brick).all { below(it).size > 1 } }
+
+  fun cascadeCount(): Int {
+    val graph = BrickGraph(bricks.associateWith { brick -> above(brick) })
+    return bricks.sumOf { graph.countStrandedWithout(it) }
+  }
+}
+
+// The directed graph, with the edges pointing from a brick to those that are directly above and resting on it.
+data class BrickGraph(val brickToAbove: Map<SandBrick, Set<SandBrick>>) {
+  private val grounded = brickToAbove.keys.filter { it.points().any { point -> point.z == 1 } }
+  val size = brickToAbove.keys.size
+
+  // The number of bricks that will fall without this one is all of them; except the bricks that are still reachable
+  // from the ground without it; and without this brick itself.
+  fun countStrandedWithout(brick: SandBrick): Int = size - countReachableWithout(brick) - 1
+
+  /**
+   * Counts how many bricks are reachable from the ground with this one brick missing.
+   */
+  private fun countReachableWithout(missingBrick: SandBrick): Int {
+    // Do a traversal from the ground.
+    val reached = mutableSetOf<SandBrick>()
+    val pending = ArrayDeque<SandBrick>()
+    pending.addAll(grounded.filter { it != missingBrick })
+    while (pending.isNotEmpty()) {
+      val next = pending.removeFirst()
+      if (next !in reached) {
+        reached.add(next)
+        val aboveNext = brickToAbove[next] ?: emptySet()
+        pending.addAll(aboveNext.filter { it != missingBrick })
+      }
+    }
+    return reached.size
   }
 }
 
@@ -64,4 +98,5 @@ fun main() {
 
   bricks.settle()
   println(bricks.removable().size)
+  println(bricks.cascadeCount())
 }
