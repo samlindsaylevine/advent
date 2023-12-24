@@ -3,6 +3,7 @@ package advent.year2022.day21
 import advent.utils.Rational
 import advent.utils.loadingCache
 import java.io.File
+import java.math.BigInteger
 import java.util.regex.Pattern
 
 /**
@@ -94,13 +95,13 @@ class ArithmeticMonkeys(private val monkeys: Map<String, ArithmeticMonkey>) {
 sealed class ArithmeticMonkey {
   companion object {
     fun parse(action: String): ArithmeticMonkey = sequenceOf(
-      ConstantMonkey::tryParse,
-      SumMonkey::tryParse,
-      DifferenceMonkey::tryParse,
-      ProductMonkey::tryParse,
-      QuotientMonkey::tryParse
+            ConstantMonkey::tryParse,
+            SumMonkey::tryParse,
+            DifferenceMonkey::tryParse,
+            ProductMonkey::tryParse,
+            QuotientMonkey::tryParse
     ).firstNotNullOfOrNull { it(action) }
-      ?: throw IllegalArgumentException("Unparseable monkey action \"$action\"")
+            ?: throw IllegalArgumentException("Unparseable monkey action \"$action\"")
   }
 
   abstract operator fun invoke(monkeys: ArithmeticMonkeys): LinearExpression
@@ -122,16 +123,16 @@ sealed class ArithmeticMonkey {
  */
 data class LinearExpression(val variableCoefficient: Rational, val constant: Rational) {
   operator fun plus(other: LinearExpression) =
-    LinearExpression(this.variableCoefficient + other.variableCoefficient, this.constant + other.constant)
+          LinearExpression(this.variableCoefficient + other.variableCoefficient, this.constant + other.constant)
 
   operator fun minus(other: LinearExpression) =
-    LinearExpression(this.variableCoefficient - other.variableCoefficient, this.constant - other.constant)
+          LinearExpression(this.variableCoefficient - other.variableCoefficient, this.constant - other.constant)
 
   operator fun times(other: LinearExpression) = when {
     this.variableCoefficient.isNonZero() && other.variableCoefficient.isNonZero() -> throw IllegalStateException("Uh-oh: trying to create a higher degree polynomial by multiplication! $this * $other")
     else -> LinearExpression(
-      this.variableCoefficient * other.constant + other.variableCoefficient * this.constant,
-      this.constant * other.constant
+            this.variableCoefficient * other.constant + other.variableCoefficient * this.constant,
+            this.constant * other.constant
     )
   }
 
@@ -144,7 +145,7 @@ data class LinearExpression(val variableCoefficient: Rational, val constant: Rat
 
   fun toLong() = when {
     variableCoefficient.isNonZero() -> throw IllegalStateException("Non-constant expression $this")
-    constant.denominator != 1L -> throw IllegalStateException("Non-integer expression $this")
+    constant.denominator != BigInteger.ONE -> throw IllegalStateException("Non-integer expression $this")
     else -> constant.numerator
   }
 }
@@ -152,8 +153,8 @@ data class LinearExpression(val variableCoefficient: Rational, val constant: Rat
 data class ConstantMonkey(val constant: Long) : ArithmeticMonkey() {
   companion object {
     fun tryParse(action: String): ConstantMonkey? = "(\\d+)".toRegex()
-      .matchEntire(action)
-      ?.let { ConstantMonkey(it.groupValues.first().toLong()) }
+            .matchEntire(action)
+            ?.let { ConstantMonkey(it.groupValues.first().toLong()) }
   }
 
   override fun invoke(monkeys: ArithmeticMonkeys) = LinearExpression(Rational.of(0, 1), Rational.of(constant, 1))
@@ -162,16 +163,16 @@ data class ConstantMonkey(val constant: Long) : ArithmeticMonkey() {
 abstract class TwoTermMonkey(val firstName: String, val secondName: String) : ArithmeticMonkey()
 
 private fun <T : ArithmeticMonkey> parseTwoTerms(
-  action: String,
-  operator: String,
-  constructor: (String, String) -> T
+        action: String,
+        operator: String,
+        constructor: (String, String) -> T
 ) =
-  "(\\w+) ${Pattern.quote(operator)} (\\w+)".toRegex()
-    .matchEntire(action)
-    ?.let { match ->
-      val (first, second) = match.destructured
-      constructor(first, second)
-    }
+        "(\\w+) ${Pattern.quote(operator)} (\\w+)".toRegex()
+                .matchEntire(action)
+                ?.let { match ->
+                  val (first, second) = match.destructured
+                  constructor(first, second)
+                }
 
 class SumMonkey(firstName: String, secondName: String) : TwoTermMonkey(firstName, secondName) {
   companion object {

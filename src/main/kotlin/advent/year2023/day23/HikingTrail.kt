@@ -14,8 +14,7 @@ class HikingTrail(val points: Map<Point, Char>) {
 
   fun toGraph(slippery: Boolean = true): HikingGraph {
     val edges = points.entries.flatMap { (point, char) ->
-      val effectiveChar = if (!slippery && char in setOf('>', '<', '^', 'v')) '.' else char
-      val neighbors: Set<Point> = when (effectiveChar) {
+      val neighbors: Set<Point> = when (if (!slippery && char in setOf('>', '<', '^', 'v')) '.' else char) {
         '#' -> emptySet()
         '.' -> point.adjacentNeighbors
         '>' -> setOf(point + Point(1, 0))
@@ -89,7 +88,8 @@ data class HikingGraph(
     return longestRestOfHike(Hike(listOf(fromStart.first()))) ?: throw IllegalStateException("No path to exit!")
   }
 
-  // Returns the longest hike that reaches the exit from the given start.
+  // Returns the longest hike that reaches the exit from the given start. Null if you can't even get to the exit
+  // with this start.
   private fun longestRestOfHike(soFar: Hike): Hike? {
     val current = soFar.currentPosition
     if (current == end) return soFar

@@ -1,8 +1,6 @@
-package advent.year2023
+package advent.year2023.day23
 
 import advent.utils.Point
-import advent.year2023.day23.HikingEdge
-import advent.year2023.day23.HikingTrail
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

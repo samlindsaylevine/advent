@@ -91,12 +91,13 @@ class GardenMap(val start: Point,
 
     // We're getting some overflow of Long (!) in evaluating the quadratic. Let's do it by hand...
     // This is gross and we should probably update our Rational to be able to handle this instead. Ah well.
-    val denominator = quadratic.a.denominator.toBigInteger() * quadratic.b.denominator.toBigInteger() * quadratic.c.denominator.toBigInteger()
+    // Edit: we later updated Rational to use BigIntegers but are leaving this as is for the moment because it works.
+    val denominator = quadratic.a.denominator * quadratic.b.denominator * quadratic.c.denominator
 
     val bigIndex = BigInteger.valueOf(numSteps.toLong())
-    val numerator = bigIndex * bigIndex * quadratic.a.numerator.toBigInteger() * quadratic.b.denominator.toBigInteger() * quadratic.c.denominator.toBigInteger() +
-            bigIndex * quadratic.b.numerator.toBigInteger() * quadratic.a.denominator.toBigInteger() * quadratic.c.denominator.toBigInteger() +
-            quadratic.c.numerator.toBigInteger() * quadratic.a.denominator.toBigInteger() * quadratic.b.denominator.toBigInteger()
+    val numerator = bigIndex * bigIndex * quadratic.a.numerator * quadratic.b.denominator * quadratic.c.denominator +
+            bigIndex * quadratic.b.numerator * quadratic.a.denominator * quadratic.c.denominator +
+            quadratic.c.numerator * quadratic.a.denominator * quadratic.b.denominator
     return (numerator / denominator).toLong()
   }
 

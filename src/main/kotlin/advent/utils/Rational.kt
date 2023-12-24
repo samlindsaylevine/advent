@@ -1,18 +1,23 @@
 package advent.utils
 
 import advent.year2019.day10.gcd
+import java.math.BigInteger
 import javax.annotation.processing.Generated
 
 /**
  * Represents a rational number. Always guaranteed to be represented in reduced terms.
  */
-class Rational private constructor(val numerator: Long, val denominator: Long) {
+class Rational private constructor(val numerator: BigInteger, val denominator: BigInteger) : Number() {
   companion object {
-    fun of(numerator: Long, denominator: Long): Rational {
-      if (denominator < 0) return of(-numerator, -denominator)
+    fun of(numerator: Long, denominator: Long) = of(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator))
+
+    fun of(numerator: BigInteger, denominator: BigInteger): Rational {
+      if (denominator < BigInteger.ZERO) return of(-numerator, -denominator)
       val gcd = gcd(numerator, denominator)
       return Rational(numerator / gcd, denominator / gcd)
     }
+
+    fun of(value: Long) = of(value, 1)
   }
 
   operator fun plus(other: Rational) = of(
@@ -26,7 +31,14 @@ class Rational private constructor(val numerator: Long, val denominator: Long) {
 
   override fun toString() = "$numerator/$denominator"
 
-  fun toLong() = if (denominator == 1L) numerator else throw IllegalStateException("$this is not an integer")
+  fun toBigInteger() = if (denominator == BigInteger.ONE) numerator else throw IllegalStateException("$this is not an integer")
+  override fun toLong() = toBigInteger().toLong()
+  override fun toShort() = toLong().toShort()
+  override fun toByte() = toLong().toByte()
+  override fun toChar() = toLong().toInt().toChar()
+  override fun toInt() = toLong().toInt()
+  override fun toDouble() = numerator.toDouble() / denominator.toDouble()
+  override fun toFloat() = toDouble().toFloat()
 
   @Generated
   override fun equals(other: Any?): Boolean {
@@ -36,9 +48,7 @@ class Rational private constructor(val numerator: Long, val denominator: Long) {
     other as Rational
 
     if (numerator != other.numerator) return false
-    if (denominator != other.denominator) return false
-
-    return true
+    return denominator == other.denominator
   }
 
   @Generated
@@ -47,7 +57,8 @@ class Rational private constructor(val numerator: Long, val denominator: Long) {
     result = 31 * result + denominator.hashCode()
     return result
   }
+
 }
 
-operator fun Int.times(rational: Rational) = Rational.of(rational.numerator * this, rational.denominator)
-operator fun Long.times(rational: Rational) = Rational.of(rational.numerator * this, rational.denominator)
+operator fun Int.times(rational: Rational) = Rational.of(rational.numerator * this.toBigInteger(), rational.denominator)
+operator fun Long.times(rational: Rational) = Rational.of(rational.numerator * this.toBigInteger(), rational.denominator)
