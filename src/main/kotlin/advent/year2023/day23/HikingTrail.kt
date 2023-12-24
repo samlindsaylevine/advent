@@ -12,9 +12,10 @@ class HikingTrail(val points: Map<Point, Char>) {
           .toMap()
   )
 
-  fun toGraph(): HikingGraph {
+  fun toGraph(slippery: Boolean = true): HikingGraph {
     val edges = points.entries.flatMap { (point, char) ->
-      val neighbors: Set<Point> = when (char) {
+      val effectiveChar = if (!slippery && char in setOf('>', '<', '^', 'v')) '.' else char
+      val neighbors: Set<Point> = when (effectiveChar) {
         '#' -> emptySet()
         '.' -> point.adjacentNeighbors
         '>' -> setOf(point + Point(1, 0))
@@ -115,7 +116,10 @@ data class Hike(val steps: List<HikingEdge>) {
 fun main() {
   val input = File("src/main/kotlin/advent/year2023/day23/input.txt").readText().trim()
   val trail = HikingTrail(input)
-  val graph = trail.toGraph().compacted()
 
+  val graph = trail.toGraph().compacted()
   println(graph.longestHike().distance)
+
+  val nonSlippery = trail.toGraph(slippery = false).compacted()
+  println(nonSlippery.longestHike().distance)
 }
