@@ -21,7 +21,14 @@ class AdventOfCodeCookies {
     fun clientWithCookies(): HttpClient {
       val cookieHandler = CookieManager()
       retrieveFromChrome().forEach {
-        val cookie = HttpCookie(it.name, it.value).apply {
+        // Our cookie-retrieving library is getting some bogus values - it has padded mojibake at the front of the
+        // actual cookie value.
+        // e.g., our cookie value is coming back as "m}?CUf�u5�>@v�ê?���k6���χ��53616c[...]b5fc5"
+        // when we see in the browser developer tools that it should be just "53616c[...]b5fc5".
+        // We're going to implement a sort of dorky workaround here to take only the final part that starts being normal
+        // ASCII text.
+        val asciiValue = it.value.takeLastWhile { char -> char.code < 128}
+        val cookie = HttpCookie(it.name, asciiValue).apply {
           path = "/"
           version = 0
         }
