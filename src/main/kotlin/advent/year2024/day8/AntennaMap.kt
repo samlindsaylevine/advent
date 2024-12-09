@@ -127,7 +127,7 @@ import advent.utils.pairs
  * contain an antinode?
  *
  */
-class AntennaMap(val width: Int, val height: Int, val antennas: List<Antenna>) {
+class AntennaMap(val width: Int, val height: Int, private val antennas: List<Antenna>) {
     companion object {
         fun of(input: String): AntennaMap {
             val lines = input.lines()
@@ -148,9 +148,6 @@ class AntennaMap(val width: Int, val height: Int, val antennas: List<Antenna>) {
     fun antinodes(harmonics: Boolean = false): Set<Point> {
         val antennasByFrequency = antennas.groupBy { it.frequency }
         return antennasByFrequency.entries.flatMap { (_, antennas) ->
-            // There's a little bit of an ambiguity - could an antinode exist between two antennas, or only outside of
-            // them, on the line between them? We're proceeding assuming that only the latter is valid and ignoring the
-            // possible interpretation where an antinode could exist between them.
             antennas.pairs()
                 .filter { (first, second) -> first != second }
                 .flatMap { (first, second) -> antinodes(first.location, second.location, harmonics) }
@@ -162,10 +159,17 @@ class AntennaMap(val width: Int, val height: Int, val antennas: List<Antenna>) {
      * In part one, this is only 0 or 1 points (depending on whether the single step is in bounds or out of bounds).
      */
     private fun antinodes(first: Point, second: Point, harmonics: Boolean): Set<Point> {
+        // There's a little bit of an ambiguity - could an antinode exist between two antennas, or only outside of
+        // them, on the line between them? We're proceeding assuming that only the latter is valid and ignoring the
+        // possible interpretation where an antinode could exist between them.
+        // Then, the antinodes exist starting with the second, and at every step equal to the vector between second and
+        // first.
         val delta = second - first
         val steps = generateSequence(second) { it + delta }
         val inBounds = steps.takeWhile { it in this }
-
+        
+        // If there are no harmonics, we skip the node that is exactly on the second point, and take only the first
+        // after that.
         return if (harmonics) inBounds.toSet() else inBounds.drop(1).take(1).toSet()
     }
 }
