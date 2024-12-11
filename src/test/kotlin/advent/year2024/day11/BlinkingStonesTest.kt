@@ -12,7 +12,7 @@ class BlinkingStonesTest {
 
         val blunk = stones.blink(1)
 
-        val expected = mapOf(253000 to 1L, 1 to 1L, 7 to 1L)
+        val expected = mapOf(253000L to 1L, 1L to 1L, 7L to 1L)
         assertThat(blunk.countsByNumber).isEqualTo(expected)
     }
 
