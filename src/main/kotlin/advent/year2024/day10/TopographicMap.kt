@@ -149,24 +149,27 @@ class TopographicMap(private val heights: Map<Point, Int>) {
     private val trailCountCache = loadingCache(::countTrailsFrom)
     private val endpointsReachableCache = loadingCache(::endpointsReachableFrom)
 
+    // Returns those neighbors that have 1 more height than the provided point.
+    private fun Point.nextSteps(): List<Point> {
+        val height = heights[this] ?: Int.MIN_VALUE
+        return this.adjacentNeighbors.filter { heights[it] == height + 1 }
+    }
+
     // Counts the number of trails from a certain point - i.e., number of paths that, from that point, increase by 1
     // each step until they reach 9. The point need not have height 0 - if it has height 9, it is one trail. If it has
     // height 8, the number of trails is equal to the number of adjacent 9s, and so forth.
-    private fun countTrailsFrom(point: Point): Int {
-        val height = heights[point] ?: Int.MIN_VALUE
-        if (height == MAX_HEIGHT) return 1
-        return point.adjacentNeighbors.filter { heights[it] == height + 1 }
-            .sumOf { trailCountCache[it] }
-    }
+    private fun countTrailsFrom(point: Point): Int =
+        if (heights[point] == MAX_HEIGHT) 1 else point.nextSteps().sumOf { trailCountCache[it] }
 
     // Returns the set of distinct endpoints reachable by trail from a certain point.
-    private fun endpointsReachableFrom(point: Point): Set<Point> {
-        val height = heights[point] ?: Int.MIN_VALUE
-        if (height == MAX_HEIGHT) return setOf(point)
-        return point.adjacentNeighbors.filter { heights[it] == height + 1 }
-            .map { endpointsReachableCache[it] }
-            .fold(emptySet(), Set<Point>::plus)
-    }
+    private fun endpointsReachableFrom(point: Point): Set<Point> =
+        if (heights[point] == MAX_HEIGHT) {
+            setOf(point)
+        } else {
+            point.nextSteps()
+                .map { endpointsReachableCache[it] }
+                .fold(emptySet(), Set<Point>::plus)
+        }
 
     private fun startingPoints() = heights.entries.filter { (_, height) -> height == MIN_HEIGHT }
         .map { it.key }
