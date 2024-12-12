@@ -12,6 +12,7 @@ class GardenRegions(private val plots: Map<Point, Char>) {
         .toMap())
 
     fun price() = regions().sumOf { it.price() }
+    fun bulkDiscountPrice() = regions().sumOf { it.bulkDiscountPrice() }
 
     private fun regions(): List<GardenRegion> {
         val output = mutableListOf<GardenRegion>()
@@ -55,12 +56,42 @@ class GardenRegions(private val plots: Map<Point, Char>) {
 class GardenRegion(val points: Set<Point>) {
     private fun area() = points.size
     private fun perimeter() = points.sumOf { point -> point.adjacentNeighbors.count { it !in points } }
+    private fun numberOfSides(): Int {
+        val perimeterCrossings: MutableSet<Pair<Point, Point>> = points.flatMap { point ->
+            point.adjacentNeighbors
+                .filter { it !in points }
+                .map { neighbor -> point to neighbor }
+        }.toMutableSet()
+
+        // Finding the sides is quite similar to finding the regions in the first place! Starting with a perimeter
+        // crossing, see if the adjacent neighbors also have a crossing in the same direction, and if so, group them
+        // together and keep going.
+        var output = 0
+        while (perimeterCrossings.isNotEmpty()) {
+            output++
+            val underConsideration = mutableListOf(perimeterCrossings.first())
+            while (underConsideration.isNotEmpty()) {
+                val crossing = underConsideration.removeFirst()
+                val wasACrossing = perimeterCrossings.remove(crossing)
+                if (wasACrossing) {
+                    val delta = crossing.second - crossing.first
+                    underConsideration.addAll(
+                        crossing.first.adjacentNeighbors.map { neighbor -> neighbor to neighbor + delta }
+                    )
+                }
+            }
+        }
+
+        return output
+    }
 
     fun price() = area() * perimeter()
+    fun bulkDiscountPrice() = area() * numberOfSides()
 }
 
 fun main() {
     val gardenRegions = GardenRegions(readInput())
 
     println(gardenRegions.price())
+    println(gardenRegions.bulkDiscountPrice())
 }
