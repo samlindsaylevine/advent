@@ -63,7 +63,7 @@ fun main() {
     }
     println(distinctPositionTime)
 
-    // And indeed, when we display the robots and advance to that time, we see the
+    // And indeed, when we display the robots and advance to that time, we see the tree!
     RestroomRobotsDisplay(robots, pausePlayingAt = distinctPositionTime)
 
 }
