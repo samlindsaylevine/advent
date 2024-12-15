@@ -50,17 +50,18 @@ data class RobotOperatedWarehouse(
             else -> this.copy(robot = targetSpace)
         }
 
-    // Try to move the box at the specified point with the specified move.
-    private fun attemptBoxMove(box: Point, move: Move): RobotOperatedWarehouse =
-        when (val targetSpace = box + move.direction.toPoint()) {
-            in walls -> this
-            in boxes -> {
-                val withNextBoxPushed = attemptBoxMove(targetSpace, move)
-                if (targetSpace in withNextBoxPushed.boxes) this else withNextBoxPushed.copy(boxes = (withNextBoxPushed.boxes - box) + targetSpace)
-            }
-
-            else -> this.copy(boxes = (boxes - box) + targetSpace)
-        }
+    private fun attempt(warehouseObject: WarehouseObject, move: Move): RobotOperatedWarehouse {
+        val targetSpaces = warehouseObject.spaces().map { it + move.direction }.toSet()
+        val moved = warehouseObject.movedTo(warehouseObject.position + move.direction)
+        val objectsInTheWay =
+            objects.filter { (it.spaces() intersect targetSpaces).isNotEmpty() && it != warehouseObject }
+        if (objectsInTheWay.any { it is Wall }) return this
+        if (objectsInTheWay.isEmpty()) return this.copy(objects = objects - warehouseObject + moved)
+        val withNextObjectsPushed =
+            objectsInTheWay.fold(this) { warehouse, nextObject -> warehouse.attempt(nextObject, move) }
+        if (targetSpaces.any { space -> withNextObjectsPushed.objects.any { it != warehouseObject && space in it.spaces() } }) return this
+        return withNextObjectsPushed.copy(objects = withNextObjectsPushed.objects - warehouseObject + moved)
+    }
 
     private fun Point.gpsCoordinate() = 100 * y + x
     fun afterMoves() = instructions.fold(this) { warehouse, move -> warehouse.attempt(move) }
