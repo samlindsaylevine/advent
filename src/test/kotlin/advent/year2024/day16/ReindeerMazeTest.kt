@@ -80,7 +80,7 @@ class ReindeerMazeTest {
         """.trimIndent()
         val maze = ReindeerMaze.of(input)
 
-        val count = maze.shortestPaths().uniqueTileCount()
+        val count = maze.countUniqueTiles(maze.shortestPaths())
 
         assertThat(count).isEqualTo(45)
     }
@@ -108,7 +108,7 @@ class ReindeerMazeTest {
         """.trimIndent()
         val maze = ReindeerMaze.of(input)
 
-        val count = maze.shortestPaths().uniqueTileCount()
+        val count = maze.countUniqueTiles(maze.shortestPaths())
 
         assertThat(count).isEqualTo(64)
     }

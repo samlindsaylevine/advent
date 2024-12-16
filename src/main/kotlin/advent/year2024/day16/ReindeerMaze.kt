@@ -19,24 +19,36 @@ class ReindeerMaze(val start: Point, val end: Point, val walls: Set<Point>) {
     }
 
     private fun nextSteps(reindeerState: ReindeerState): Set<Step<ReindeerState>> {
-        val output = mutableSetOf<Step<ReindeerState>>()
-
-        val forwardPosition = reindeerState.position + reindeerState.direction.toPoint()
-        if (forwardPosition !in walls) output.add(Step(reindeerState.copy(position = forwardPosition), 1))
-
-        // Running the search naively with all the options always available is slow, so we're going to do a little
-        // optimization - we will never turn to face a wall, because we know that's not an optimal thing to do.
-
-        val forwardFromLeft = reindeerState.position + reindeerState.direction.left()
-        val left = Step(reindeerState.copy(direction = reindeerState.direction.left()), 1000)
-        if (forwardFromLeft !in walls) output.add(left)
-
-        val forwardFromRight = reindeerState.position + reindeerState.direction.right()
-        val right = Step(reindeerState.copy(direction = reindeerState.direction.right()), 1000)
-        if (forwardFromRight !in walls) output.add(right)
-
-        return output
+        // Naively calculating steps with one step at a time, and turning options available, is too slow for part two
+        // where we keep all the paths around. Instead, we will have each step be an optional turn, then advance forward
+        // to the next intersection.
+        val direction = reindeerState.direction
+        val turnsWithCosts = listOf(direction.left() to 1000, direction to 0, direction.right() to 1000)
+        return turnsWithCosts.mapNotNull { (newDirection, turnCost) ->
+            val nextPossibleTurnPoint = nextTurnPoint(reindeerState.position, newDirection)
+            nextPossibleTurnPoint?.let { newPosition ->
+                val tilesMoved = newPosition.distanceFrom(reindeerState.position)
+                Step(ReindeerState(newPosition, newDirection), turnCost + tilesMoved)
+            }
+        }.toSet()
     }
+
+    /**
+     * Finds the next point to consider when travelling in the same direction from the given point.
+     *
+     * We will stop and consider a point when either
+     * 1) that point's forward space is a wall, so we must turn
+     * 2) one of the right or left spaces is not a wall, so we may turn
+     *
+     * If we start out facing a dead end, there will be no such thing at all and we will return null.
+     */
+    private fun nextTurnPoint(start: Point, direction: Direction): Point? =
+        generateSequence(start) { it + direction }
+            .takeWhile { it !in walls }
+            .drop(1)
+            .firstOrNull { point ->
+                point + direction in walls || point + direction.left() !in walls || point + direction.right() !in walls
+            }
 
     fun shortestPaths(): Set<Path<ReindeerState>> {
         val startingState = ReindeerState(start, Direction.E)
@@ -51,17 +63,30 @@ class ReindeerMaze(val start: Point, val end: Point, val walls: Set<Point>) {
         return paths
     }
 
+    fun countUniqueTiles(paths: Set<Path<ReindeerState>>) =
+        paths.flatMap { it.uniqueTiles() }.toSet().size
+
+    private fun Path<ReindeerState>.uniqueTiles() =
+        this.steps
+            .map { it.position }
+            // Paths don't contain their starting position.
+            .let { listOf(start) + it }
+            .zipWithNext()
+            .flatMap { (first, second) -> first..second }
+            .toSet()
+
     data class ReindeerState(val position: Point, val direction: Direction)
 }
 
 fun Set<Path<ReindeerMaze.ReindeerState>>.lowestScore() = this.first().totalCost
-fun Set<Path<ReindeerMaze.ReindeerState>>.uniqueTileCount() =
-    this.flatMap { it.steps.map { step -> step.position } }.toSet().size
 
 fun main() {
     val maze = ReindeerMaze.of(readInput())
 
+    // This is still pretty slow (like 5 minutes!) Oh well, some day instead of reusing my breadth-first search
+    // for these purposes, I will actually use Dijkstra's algorithm with the enhancement that preserves arrows
+    // on the graph and then can reconsistute the shortest path itself.
     val paths = maze.shortestPaths()
     println(paths.lowestScore())
-    println(paths.uniqueTileCount())
+    println(maze.countUniqueTiles(paths))
 }
