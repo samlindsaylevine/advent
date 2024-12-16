@@ -22,3 +22,5 @@ enum class Direction(val x: Int, val y: Int) {
         E -> N
     }
 }
+
+operator fun Point.plus(direction: Direction) = this + direction.toPoint()
