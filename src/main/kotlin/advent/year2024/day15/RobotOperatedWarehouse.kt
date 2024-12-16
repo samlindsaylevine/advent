@@ -5,9 +5,7 @@ import advent.utils.Direction
 import advent.utils.Point
 
 data class RobotOperatedWarehouse(
-    val robot: Point,
-    val boxes: Set<Point>,
-    val walls: Set<Point>,
+    val objects: Set<WarehouseObject>,
     val instructions: List<Move>
 ) {
     companion object {
@@ -17,13 +15,19 @@ data class RobotOperatedWarehouse(
             val charsByPoint: List<Pair<Point, Char>> = lines.flatMapIndexed { y, line ->
                 line.mapIndexed { x, c -> Point(x, y) to c }
             }
-            val robot = charsByPoint.first { it.second == '@' }.first
-            val boxes = charsByPoint.filter { it.second == 'O' }.map { it.first }.toSet()
-            val walls = charsByPoint.filter { it.second == '#' }.map { it.first }.toSet()
+            val objects = charsByPoint.mapNotNull { (point, c) ->
+                when (c) {
+                    '@' -> Robot(point)
+                    'O' -> Box(point)
+                    '#' -> Wall(point)
+                    '[' -> WideBox(point)
+                    else -> null
+                }
+            }.toSet()
 
             val instructionString = instructionSection.replace("\n", "").trim()
             val instructions = instructionString.map(Move::of)
-            return RobotOperatedWarehouse(robot, boxes, walls, instructions)
+            return RobotOperatedWarehouse(objects, instructions)
         }
     }
 
@@ -39,16 +43,9 @@ data class RobotOperatedWarehouse(
         }
     }
 
-    fun attempt(move: Move): RobotOperatedWarehouse =
-        when (val targetSpace = robot + move.direction.toPoint()) {
-            in walls -> this
-            in boxes -> {
-                val withBoxPushed = attemptBoxMove(targetSpace, move)
-                if (targetSpace in withBoxPushed.boxes) this else withBoxPushed.copy(robot = targetSpace)
-            }
+    private operator fun Point.plus(direction: Direction) = this + direction.toPoint()
 
-            else -> this.copy(robot = targetSpace)
-        }
+    fun attempt(move: Move): RobotOperatedWarehouse = attempt(objects.first { it is Robot }, move)
 
     private fun attempt(warehouseObject: WarehouseObject, move: Move): RobotOperatedWarehouse {
         val targetSpaces = warehouseObject.spaces().map { it + move.direction }.toSet()
@@ -65,22 +62,54 @@ data class RobotOperatedWarehouse(
 
     private fun Point.gpsCoordinate() = 100 * y + x
     fun afterMoves() = instructions.fold(this) { warehouse, move -> warehouse.attempt(move) }
-    fun gpsSum() = boxes.sumOf { it.gpsCoordinate() }
+    fun gpsSum() = objects.filter { it is Box || it is WideBox }.sumOf { it.position.gpsCoordinate() }
 
-    override fun toString(): String = (0..walls.maxOf { it.y }).joinToString(separator = "\n") { y ->
-        (0..walls.maxOf { it.x }).joinToString(separator = "") { x ->
-            when (Point(x, y)) {
-                robot -> "@"
-                in boxes -> "O"
-                in walls -> "#"
+    override fun toString(): String = (0..objects.maxOf { it.position.y }).joinToString(separator = "\n") { y ->
+        (0..objects.maxOf { it.position.x }).joinToString(separator = "") { x ->
+            val point = Point(x, y)
+            when {
+                objects.any { point == it.position && it is Robot } -> "@"
+                objects.any { point == it.position && it is Box } -> "O"
+                objects.any { point == it.position && it is Wall } -> "#"
+                objects.any { point == it.position && it is WideBox } -> "["
+                objects.any { point == it.position + Direction.E && it is WideBox } -> "]"
                 else -> "."
             }
         }
     }
+
+    sealed class WarehouseObject(val position: Point) {
+        open fun spaces(): Set<Point> = setOf(position)
+        abstract fun movedTo(newPosition: Point): WarehouseObject
+    }
+
+    class Robot(position: Point) : WarehouseObject(position) {
+        override fun movedTo(newPosition: Point) = Robot(newPosition)
+    }
+
+    class Wall(position: Point) : WarehouseObject(position) {
+        override fun movedTo(newPosition: Point) = throw IllegalStateException("Walls don't move!")
+    }
+
+    class Box(position: Point) : WarehouseObject(position) {
+        override fun movedTo(newPosition: Point) = Box(newPosition)
+    }
+
+    class WideBox(position: Point) : WarehouseObject(position) {
+        override fun spaces(): Set<Point> = setOf(position, position + Direction.E.toPoint())
+        override fun movedTo(newPosition: Point) = WideBox(newPosition)
+    }
 }
+
+fun String.widerWarehouse() = this.replace("#", "##")
+    .replace("O", "[]")
+    .replace(".", "..")
+    .replace("@", "@.")
 
 fun main() {
     val warehouse = RobotOperatedWarehouse.of(readInput())
-
     println(warehouse.afterMoves().gpsSum())
+
+    val widened = RobotOperatedWarehouse.of(readInput().widerWarehouse())
+    println(widened.afterMoves().gpsSum())
 }
