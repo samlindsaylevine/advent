@@ -24,4 +24,25 @@ class OnsenTest {
 
         assertThat(count).isEqualTo(6)
     }
+
+    @Test
+    fun `possibilitiesCount -- reference input -- 16`() {
+        val input = """
+            r, wr, b, g, bwu, rb, gb, br
+
+            brwrr
+            bggr
+            gbbr
+            rrbgbr
+            ubwu
+            bwurrg
+            brgr
+            bbrgwb
+        """.trimIndent()
+        val onsen = Onsen(input)
+
+        val count = onsen.possiblitiesCount()
+
+        assertThat(count).isEqualTo(16)
+    }
 }
