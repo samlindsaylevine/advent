@@ -11,7 +11,7 @@ class RobotKeypadsTest {
 
         val length = keypads.lengthOfShortestSequence("029A")
 
-        assertThat(length).isEqualTo(68)
+        assertThat(length).isEqualTo(68L)
     }
 
     @Test
@@ -27,6 +27,6 @@ class RobotKeypadsTest {
 
         val sum = keypads.complexitySum()
 
-        assertThat(sum).isEqualTo(126384)
+        assertThat(sum).isEqualTo(126384L)
     }
 }
