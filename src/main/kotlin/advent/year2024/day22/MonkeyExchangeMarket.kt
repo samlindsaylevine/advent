@@ -1,6 +1,7 @@
 package advent.year2024.day22
 
 import advent.meta.readInput
+import advent.utils.merge
 
 /**
  * --- Day 22: Monkey Market ---
@@ -142,30 +143,9 @@ import advent.meta.readInput
 class MonkeyExchangeMarket(val buyers: List<MonkeyBuyer>) {
     constructor(input: String) : this(input.trim().lines().map(String::toLong).map(::MonkeyBuyer))
 
-    fun optimalRevenue(): Int = allPriceChangeSequences()
-        .withIndex()
-        .maxOf { (_, priceChangeSequence) -> buyers.sumOf { it.revenue(priceChangeSequence) } }
-
-    private fun allPriceChangeSequences(): Sequence<List<Int>> =
-        (-9..9).asSequence().flatMap { first ->
-            (-9..9).asSequence().flatMap { second ->
-                (-9..9).asSequence().flatMap { third ->
-                    (-9..9).asSequence().map { fourth ->
-                        listOf(first, second, third, fourth)
-                    }
-                }
-            }
-        }.filter { priceChangeSequenceIsPossible(it) }
-
-    // There's probably a smoother way to calculate all possible change sequences, but this checks
-    // to ensure that we never go above a total of +9 or below -9.
-    private fun priceChangeSequenceIsPossible(changeSequence: List<Int>): Boolean {
-        val partialSums = changeSequence.indices
-            .map { i ->
-                changeSequence.slice(0..i).sum()
-            }
-        return partialSums.all { it in -9..9 }
-    }
+    fun optimalRevenue(): Int = buyers.map { it.sequenceToRevenue }
+        .reduce { first, second -> first.merge(second, Int::plus) }
+        .maxOf { it.value }
 }
 
 class MonkeyBuyer(val secret: Long) {
@@ -183,7 +163,7 @@ class MonkeyBuyer(val secret: Long) {
 
     fun secretNumber(index: Int) = sequence().drop(index).first()
 
-    private val sequenceToRevenue: Map<List<Int>, Int> by lazy {
+    val sequenceToRevenue: Map<List<Int>, Int> by lazy {
         sequence().drop(1)
             .take(2000)
             .map { (it % 10).toInt() }
