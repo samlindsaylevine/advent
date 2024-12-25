@@ -14,9 +14,9 @@ class ProblemStatement(val original: String) {
     companion object {
         fun retrieve(client: HttpClient, date: LocalDate = LocalDate.now()): ProblemStatement {
             val request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://adventofcode.com/${date.year}/day/${date.dayOfMonth}"))
-                    .header("User-Agent", AdventOfCodeUserAgent.HEADER)
-                    .build()
+                .uri(URI.create("https://adventofcode.com/${date.year}/day/${date.dayOfMonth}"))
+                .header("User-Agent", AdventOfCodeUserAgent.HEADER)
+                .build()
 
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
@@ -45,8 +45,8 @@ class ProblemStatement(val original: String) {
         val maxWidth = 120 - 3
 
         val docBody = original.lines()
-                .flatMap { splitLine(it, maxWidth) }
-                .joinToString("\n") { " * $it" }
+            .flatMap { splitLine(it, maxWidth) }
+            .joinToString("\n") { " * $it" }
 
         return "/**\n" +
                 docBody + "\n" +

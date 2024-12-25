@@ -4,219 +4,137 @@ import advent.meta.readInput
 import advent.utils.Point
 
 /**
- * --- Day 24: Crossed Wires ---
- * You and The Historians arrive at the edge of a large grove somewhere in the jungle. After the last incident, the
- * Elves installed a small device that monitors the fruit. While The Historians search the grove, one of them asks if
- * you can take a look at the monitoring device; apparently, it's been malfunctioning recently.
- * The device seems to be trying to produce a number through some boolean logic gates. Each gate has two inputs and one
- * output. The gates all operate on values that are either true (1) or false (0).
+ * --- Day 25: Code Chronicle ---
+ * Out of ideas and time, The Historians agree that they should go back to check the Chief Historian's office one last
+ * time, just in case he went back there without you noticing.
+ * When you get there, you are surprised to discover that the door to his office is locked! You can hear someone
+ * inside, but knocking yields no response. The locks on this floor are all fancy, expensive, virtual versions of
+ * five-pin tumbler locks, so you contact North Pole security to see if they can help open the door.
+ * Unfortunately, they've lost track of which locks are installed and which keys go with them, so the best they can do
+ * is send over schematics of every lock and every key for the floor you're on (your puzzle input).
+ * The schematics are in a cryptic file format, but they do contain manufacturer information, so you look up their
+ * support number.
+ * "Our Virtual Five-Pin Tumbler product? That's our most expensive model! Way more secure than--" You explain that you
+ * need to open a door and don't have a lot of time.
+ * "Well, you can't know whether a key opens a lock without actually trying the key in the lock (due to quantum hidden
+ * variables), but you can rule out some of the key/lock combinations."
+ * "The virtual system is complicated, but part of it really is a crude simulation of a five-pin tumbler lock, mostly
+ * for marketing reasons. If you look at the schematics, you can figure out whether a key could possibly fit in a lock."
+ * He transmits you some example schematics:
+ * #####
+ * .####
+ * .####
+ * .####
+ * .#.#.
+ * .#...
+ * .....
  *
- * AND gates output 1 if both inputs are 1; if either input is 0, these gates output 0.
- * OR gates output 1 if one or both inputs is 1; if both inputs are 0, these gates output 0.
- * XOR gates output 1 if the inputs are different; if the inputs are the same, these gates output 0.
+ * #####
+ * ##.##
+ * .#.##
+ * ...##
+ * ...#.
+ * ...#.
+ * .....
  *
- * Gates wait until both inputs are received before producing output; wires can carry 0, 1 or no value at all. There
- * are no loops; once a gate has determined its output, the output will not change until the whole system is reset.
- * Each wire is connected to at most one gate output, but can be connected to many gate inputs.
- * Rather than risk getting shocked while tinkering with the live system, you write down all of the gate connections
- * and initial wire values (your puzzle input) so you can consider them in relative safety. For example:
- * x00: 1
- * x01: 1
- * x02: 1
- * y00: 0
- * y01: 1
- * y02: 0
+ * .....
+ * #....
+ * #....
+ * #...#
+ * #.#.#
+ * #.###
+ * #####
  *
- * x00 AND y00 -> z00
- * x01 XOR y01 -> z01
- * x02 OR y02 -> z02
+ * .....
+ * .....
+ * #.#..
+ * ###..
+ * ###.#
+ * ###.#
+ * #####
  *
- * Because gates wait for input, some wires need to start with a value (as inputs to the entire system). The first
- * section specifies these values. For example, x00: 1 means that the wire named x00 starts with the value 1 (as if a
- * gate is already outputting that value onto that wire).
- * The second section lists all of the gates and the wires connected to them. For example, x00 AND y00 -> z00 describes
- * an instance of an AND gate which has wires x00 and y00 connected to its inputs and which will write its output to
- * wire z00.
- * In this example, simulating these gates eventually causes 0 to appear on wire z00, 0 to appear on wire z01, and 1 to
- * appear on wire z02.
- * Ultimately, the system is trying to produce a number by combining the bits on all wires starting with z. z00 is the
- * least significant bit, then z01, then z02, and so on.
- * In this example, the three output bits form the binary number 100 which is equal to the decimal number 4.
- * Here's a larger example:
- * x00: 1
- * x01: 0
- * x02: 1
- * x03: 1
- * x04: 0
- * y00: 1
- * y01: 1
- * y02: 1
- * y03: 1
- * y04: 1
+ * .....
+ * .....
+ * .....
+ * #....
+ * #.#..
+ * #.#.#
+ * #####
  *
- * ntg XOR fgs -> mjb
- * y02 OR x01 -> tnw
- * kwq OR kpj -> z05
- * x00 OR x03 -> fst
- * tgd XOR rvg -> z01
- * vdt OR tnw -> bfw
- * bfw AND frj -> z10
- * ffh OR nrd -> bqk
- * y00 AND y03 -> djm
- * y03 OR y00 -> psh
- * bqk OR frj -> z08
- * tnw OR fst -> frj
- * gnj AND tgd -> z11
- * bfw XOR mjb -> z00
- * x03 OR x00 -> vdt
- * gnj AND wpb -> z02
- * x04 AND y00 -> kjc
- * djm OR pbm -> qhw
- * nrd AND vdt -> hwm
- * kjc AND fst -> rvg
- * y04 OR y02 -> fgs
- * y01 AND x02 -> pbm
- * ntg OR kjc -> kwq
- * psh XOR fgs -> tgd
- * qhw XOR tgd -> z09
- * pbm OR djm -> kpj
- * x03 XOR y03 -> ffh
- * x00 XOR y04 -> ntg
- * bfw OR bqk -> z06
- * nrd XOR fgs -> wpb
- * frj XOR qhw -> z04
- * bqk OR frj -> z07
- * y03 OR x01 -> nrd
- * hwm AND bqk -> z03
- * tgd XOR rvg -> z12
- * tnw OR pbm -> gnj
+ * "The locks are schematics that have the top row filled (#) and the bottom row empty (.); the keys have the top row
+ * empty and the bottom row filled. If you look closely, you'll see that each schematic is actually a set of columns of
+ * various heights, either extending downward from the top (for locks) or upward from the bottom (for keys)."
+ * "For locks, those are the pins themselves; you can convert the pins in schematics to a list of heights, one per
+ * column. For keys, the columns make up the shape of the key where it aligns with pins; those can also be converted to
+ * a list of heights."
+ * "So, you could say the first lock has pin heights 0,5,3,4,3:"
+ * #####
+ * .####
+ * .####
+ * .####
+ * .#.#.
+ * .#...
+ * .....
  *
- * After waiting for values on all wires starting with z, the wires in this system have the following values:
- * bfw: 1
- * bqk: 1
- * djm: 1
- * ffh: 0
- * fgs: 1
- * frj: 1
- * fst: 1
- * gnj: 1
- * hwm: 1
- * kjc: 0
- * kpj: 1
- * kwq: 0
- * mjb: 1
- * nrd: 1
- * ntg: 0
- * pbm: 1
- * psh: 1
- * qhw: 1
- * rvg: 0
- * tgd: 0
- * tnw: 1
- * vdt: 1
- * wpb: 0
- * z00: 0
- * z01: 0
- * z02: 0
- * z03: 1
- * z04: 0
- * z05: 1
- * z06: 1
- * z07: 1
- * z08: 1
- * z09: 1
- * z10: 1
- * z11: 0
- * z12: 0
+ * "Or, that the first key has heights 5,0,2,1,3:"
+ * .....
+ * #....
+ * #....
+ * #...#
+ * #.#.#
+ * #.###
+ * #####
  *
- * Combining the bits from all wires starting with z produces the binary number 0011111101000. Converting this number
- * to decimal produces 2024.
- * Simulate the system of gates and wires. What decimal number does it output on the wires starting with z?
+ * "These seem like they should fit together; in the first four columns, the pins and key don't overlap. However, this
+ * key cannot be for this lock: in the rightmost column, the lock's pin overlaps with the key, which you know because
+ * in that column the sum of the lock height and key height is more than the available space."
+ * "So anyway, you can narrow down the keys you'd need to try by just testing each key with each lock, which means you
+ * would have to check... wait, you have how many locks? But the only installation that size is at the North--" You
+ * disconnect the call.
+ * In this example, converting both locks to pin heights produces:
+ * 0,5,3,4,3
+ * 1,2,0,5,3
+ *
+ * Converting all three keys to heights produces:
+ * 5,0,2,1,3
+ * 4,3,4,0,2
+ * 3,0,2,0,1
+ *
+ * Then, you can try every key with every lock:
+ *
+ * Lock 0,5,3,4,3 and key 5,0,2,1,3: overlap in the last column.
+ * Lock 0,5,3,4,3 and key 4,3,4,0,2: overlap in the second column.
+ * Lock 0,5,3,4,3 and key 3,0,2,0,1: all columns fit!
+ * Lock 1,2,0,5,3 and key 5,0,2,1,3: overlap in the first column.
+ * Lock 1,2,0,5,3 and key 4,3,4,0,2: all columns fit!
+ * Lock 1,2,0,5,3 and key 3,0,2,0,1: all columns fit!
+ *
+ * So, in this example, the number of unique lock/key pairs that fit together without overlapping in any column is 3.
+ * Analyze your lock and key schematics. How many unique lock/key pairs fit together without overlapping in any column?
  *
  * --- Part Two ---
- * After inspecting the monitoring device more closely, you determine that the system you're simulating is trying to
- * add two binary numbers.
- * Specifically, it is treating the bits on wires starting with x as one binary number, treating the bits on wires
- * starting with y as a second binary number, and then attempting to add those two numbers together. The output of this
- * operation is produced as a binary number on the wires starting with z. (In all three cases, wire 00 is the least
- * significant bit, then 01, then 02, and so on.)
- * The initial values for the wires in your puzzle input represent just one instance of a pair of numbers that sum to
- * the wrong value. Ultimately, any two binary numbers provided as input should be handled correctly. That is, for any
- * combination of bits on wires starting with x and wires starting with y, the sum of the two numbers those bits
- * represent should be produced as a binary number on the wires starting with z.
- * For example, if you have an addition system with four x wires, four y wires, and five z wires, you should be able to
- * supply any four-bit number on the x wires, any four-bit number on the y numbers, and eventually find the sum of
- * those two numbers as a five-bit number on the z wires. One of the many ways you could provide numbers to such a
- * system would be to pass 11 on the x wires (1011 in binary) and 13 on the y wires (1101 in binary):
- * x00: 1
- * x01: 1
- * x02: 0
- * x03: 1
- * y00: 1
- * y01: 0
- * y02: 1
- * y03: 1
- *
- * If the system were working correctly, then after all gates are finished processing, you should find 24 (11+13) on
- * the z wires as the five-bit binary number 11000:
- * z00: 0
- * z01: 0
- * z02: 0
- * z03: 1
- * z04: 1
- *
- * Unfortunately, your actual system needs to add numbers with many more bits and therefore has many more wires.
- * Based on forensic analysis of scuff marks and scratches on the device, you can tell that there are exactly four
- * pairs of gates whose output wires have been swapped. (A gate can only be in at most one such pair; no gate's output
- * was swapped multiple times.)
- * For example, the system below is supposed to find the bitwise AND of the six-bit number on x00 through x05 and the
- * six-bit number on y00 through y05 and then write the result as a six-bit number on z00 through z05:
- * x00: 0
- * x01: 1
- * x02: 0
- * x03: 1
- * x04: 0
- * x05: 1
- * y00: 0
- * y01: 0
- * y02: 1
- * y03: 1
- * y04: 0
- * y05: 1
- *
- * x00 AND y00 -> z05
- * x01 AND y01 -> z02
- * x02 AND y02 -> z01
- * x03 AND y03 -> z03
- * x04 AND y04 -> z04
- * x05 AND y05 -> z00
- *
- * However, in this example, two pairs of gates have had their output wires swapped, causing the system to produce
- * wrong answers. The first pair of gates with swapped outputs is x00 AND y00 -> z05 and x05 AND y05 -> z00; the second
- * pair of gates is x01 AND y01 -> z02 and x02 AND y02 -> z01. Correcting these two swaps results in this system that
- * works as intended for any set of initial values on wires that start with x or y:
- * x00 AND y00 -> z00
- * x01 AND y01 -> z01
- * x02 AND y02 -> z02
- * x03 AND y03 -> z03
- * x04 AND y04 -> z04
- * x05 AND y05 -> z05
- *
- * In this example, two pairs of gates have outputs that are involved in a swap. By sorting their output wires' names
- * and joining them with commas, the list of wires involved in swaps is z00,z01,z02,z05.
- * Of course, your actual system is much more complex than this, and the gates that need their outputs swapped could be
- * anywhere, not just attached to a wire starting with z. If you were to determine that you need to swap output wires
- * aaa with eee, ooo with z99, bbb with ccc, and aoc with z24, your answer would be aaa,aoc,bbb,ccc,eee,ooo,z24,z99.
- * Your system of gates and wires has four pairs of gates which need their output wires swapped - eight wires in total.
- * Determine which four pairs of gates need their outputs swapped so that your system correctly performs addition; what
- * do you get if you sort the names of the eight wires involved in a swap and then join those names with commas?
+ * You and The Historians crowd into the office, startling the Chief Historian awake! The Historians all take turns
+ * looking confused until one asks where he's been for the last few months.
+ * "I've been right here, working on this high-priority request from Santa! I think the only time I even stepped away
+ * was about a month ago when I went to grab a cup of coffee..."
+ * Just then, the Chief notices the time. "Oh no! I'm going to be late! I must have fallen asleep trying to put the
+ * finishing touches on this chronicle Santa requested, but now I don't have enough time to go visit the last 50 places
+ * on my list and complete the chronicle before Santa leaves! He said he needed it before tonight's sleigh launch."
+ * One of The Historians holds up the list they've been using this whole time to keep track of where they've been
+ * searching. Next to each place you all visited, they checked off that place with a star. Other Historians hold up
+ * their own notes they took on the journey; as The Historians, how could they resist writing everything down while
+ * visiting all those historically significant places?
+ * The Chief's eyes get wide. "With all this, we might just have enough time to finish the chronicle! Santa said he
+ * wanted it wrapped up with a bow, so I'll call down to the wrapping department and... hey, could you bring it up to
+ * Santa? I'll need to be in my seat to watch the sleigh launch by then."
+ * You nod, and The Historians quickly work to collect their notes into the final set of pages for the chronicle.
  *
  */
 class LocksAndKeys(private val locks: List<Lock>, val keys: List<Key>) {
-    val width = 5
-    val height = 5
 
     companion object {
+        const val SIZE = 5
+
         fun of(input: String): LocksAndKeys {
             val sections = input.split("\n\n")
 
@@ -225,6 +143,18 @@ class LocksAndKeys(private val locks: List<Lock>, val keys: List<Key>) {
             val keys = keySections.map(::Key)
 
             return LocksAndKeys(locks, keys)
+        }
+
+        private fun String.sectionToPointMap() = this.lines().drop(1).dropLast(1).flatMapIndexed { y, line ->
+            line.mapIndexed { x, c -> Point(x, y) to c }
+        }.toMap()
+
+        private fun String.heights(): List<Int> {
+            val map = this.sectionToPointMap()
+
+            return (0 until SIZE).map { x ->
+                (0 until SIZE).count { y -> map[Point(x, y)] == '#' }
+            }
         }
     }
 
@@ -240,22 +170,11 @@ class LocksAndKeys(private val locks: List<Lock>, val keys: List<Key>) {
         constructor(input: String) : this(input.heights())
 
         fun fits(lock: Lock) = heights.indices.all { i ->
-            this.heights[i] + lock.heights[i] <= 5
+            this.heights[i] + lock.heights[i] <= SIZE
         }
     }
 }
 
-private fun String.sectionToPointMap() = this.lines().drop(1).dropLast(1).flatMapIndexed { y, line ->
-    line.mapIndexed { x, c -> Point(x, y) to c }
-}.toMap()
-
-private fun String.heights(): List<Int> {
-    val map = this.sectionToPointMap()
-
-    return (0 until 5).map { x ->
-        (0 until 5).count { y -> map[Point(x, y)] == '#' }
-    }
-}
 
 fun main() {
     val locksAndKeys = LocksAndKeys.of(readInput())

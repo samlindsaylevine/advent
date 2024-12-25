@@ -7,7 +7,6 @@ import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
-import java.time.Month
 
 object InputFile {
     fun save(client: HttpClient, date: LocalDate = LocalDate.now()) {
@@ -30,5 +29,5 @@ object InputFile {
  * If you want some file other than today, provide it as an argument to "save".
  */
 fun main() {
-    InputFile.save(AdventOfCodeCookies.clientWithCookies(), date = LocalDate.of(2024, Month.DECEMBER, 25))
+    InputFile.save(AdventOfCodeCookies.clientWithCookies())
 }
