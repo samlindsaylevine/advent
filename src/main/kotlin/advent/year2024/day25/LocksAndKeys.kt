@@ -1,9 +1,7 @@
-package advent.year2024.day24
+package advent.year2024.day25
 
 import advent.meta.readInput
-import advent.utils.findNumber
-import advent.utils.loadingCache
-import advent.utils.merge
+import advent.utils.Point
 
 /**
  * --- Day 24: Crossed Wires ---
@@ -214,178 +212,52 @@ import advent.utils.merge
  * do you get if you sort the names of the eight wires involved in a swap and then join those names with commas?
  *
  */
-class MonitoringDevice(components: List<DeviceComponent>) {
-    constructor(input: String) : this(input.trim()
-        .lines()
-        .filter { it.isNotEmpty() }
-        .map(DeviceComponent::of))
+class LocksAndKeys(private val locks: List<Lock>, val keys: List<Key>) {
+    val width = 5
+    val height = 5
 
-    private val componentsByOutput = components.associateBy { it.output }
-
-    private val gatesByInput by lazy {
-        val gates = components.filterIsInstance<GateConnection>()
-        val gatesByFirst = gates.groupBy { it.firstInput }
-        val gatesBySecond = gates.groupBy { it.secondInput }
-        gatesByFirst.merge(gatesBySecond) { first, second -> first + second }
-    }
-
-    private fun gatesByInput(input: String) = gatesByInput[input] ?: emptyList()
-
-    private val valueByOutput = loadingCache(::calculateValue)
-
-    private fun calculateValue(wire: String): Int {
-        val component = componentsByOutput[wire] ?: throw IllegalStateException("No component $wire")
-        return when (component) {
-            is InitialWireValue -> component.value
-            is GateConnection -> {
-                val firstValue = valueByOutput[component.firstInput]
-                val secondValue = valueByOutput[component.secondInput]
-                component.operation(firstValue, secondValue)
-            }
-        }
-    }
-
-    private fun zWires() = componentsByOutput.keys.filter { it.startsWith("z") }
-
-    fun zValue(): Long {
-        val binary = zWires().sortedDescending().joinToString(separator = "") { valueByOutput[it].toString() }
-
-        return binary.toLong(radix = 2)
-    }
-
-    fun examineBinaryAdder() {
-        val maxNumber = zWires().max().findNumber(0)
-        // There are five kinds of gate involved in this binary adder.
-        // The zeroes place is quite easy, using only two of the types:
-        // y00 XOR x00 -> z00
-        // This is the sum, written directly into the output digit.
-        // x00 AND y00 -> fgw (carry from 0)
-        // This calculates a carry digit to roll forward into the calculation for the next digit.
-
-        // Let's consider the ones place (x01 and y01).
-        // We have a
-        // x01 XOR y01 -> bgb (partial-sum-1)
-        // This is a partial sum, just like the XOR before. Note we don't yet write it to output.
-        //
-        //  y01 AND x01 -> pjh (in-place carry from 1)
-        // This is again a carry, but will only be used in calculations for this digit.
-        //
-        // fgw (carry from 0) XOR bgb (partial-sum-1) -> z01
-        // This writes the output.
-        //
-        // fgw (carry from 0) AND bgb (partial-sum-1) -> gww (rolling-carry from 1)
-        // This checks whether our previous carry causes us to rolling a carry forward.
-        //
-        //  pjh (in-place carry from 1) OR gww (rolling-carry from 1) -> wwp (carry from 1)
-        // Then, finally, this rolls forward to the next digit. Note in particular that only wwp, this "carry from 1",
-        // is then used in any further calculations.
-
-        // So, we can audit the gates and see if they match this pattern.
-        // It seems easiest to start by printing the gates, for each n, that have xn and yn as their inputs,
-        // then those gates that have those gates' outputs as their inputs, and inspecting.
-
-        for (i in 0 until maxNumber) {
-            val numberString = i.toString().padStart(2, '0')
-            val direct = gatesByInput("x$numberString")
-            direct.sortedBy { it.operation }.forEach(::println)
-            val indirect = direct.flatMap { gatesByInput(it.output) }
-            indirect.sortedBy { it.operation }.forEach(::println)
-            println()
-        }
-    }
-}
-
-sealed class DeviceComponent(open val output: String) {
     companion object {
-        private val initialValueRegex = "(\\w+): (\\d)".toRegex()
-        private val gateRegex = "(\\w+) (\\w+) (\\w+) -> (\\w+)".toRegex()
-        fun of(input: String): DeviceComponent {
-            val initialValueMatch = initialValueRegex.matchEntire(input)
-            if (initialValueMatch != null) {
-                val (output, value) = initialValueMatch.destructured
-                return InitialWireValue(output, value.toInt())
-            }
-            val gateMatch = gateRegex.matchEntire(input)
-            if (gateMatch != null) {
-                val (firstInput, operationName, secondInput, output) = gateMatch.destructured
-                return GateConnection(firstInput, secondInput, GateOperation.valueOf(operationName), output)
-            }
-            throw IllegalArgumentException("Unparseable component $input")
+        fun of(input: String): LocksAndKeys {
+            val sections = input.split("\n\n")
+
+            val (lockSections, keySections) = sections.partition { it.startsWith("#") }
+            val locks = lockSections.map(::Lock)
+            val keys = keySections.map(::Key)
+
+            return LocksAndKeys(locks, keys)
+        }
+    }
+
+    fun countPairs(): Int = keys.sumOf { key ->
+        locks.count { lock -> key.fits(lock) }
+    }
+
+    class Lock(val heights: List<Int>) {
+        constructor(input: String) : this(input.heights())
+    }
+
+    class Key(private val heights: List<Int>) {
+        constructor(input: String) : this(input.heights())
+
+        fun fits(lock: Lock) = heights.indices.all { i ->
+            this.heights[i] + lock.heights[i] <= 5
         }
     }
 }
 
-data class InitialWireValue(override val output: String, val value: Int) : DeviceComponent(output)
-data class GateConnection(
-    val firstInput: String,
-    val secondInput: String,
-    val operation: GateOperation,
-    override val output: String
-) : DeviceComponent(output) {
-    override fun toString(): String {
-        val (first, second) = listOf(firstInput, secondInput).sorted()
-        return "$first $operation $second -> $output"
+private fun String.sectionToPointMap() = this.lines().drop(1).dropLast(1).flatMapIndexed { y, line ->
+    line.mapIndexed { x, c -> Point(x, y) to c }
+}.toMap()
+
+private fun String.heights(): List<Int> {
+    val map = this.sectionToPointMap()
+
+    return (0 until 5).map { x ->
+        (0 until 5).count { y -> map[Point(x, y)] == '#' }
     }
-
-}
-
-enum class GateOperation(val operation: (Int, Int) -> Int) {
-    XOR(Int::xor),
-    AND(Int::and),
-    OR(Int::or);
-
-    operator fun invoke(first: Int, second: Int) = operation(first, second)
 }
 
 fun main() {
-    val device = MonitoringDevice(readInput())
-
-    println(device.zValue())
-
-    // We're going to inspect the input ourselves and use our brain to determine the
-    // wrong values. For a little help, we'll print the gates in a sorted, segmented
-    // fashion. See examineBinaryAdder(), above, for more discussion of the structure.
-    device.examineBinaryAdder()
-
-    // Upon reading the output, we see:
-
-    //    09s:
-    //    qwf and cnk (the output from the XOR and the AND) are switched
-    //
-    //    14s:
-    //    x14 AND y14 -> z14, but that is wrong; x14 AND y14 should be an in-place carry that is then ORed with the
-    //    rolling carry from 13 to yield the new carry. The rolling carry from 13 is calculated by ndq AND rkm -> fgv;
-    //    we have
-    //            vhm OR fgv -> bbw
-    //    If we switch vhm and z14, then we have
-    //    x14 xor y14 -> rkm (partial sum)
-    //    x14 and y14 -> vhm (in-place carry)
-    //    ndq xor rkm -> z14 (output)
-    //    ndq and rkm -> fgv (rolling carry)
-    //    vhm OR fgv -> bbw (carry from 14)
-    //    That looks good!
-    //
-    //    27s:
-    //    kqj is the carry from 26.
-    //    These are wrong:
-    //    kqj XOR kqw -> mps
-    //    jgq OR snv -> z27
-    //    The OR should be building the next carry, and the XOR should be outputting to z27. So switch mps and z27.
-    //    We can indeed see in the 28s that mps is the appropriate carry.
-    //
-    //    39s:
-    //    These are wrong:
-    //    gpm XOR trn -> msq
-    //    gpm AND trn -> z39
-    //    The XOR should be writing into the output, and the AND should be making an intermediate value that feeds into
-    //    the OR:
-    //    mgb OR msq -> cqt
-    //    Switch msq and z39.
-
-    // So our result is this:
-    println(
-        listOf("qwf", "cnk", "vhm", "z14", "mps", "z27", "msq", "z39")
-            .sorted()
-            .joinToString(separator = ",")
-    )
+    val locksAndKeys = LocksAndKeys.of(readInput())
+    println(locksAndKeys.countPairs())
 }
