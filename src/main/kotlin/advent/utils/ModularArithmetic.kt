@@ -90,4 +90,4 @@ fun chineseRemainderSolution(constraints: List<ModularConstraint>) = constraints
 /**
  * Returns all the factors of this number, starting with 1, up to and including itself.
  */
-fun Long.factors() = (1..this).filter { this % it == 0L }
+fun Int.factors() = (1..this).filter { this % it == 0 }
