@@ -79,8 +79,15 @@ data class ModularConstraint(val remainder: Long, val modulus: Long)
  * coprime, but we rely on [multiplicativeInverse] which currently demands primality.
  */
 fun chineseRemainderSolution(constraints: List<ModularConstraint>) = constraints
-        .reduce { first, second ->
-          ModularConstraint(remainder = chineseRemainderSolution(first, second),
-                  modulus = StrictMath.multiplyExact(first.modulus, second.modulus))
-        }
-        .remainder
+  .reduce { first, second ->
+    ModularConstraint(
+      remainder = chineseRemainderSolution(first, second),
+      modulus = StrictMath.multiplyExact(first.modulus, second.modulus)
+    )
+  }
+  .remainder
+
+/**
+ * Returns all the factors of this number, starting with 1, up to and including itself.
+ */
+fun Long.factors() = (1..this).filter { this % it == 0L }
