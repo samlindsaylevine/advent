@@ -46,8 +46,7 @@ tailrec fun expMod(x: Long, n: Long, m: Long, current: Long = 1): Long = when {
  *
  * See https://crypto.stanford.edu/pbc/notes/numbertheory/crt.html for the proof that this is the solution.
  *
- * p and q must be prime or this will not return the right solution. (This function works fine as long as p and q are
- * merely coprime, but it relies on our [multiplicativeInverse] which currently requires the modulus to be prime.)
+ * p and q must be coprime or this will not return the right solution.
  */
 fun chineseRemainderSolution(first: ModularConstraint, second: ModularConstraint): Long {
   val (a, p) = first
@@ -75,8 +74,7 @@ data class ModularConstraint(val remainder: Long, val modulus: Long)
  * Solves the Chinese Remainder Problem for any number of constraints, by recursively solving the first pair of
  * equations, and turning it into a single equation in the modulo that is the product of the individual ones.
  *
- * All of the moduluses (moduli?) must be prime. For the purposes of this function, they only have to be pairwise
- * coprime, but we rely on [multiplicativeInverse] which currently demands primality.
+ * All of the moduluses (moduli?) must be pairwise coprime.
  */
 fun chineseRemainderSolution(constraints: List<ModularConstraint>) = constraints
   .reduce { first, second ->
@@ -90,4 +88,4 @@ fun chineseRemainderSolution(constraints: List<ModularConstraint>) = constraints
 /**
  * Returns all the factors of this number, starting with 1, up to and including itself.
  */
-fun Int.factors() = (1..this).filter { this % it == 0 }
+fun Int.factors() = (1..this / 2).filter { this % it == 0 } + this

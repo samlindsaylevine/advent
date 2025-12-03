@@ -75,9 +75,8 @@ class ProductIdRange(val first: Long, val second: Long) {
 }
 
 fun String.isSequenceRepeatedTwice(): Boolean {
-  val str = this.toString()
-  if (str.length % 2 != 0) return false
-  return str.take(str.length / 2) == str.drop(str.length / 2)
+  if (this.length % 2 != 0) return false
+  return this.take(this.length / 2) == this.drop(this.length / 2)
 }
 
 fun String.isSequenceRepeated(): Boolean {
