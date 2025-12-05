@@ -192,6 +192,12 @@ class PaperGrid(val rolls: Set<Point>) {
 
   private fun Point.isAccessible() = this.eightNeighbors.count { it in rolls } < 4
 
+  /**
+   * This is very clear and simple and easy to understand and also very slow! If we wanted it to be faster, we wouldn't
+   * recheck all the rolls every time, we would look at all the currently accessible ones, remove those, and look only
+   * at their eight neighbors as candidates for the next removal. Also we could make it tail recursive. But, we didn't
+   * blow out the stack and it only took a couple seconds, so, good enough!
+   */
   fun totalRemovable(): Int {
     val firstAccessible = rolls.firstOrNull { it.isAccessible() }
     return if (firstAccessible == null) 0
