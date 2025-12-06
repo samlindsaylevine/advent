@@ -50,4 +50,60 @@ class SparseRangeTest {
     assertThat(removed).isEqualTo(range)
   }
 
+  @Test
+  fun `sparse range -- add non-overlapping -- leaves unchanged`() {
+    val range = SparseRange(1L..4L)
+
+    val added = range + (7L..10L)
+
+    assertThat(added).isEqualTo(SparseRange(listOf(1L..4L, 7L..10L)))
+  }
+
+  @Test
+  fun `sparse range -- add overlapping the front -- results in union`() {
+    val range = SparseRange(4L..10L)
+
+    val added = range + (1L..6L)
+
+    assertThat(added).isEqualTo(SparseRange(listOf(1L..10L)))
+  }
+
+  @Test
+  fun `sparse range -- add overlapping the back -- results in union`() {
+    val range = SparseRange(1L..6L)
+
+    val added = range + (3L..10L)
+
+    assertThat(added).isEqualTo(SparseRange(listOf(1L..10L)))
+  }
+
+
+  @Test
+  fun `sparse range -- add already existing -- no change`() {
+    val range = SparseRange(1L..6L)
+
+    val added = range + (1L..6L)
+
+    assertThat(added).isEqualTo(SparseRange(listOf(1L..6L)))
+  }
+
+
+  @Test
+  fun `sparse range -- add fully surrounding multiple existing -- existing are subsumed`() {
+    val range = SparseRange(listOf(2L..3L, 5L..7L))
+
+    val added = range + (1L..10L)
+
+    assertThat(added).isEqualTo(SparseRange(listOf(1L..10L)))
+  }
+
+
+  @Test
+  fun `sparse range -- add partially overlapping multiple existing -- existing merged with new`() {
+    val range = SparseRange(listOf(1L..5L, 8L..10L))
+
+    val added = range + (4L..9L)
+
+    assertThat(added).isEqualTo(SparseRange(listOf(1L..10L)))
+  }
 }

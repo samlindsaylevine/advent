@@ -26,4 +26,26 @@ class KitchenDatabaseTest {
 
     assertThat(count).isEqualTo(3)
   }
+
+  @Test
+  fun `totalFresh -- reference input -- 14`() {
+    val input = """
+     3-5
+     10-14
+     16-20
+     12-18
+
+     1
+     5
+     8
+     11
+     17
+     32
+   """.trimIndent()
+    val database = KitchenDatabase.of(input)
+
+    val total = database.totalFresh()
+
+    assertThat(total).isEqualTo(14L)
+  }
 }

@@ -7,12 +7,24 @@ data class SparseRange(
   // Guaranteed non-overlapping.
   private val longRanges: List<LongRange>
 ) {
+  constructor() : this(emptyList<LongRange>())
   constructor(intRange: LongRange) : this(listOf(intRange))
 
   operator fun minus(range: LongRange): SparseRange = SparseRange(longRanges.flatMap { it.remove(range) })
+  operator fun plus(range: LongRange): SparseRange {
+    var adding = range
+    val output = mutableListOf<LongRange>()
+    for (existing in longRanges) {
+      if ((adding intersect existing).isEmpty()) output.add(existing)
+      else adding = (adding union existing)
+    }
+    output.add(adding)
+    return SparseRange(output)
+  }
 
   fun first() = longRanges.minOf { it.first }
   fun size() = longRanges.sumOf { it.size }
+  operator fun contains(value: Long) = longRanges.any { value in it }
 
   private val LongRange.size
     get() = this.last - this.first + 1
