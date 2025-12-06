@@ -1,7 +1,9 @@
 package advent.utils
 
 /**
- * Represents a union of IntRanges, with a way to remove a new IntRange and leave just the remaining values.
+ * Represents a union of LongRanges, with a way to add or remove a new LongRange and leave just the remaining values.
+ * Representing them internally as non-overlapping ranges lets us much more efficiently do things like count the total
+ * number of values.
  */
 data class SparseRange(
   // Guaranteed non-overlapping.
