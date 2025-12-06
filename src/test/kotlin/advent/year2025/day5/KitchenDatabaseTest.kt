@@ -20,7 +20,7 @@ class KitchenDatabaseTest {
      17
      32
    """.trimIndent()
-    val database = KitchenDatabase(input)
+    val database = KitchenDatabase.of(input)
 
     val count = database.countFresh()
 

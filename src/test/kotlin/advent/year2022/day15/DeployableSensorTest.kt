@@ -51,51 +51,6 @@ class DeployableSensorTest {
   }
 
   @Test
-  fun `sparse range -- remove from front -- eliminates removed range`() {
-    val range = SparseRange(1..10)
-
-    val removed = range - (1..4)
-
-    assertThat(removed).isEqualTo(SparseRange(5..10))
-  }
-
-  @Test
-  fun `sparse range -- remove from back -- eliminates removed range`() {
-    val range = SparseRange(1..10)
-
-    val removed = range - (5..100)
-
-    assertThat(removed).isEqualTo(SparseRange(1..4))
-  }
-
-  @Test
-  fun `sparse range -- remove entire -- eliminates removed range`() {
-    val range = SparseRange(1..10)
-
-    val removed = range - (-2..100)
-
-    assertThat(removed).isEqualTo(SparseRange(emptyList()))
-  }
-
-  @Test
-  fun `sparse range -- remove from middle -- leaves two ranges`() {
-    val range = SparseRange(1..10)
-
-    val removed = range - (4..7)
-
-    assertThat(removed).isEqualTo(SparseRange(listOf(1..3, 8..10)))
-  }
-
-  @Test
-  fun `sparse range -- remove non-overlapping -- leaves unchanged`() {
-    val range = SparseRange(1..10)
-
-    val removed = range - (12..20)
-
-    assertThat(removed).isEqualTo(range)
-  }
-
-  @Test
   fun `eliminatedDistressPositionsOnRow -- sample sensor -- gives expected eliminated range`() {
     val sensor = DeployableSensor.parse("Sensor at x=8, y=7: closest beacon is at x=2, y=10")
 

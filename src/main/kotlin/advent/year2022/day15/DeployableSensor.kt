@@ -1,6 +1,7 @@
 package advent.year2022.day15
 
 import advent.utils.Point
+import advent.utils.SparseRange
 import java.io.File
 import kotlin.math.absoluteValue
 
@@ -144,45 +145,18 @@ class DeployableSensors(private val sensors: List<DeployableSensor>) {
   fun distressBeacon(max: Int = 4000000) = (0..max).asSequence().map { y ->
     legalDistressXs(y, max) to y
   }
-    .first { (xValues, _) -> xValues.size() == 1 }
-    .let { (xRange, y) -> Point(xRange.first(), y) }
+    .first { (xValues, _) -> xValues.size() == 1L }
+    .let { (xRange, y) -> Point(xRange.first().toInt(), y) }
+
+  private fun IntRange.toLongRange() = this.first.toLong()..this.last.toLong()
 
   private fun legalDistressXs(y: Int, max: Int): SparseRange =
-    sensors.fold(SparseRange(0..max)) { range, sensor ->
-      range - sensor.eliminatedDistressPositionsOnRow(y)
+    sensors.fold(SparseRange(0..max.toLong())) { range, sensor ->
+      range - sensor.eliminatedDistressPositionsOnRow(y).toLongRange()
     }
 }
 
 fun Point.tuningFrequency(): Long = this.x.toLong() * 4000000L + this.y.toLong()
-
-/**
- * Represents a union of IntRanges, with a way to remove a new IntRange and leave just the remaining values.
- */
-data class SparseRange(
-  // Guaranteed non-overlapping.
-  private val intRanges: List<IntRange>
-) {
-  constructor(intRange: IntRange) : this(listOf(intRange))
-
-  operator fun minus(range: IntRange): SparseRange = SparseRange(intRanges.flatMap { it.remove(range) })
-
-  fun first() = intRanges.minOf { it.first }
-  fun size() = intRanges.sumOf { it.size }
-
-  private val IntRange.size
-    get() = this.last - this.first + 1
-
-  private fun IntRange.remove(other: IntRange): List<IntRange> = when {
-    this.first in other && this.last in other -> emptyList()
-    other.first <= this.first && other.last in this -> listOf(other.last + 1..this.last)
-    other.first in this && other.last >= this.last -> listOf(this.first until other.first)
-    other.first in this && other.last in this -> listOf(
-      this.first until other.first,
-      other.last + 1..this.last
-    )
-    else -> listOf(this)
-  }
-}
 
 class DeployableSensor(val position: Point, val closestBeacon: Point) {
   companion object {
