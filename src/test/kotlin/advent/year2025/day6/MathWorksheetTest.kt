@@ -1,8 +1,6 @@
-package advent.year2025
+package advent.year2025.day6
 
-import advent.year2025.day6.MathWorksheet
-import advent.year2025.day6.rotateLeft
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 class MathWorksheetTest {
@@ -18,7 +16,7 @@ class MathWorksheetTest {
 
     val total = worksheet.grandTotal()
 
-    assertThat(total).isEqualTo(4277556)
+    Assertions.assertThat(total).isEqualTo(4277556)
   }
 
   @Test
@@ -31,7 +29,7 @@ class MathWorksheetTest {
 
     val rotated = input.rotateLeft()
 
-    assertThat(rotated).containsExactly(
+    Assertions.assertThat(rotated).containsExactly(
       "  4",
       "431",
       "623",
@@ -62,6 +60,6 @@ class MathWorksheetTest {
 
     val total = worksheet.verticalTotal()
 
-    assertThat(total).isEqualTo(3263827L)
+    Assertions.assertThat(total).isEqualTo(3263827L)
   }
 }
