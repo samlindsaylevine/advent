@@ -19,6 +19,8 @@ class UnorderedPair<T>(private val a: T, private val b: T) {
   operator fun component1() = a
   operator fun component2() = b
   fun <R> map(transform: (T) -> R) = UnorderedPair(transform(a), transform(b))
+  fun <R> reduce(operator: (T, T) -> R) = operator(a, b)
+  override fun toString() = "Unordered($a, $b)"
 }
 
 infix fun <T> T.with(other: T) = UnorderedPair(this, other)

@@ -2,11 +2,20 @@ package advent.utils
 
 import kotlin.math.abs
 import kotlin.math.sign
+import kotlin.math.sqrt
 
 data class Point3D(val x: Int, val y: Int, val z: Int) {
   fun distanceTo(other: Point3D) = abs(this.x - other.x) +
           abs(this.y - other.y) +
           abs(this.z - other.z)
+
+  fun euclideanDistanceTo(other: Point3D): Double = sqrt(
+    (this.x - other.x).squared() +
+            (this.y - other.y).squared() +
+            (this.z - other.z).squared()
+  )
+
+  private fun Int.squared() = (this * this).toDouble()
 
   /**
    * Including neighbors that are "diagonal".
@@ -21,12 +30,12 @@ data class Point3D(val x: Int, val y: Int, val z: Int) {
 
   val orthogonallyAdjacent by lazy {
     setOf(
-            Point3D(x - 1, y, z),
-            Point3D(x + 1, y, z),
-            Point3D(x, y - 1, z),
-            Point3D(x, y + 1, z),
-            Point3D(x, y, z - 1),
-            Point3D(x, y, z + 1)
+      Point3D(x - 1, y, z),
+      Point3D(x + 1, y, z),
+      Point3D(x, y - 1, z),
+      Point3D(x, y + 1, z),
+      Point3D(x, y, z - 1),
+      Point3D(x, y, z + 1)
     )
   }
 
