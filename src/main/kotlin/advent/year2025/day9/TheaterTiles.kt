@@ -193,14 +193,14 @@ class TheaterTiles(val redTiles: List<Point>) {
 
   fun rectangleIsInPolygon(corners: Pair<Point, Point>): Boolean {
     val boundingBox = BoundingBox(corners)
-    // The rectangle is *not* in the polygon if any of the red points are on the inside of the rectangle; or if
-    // any of the edges of the polygon go through the rectangle (although going alongside the perimeter of the rectangle
-    // is fine).
+    // The rectangle is *not* in the polygon if any of the edges of the polygon go through the rectangle (although
+    // going alongside the perimeter of the rectangle is fine).
+    // We're making some simplifying assumptions that
+    // a) the edges really do form a polygon, i.e., that they do not overlap
+    // b) no edges are only 1 unit apart, i.e., none of them are adjacent to each other.
+    // These simplify our implementation a lot and seem to be true both for the example and our input.
     val insideBox = boundingBox.shrink(1)
-    if (redTiles.any { it in insideBox }) return false
-    if (edges.any { BoundingBox(it).overlaps(insideBox) }) return false
-
-    return true
+    return !edges.any { BoundingBox(it).overlaps(insideBox) }
   }
 
   fun largestRectangleArea() = pairs()
