@@ -41,6 +41,6 @@ class TheaterTilesTest {
 
     val rectangle = Point(9, 5) to Point(2, 3)
 
-    assertThat(tiles.rectanglePerimeterIsInPolygon(rectangle)).isTrue
+    assertThat(tiles.rectangleIsInPolygon(rectangle)).isTrue
   }
 }

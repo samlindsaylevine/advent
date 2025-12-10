@@ -6,6 +6,153 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * --- Day 9: Movie Theater ---
+ * You slide down the firepole in the corner of the playground and land in the North Pole base movie theater!
+ * The movie theater has a big tile floor with an interesting pattern. Elves here are redecorating the theater by
+ * switching out some of the square tiles in the big grid they form. Some of the tiles are red; the Elves would like to
+ * find the largest rectangle that uses red tiles for two of its opposite corners. They even have a list of where the
+ * red tiles are located in the grid (your puzzle input).
+ * For example:
+ * 7,1
+ * 11,1
+ * 11,7
+ * 9,7
+ * 9,5
+ * 2,5
+ * 2,3
+ * 7,3
+ *
+ * Showing red tiles as # and other tiles as ., the above arrangement of red tiles would look like this:
+ * ..............
+ * .......#...#..
+ * ..............
+ * ..#....#......
+ * ..............
+ * ..#......#....
+ * ..............
+ * .........#.#..
+ * ..............
+ *
+ * You can choose any two red tiles as the opposite corners of your rectangle; your goal is to find the largest
+ * rectangle possible.
+ * For example, you could make a rectangle (shown as O) with an area of 24 between 2,5 and 9,7:
+ * ..............
+ * .......#...#..
+ * ..............
+ * ..#....#......
+ * ..............
+ * ..OOOOOOOO....
+ * ..OOOOOOOO....
+ * ..OOOOOOOO.#..
+ * ..............
+ *
+ * Or, you could make a rectangle with area 35 between 7,1 and 11,7:
+ * ..............
+ * .......OOOOO..
+ * .......OOOOO..
+ * ..#....OOOOO..
+ * .......OOOOO..
+ * ..#....OOOOO..
+ * .......OOOOO..
+ * .......OOOOO..
+ * ..............
+ *
+ * You could even make a thin rectangle with an area of only 6 between 7,3 and 2,3:
+ * ..............
+ * .......#...#..
+ * ..............
+ * ..OOOOOO......
+ * ..............
+ * ..#......#....
+ * ..............
+ * .........#.#..
+ * ..............
+ *
+ * Ultimately, the largest rectangle you can make in this example has area 50. One way to do this is between 2,5 and
+ * 11,1:
+ * ..............
+ * ..OOOOOOOOOO..
+ * ..OOOOOOOOOO..
+ * ..OOOOOOOOOO..
+ * ..OOOOOOOOOO..
+ * ..OOOOOOOOOO..
+ * ..............
+ * .........#.#..
+ * ..............
+ *
+ * Using two red tiles as opposite corners, what is the largest area of any rectangle you can make?
+ *
+ * --- Part Two ---
+ * The Elves just remembered: they can only switch out tiles that are red or green. So, your rectangle can only include
+ * red or green tiles.
+ * In your list, every red tile is connected to the red tile before and after it by a straight line of green tiles. The
+ * list wraps, so the first red tile is also connected to the last red tile. Tiles that are adjacent in your list will
+ * always be on either the same row or the same column.
+ * Using the same example as before, the tiles marked X would be green:
+ * ..............
+ * .......#XXX#..
+ * .......X...X..
+ * ..#XXXX#...X..
+ * ..X........X..
+ * ..#XXXXXX#.X..
+ * .........X.X..
+ * .........#X#..
+ * ..............
+ *
+ * In addition, all of the tiles inside this loop of red and green tiles are also green. So, in this example, these are
+ * the green tiles:
+ * ..............
+ * .......#XXX#..
+ * .......XXXXX..
+ * ..#XXXX#XXXX..
+ * ..XXXXXXXXXX..
+ * ..#XXXXXX#XX..
+ * .........XXX..
+ * .........#X#..
+ * ..............
+ *
+ * The remaining tiles are never red nor green.
+ * The rectangle you choose still must have red tiles in opposite corners, but any other tiles it includes must now be
+ * red or green. This significantly limits your options.
+ * For example, you could make a rectangle out of red and green tiles with an area of 15 between 7,3 and 11,1:
+ * ..............
+ * .......OOOOO..
+ * .......OOOOO..
+ * ..#XXXXOOOOO..
+ * ..XXXXXXXXXX..
+ * ..#XXXXXX#XX..
+ * .........XXX..
+ * .........#X#..
+ * ..............
+ *
+ * Or, you could make a thin rectangle with an area of 3 between 9,7 and 9,5:
+ * ..............
+ * .......#XXX#..
+ * .......XXXXX..
+ * ..#XXXX#XXXX..
+ * ..XXXXXXXXXX..
+ * ..#XXXXXXOXX..
+ * .........OXX..
+ * .........OX#..
+ * ..............
+ *
+ * The largest rectangle you can make in this example using only red and green tiles has area 24. One way to do this is
+ * between 9,5 and 2,3:
+ * ..............
+ * .......#XXX#..
+ * .......XXXXX..
+ * ..OOOOOOOOXX..
+ * ..OOOOOOOOXX..
+ * ..OOOOOOOOXX..
+ * .........XXX..
+ * .........#X#..
+ * ..............
+ *
+ * Using two red tiles as opposite corners, what is the largest area of any rectangle you can make using only red and
+ * green tiles?
+ *
+ */
 class TheaterTiles(val redTiles: List<Point>) {
   constructor(input: String) : this(
     input.trim()
@@ -25,13 +172,6 @@ class TheaterTiles(val redTiles: List<Point>) {
 
   private val edges: List<Pair<Point, Point>> = (redTiles.zipWithNext() + (redTiles.last() to redTiles.first()))
 
-  fun isOnEdge(point: Point): Boolean = edges.any { this.isOnEdge(point, it) }
-  private fun isOnEdge(point: Point, edge: Pair<Point, Point>): Boolean {
-    val (minX, maxX, minY, maxY) = BoundingBox(edge)
-    return (point.x == minX && point.x == maxX && point.y in minY..maxY) ||
-            (point.y == minY && point.y == maxY && point.x in minX..maxX)
-  }
-
   private data class BoundingBox(val minX: Int, val maxX: Int, val minY: Int, val maxY: Int) {
     constructor(edge: Pair<Point, Point>) : this(
       min(edge.first.x, edge.second.x),
@@ -39,46 +179,27 @@ class TheaterTiles(val redTiles: List<Point>) {
       min(edge.first.y, edge.second.y),
       max(edge.first.y, edge.second.y)
     )
-  }
 
-  fun rectanglePerimeterIsInPolygon(corners: Pair<Point, Point>): Boolean {
-    val (minX, maxX, minY, maxY) = BoundingBox(corners)
-    val segments = listOf(
-      Point(minX, minY) to Point(maxX, minY),
-      Point(minX, maxY) to Point(maxX, maxY),
-      Point(minX, minY) to Point(minX, maxY),
-      Point(maxX, minY) to Point(maxX, maxY)
-    )
-    return segments.all { (start, endInclusive) ->
-      segmentIsInPolygon(start, endInclusive)
+    fun shrink(amount: Int) = BoundingBox(minX + amount, maxX - amount, minY + amount, maxY - amount)
+    operator fun contains(point: Point) = point.x in minX..maxX && point.y in minY..maxY
+    fun overlaps(other: BoundingBox) = when {
+      this.maxX < other.minX -> false
+      this.minX > other.maxX -> false
+      this.maxY < other.minY -> false
+      this.minY > other.maxY -> false
+      else -> true
     }
   }
 
-  private fun segmentIsInPolygon(start: Point, endInclusive: Point): Boolean {
-    // We'll use a 'ray tracing' technique to see which points are in the polygon: start walking in from "infinity"
-    // (i.e., -1 X or Y) and every time we pass through an edge, we will toggle whether we think we are in the polygon.
-    // We're going to make a couple simplifying assumptions: 1) that none of the edges overlap (i.e., that the
-    // segments between successive red tiles really does form a single polygon
-    // 2) none of the edges are immediately adjacent to each other; this would increase our complexity significantly
-    // and appears to be true in our input data, as well as the example.
-    val farAway: Point = when {
-      start.x == endInclusive.x -> Point(start.x, -1)
-      start.y == endInclusive.y -> Point(-1, start.y)
-      else -> throw IllegalArgumentException("Somehow start $start is not lined up with end $endInclusive!")
-    }
-    var inPolygon = false
-    var previousPointOnEdge = false
-    for (point in (farAway..start)) {
-      val currentPointOnEdge = isOnEdge(point)
-      if (!currentPointOnEdge && previousPointOnEdge) inPolygon = !inPolygon
-      previousPointOnEdge = currentPointOnEdge
-    }
-    for (point in (start..endInclusive).drop(1)) {
-      val currentPointOnEdge = isOnEdge(point)
-      if (!currentPointOnEdge && previousPointOnEdge) inPolygon = !inPolygon
-      if (!currentPointOnEdge && !inPolygon) return false
-      previousPointOnEdge = currentPointOnEdge
-    }
+  fun rectangleIsInPolygon(corners: Pair<Point, Point>): Boolean {
+    val boundingBox = BoundingBox(corners)
+    // The rectangle is *not* in the polygon if any of the red points are on the inside of the rectangle; or if
+    // any of the edges of the polygon go through the rectangle (although going alongside the perimeter of the rectangle
+    // is fine).
+    val insideBox = boundingBox.shrink(1)
+    if (redTiles.any { it in insideBox }) return false
+    if (edges.any { BoundingBox(it).overlaps(insideBox) }) return false
+
     return true
   }
 
@@ -87,12 +208,8 @@ class TheaterTiles(val redTiles: List<Point>) {
     .max()
 
   fun largestRedAndGreenRectangleArea() = pairs()
-    .withIndex()
-    // If all the points on the perimeter are in the polygon, so too must all the ones be that are inside the
-    // rectangle.
-    .onEach { (i, _) -> if (i % 10 == 0) println(i) }
-    .filter { (_, pair) -> rectanglePerimeterIsInPolygon(pair) }
-    .map { (_, pair) -> pair.rectangleArea() }
+    .filter { rectangleIsInPolygon(it) }
+    .map { it.rectangleArea() }
     .max()
 }
 
