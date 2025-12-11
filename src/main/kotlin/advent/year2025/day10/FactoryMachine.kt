@@ -155,12 +155,13 @@ class FactoryMachine(
     // returns 'darwin' as our OS suffix on my Mac laptop, whereas the newer version returns 'darwin-x86-64').
     // I handled this in a brute force solution by deleting the conflicting class files out of the CookieMonster.jar!
     // The other part of the pain is that this takes like a minute. Fine for the real run; but it's long enough
-    // that I might want to disable it from the test run.
+    // that I might want to disable it from the test run. (Although it seems to not take that long on the Github Actions
+    // CI server!)
     Loader.loadNativeLibraries()
 
     val maxJoltage = joltageRequirements.max().toLong()
     val model = CpModel()
-    val variables = buttons.mapIndexed { i, button ->
+    val variables = buttons.indices.map { i ->
       model.newIntVar(0, maxJoltage, "Button $i")
     }
     joltageRequirements.forEachIndexed { i, targetJoltage ->

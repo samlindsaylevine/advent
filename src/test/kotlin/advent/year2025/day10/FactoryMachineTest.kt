@@ -1,7 +1,6 @@
-package advent.year2025
+package advent.year2025.day10
 
-import advent.year2025.day10.FactoryMachine
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 class FactoryMachineTest {
@@ -12,7 +11,7 @@ class FactoryMachineTest {
 
     val presses = machine.minimumButtonLightPresses()
 
-    assertThat(presses).isEqualTo(2)
+    Assertions.assertThat(presses).isEqualTo(2)
   }
 
   @Test
@@ -21,7 +20,7 @@ class FactoryMachineTest {
 
     val presses = machine.minimumButtonLightPresses()
 
-    assertThat(presses).isEqualTo(3)
+    Assertions.assertThat(presses).isEqualTo(3)
   }
 
   @Test
@@ -30,7 +29,7 @@ class FactoryMachineTest {
 
     val presses = machine.minimumButtonLightPresses()
 
-    assertThat(presses).isEqualTo(2)
+    Assertions.assertThat(presses).isEqualTo(2)
   }
 
 
@@ -40,7 +39,7 @@ class FactoryMachineTest {
 
     val presses = machine.minimumButtonJoltagePresses()
 
-    assertThat(presses).isEqualTo(10)
+    Assertions.assertThat(presses).isEqualTo(10)
   }
 
   @Test
@@ -49,7 +48,7 @@ class FactoryMachineTest {
 
     val presses = machine.minimumButtonJoltagePresses()
 
-    assertThat(presses).isEqualTo(12)
+    Assertions.assertThat(presses).isEqualTo(12)
   }
 
   @Test
@@ -58,6 +57,6 @@ class FactoryMachineTest {
 
     val presses = machine.minimumButtonJoltagePresses()
 
-    assertThat(presses).isEqualTo(11)
+    Assertions.assertThat(presses).isEqualTo(11)
   }
 }
