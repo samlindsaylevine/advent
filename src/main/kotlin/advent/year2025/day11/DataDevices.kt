@@ -101,27 +101,21 @@ class DataDevices(
     return inputDevices.sumOf { countPaths(origin, it) }
   }
 
-  private fun withoutDevice(device: String): DataDevices = DataDevices(
-    inputsByDevice.filter { it.key != device }.mapValues { (_, inputs) -> inputs.filter { it != device } }
-  )
-
   fun countServerPaths(): Long {
     // There are two possibilities: visiting fft first, and visiting dac first. We can count each possibility
     // separately and sum them together.
-    // To avoid double-counting any paths, we will need to look at some paths that do NOT go through a chosen node;
-    // e.g., paths from svr to fft that don't go through dac. To handle that, we will count paths in sub-graphs
-    // that are copies of this one, but without the node we don't want to pass through.
-    val withoutFft = this.withoutDevice("fft")
-    val withoutDac = this.withoutDevice("dac")
-
+    // At first I worried about double-counting (i.e., if paths from dac to out count ones that go from dac to fft to
+    // out) but it seems like in practice the input is acyclic (i.e., a tree), so we will never revisit a node on a
+    // path and don't have to worry about this. (In fact this means that we will always visit fft before dac or vice
+    // versa! One of the counts fft -> dac or dac -> fft will be 0.)
     val fftDacPathCount =
-      withoutDac.countPaths("svr", "fft") *
+      this.countPaths("svr", "fft") *
               this.countPaths("fft", "dac") *
-              withoutFft.countPaths("dac", "out")
+              this.countPaths("dac", "out")
     val dacFftPathCount =
-      withoutFft.countPaths("svr", "dac") *
+      this.countPaths("svr", "dac") *
               this.countPaths("dac", "fft") *
-              withoutDac.countPaths("fft", "out")
+              this.countPaths("fft", "out")
 
     return fftDacPathCount + dacFftPathCount
   }
