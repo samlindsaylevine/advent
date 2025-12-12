@@ -179,5 +179,5 @@ fun main() {
   // A little further investigation (these two counts return the same value!) indicates that all of our regions with
   // >=0 free space actually have enough space for a full 3x3 box for each of our tiles - i.e., we can just put them
   // all in any old which way and not even care about their orientations. Funny!
-  println(tiles.regions.count { it.area() >= it.tileCounts.sum() * 9 })
+  println(tiles.regions.count { (it.width / 3) * (it.height / 3) >= it.tileCounts.sum() })
 }
